@@ -78,7 +78,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: IconButton(
                     icon: const Icon(Icons.menu_book, color: Colors.white, size: 24),
                     onPressed: () {
-                      if (state is! ChatLoadedState) return;
+                      if (state is! ChatLoadedState || state.isAiTyping) return;
                       _showSummaryEditDialog(context, loc, state.summary);
                     },
                   ),
@@ -88,6 +88,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: IconButton(
                     icon: const Icon(Icons.add_comment, color: Colors.white, size: 26),
                     onPressed: () {
+                      if (state is! ChatLoadedState || state.isAiTyping) return;
                       _showNewChatConfirmationDialog(context, loc);
                     },
                   ),
@@ -161,21 +162,27 @@ class _ChatScreenState extends State<ChatScreen> {
                         state.char,
                         state.userCard,
                         state.messages.last.id == message.id,
+                        state.isAiTyping,
                       );
                     },
                   ),
                 ),
 
-                if (state.isAiTyping && state.messages.last.content.isEmpty)
-                  Padding(
-                    padding: EdgeInsets.all(8.0),
-                    child: Text(
-                      loc.characterTyping,
-                      style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
-                    ),
-                  ),
-
-                _buildInputZone(context, loc, state.userCard, state.availableCards),
+                // if (state.isAiTyping && state.messages.last.content.isEmpty)
+                //   Padding(
+                //     padding: EdgeInsets.all(8.0),
+                //     child: Text(
+                //       loc.characterTyping,
+                //       style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
+                //     ),
+                //   ),
+                _buildInputZone(
+                  context,
+                  loc,
+                  state.userCard,
+                  state.availableCards,
+                  state.isAiTyping,
+                ),
               ],
             ),
           ],
@@ -194,6 +201,7 @@ class _ChatScreenState extends State<ChatScreen> {
     Char char,
     UserCard? user,
     bool isLastMessage,
+    bool isBlocked,
   ) {
     final theme = Theme.of(context);
     final baseUrl = AppConfig.of(context).baseUrl;
@@ -241,7 +249,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.65),
                 child: SelectionArea(
                   child: GptMarkdown(
-                    message.content,
+                    message.content.isNotEmpty
+                        ? message.content
+                        : isLastMessage && isBlocked
+                        ? loc.characterTyping
+                        : '',
                     style: TextStyle(
                       // Базовый цвет текста (для ИИ — мягкий белый, для юзера — чистый белый)
                       color: isUser ? Colors.white70 : Colors.white,
@@ -281,14 +293,16 @@ class _ChatScreenState extends State<ChatScreen> {
                               icon: const Icon(Icons.arrow_left, size: 20, color: Colors.grey),
                               constraints: const BoxConstraints(),
                               padding: EdgeInsets.zero,
-                              onPressed: () {
-                                context.read<ChatBloc>().add(
-                                  SwitchMessageBranchEvent(
-                                    messageId: message.id,
-                                    direction: "left",
-                                  ),
-                                );
-                              },
+                              onPressed: isBlocked
+                                  ? null
+                                  : () {
+                                      context.read<ChatBloc>().add(
+                                        SwitchMessageBranchEvent(
+                                          messageId: message.id,
+                                          direction: "left",
+                                        ),
+                                      );
+                                    },
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -304,14 +318,16 @@ class _ChatScreenState extends State<ChatScreen> {
                               icon: const Icon(Icons.arrow_right, size: 20, color: Colors.grey),
                               constraints: const BoxConstraints(),
                               padding: EdgeInsets.zero,
-                              onPressed: () {
-                                context.read<ChatBloc>().add(
-                                  SwitchMessageBranchEvent(
-                                    messageId: message.id,
-                                    direction: "right",
-                                  ),
-                                );
-                              },
+                              onPressed: isBlocked
+                                  ? null
+                                  : () {
+                                      context.read<ChatBloc>().add(
+                                        SwitchMessageBranchEvent(
+                                          messageId: message.id,
+                                          direction: "right",
+                                        ),
+                                      );
+                                    },
                             ),
                           ],
                         ),
@@ -331,9 +347,11 @@ class _ChatScreenState extends State<ChatScreen> {
                           icon: Icon(Icons.refresh, size: 16, color: theme.colorScheme.primary),
                           constraints: const BoxConstraints(),
                           padding: const EdgeInsets.all(2),
-                          onPressed: () {
-                            context.read<ChatBloc>().add(RegenerateLastAiMessageEvent());
-                          },
+                          onPressed: isBlocked
+                              ? null
+                              : () {
+                                  context.read<ChatBloc>().add(RegenerateLastAiMessageEvent());
+                                },
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -350,9 +368,11 @@ class _ChatScreenState extends State<ChatScreen> {
                         icon: const Icon(Icons.edit, size: 14, color: Colors.grey),
                         constraints: const BoxConstraints(),
                         padding: const EdgeInsets.all(2),
-                        onPressed: () {
-                          _showEditMessageDialog(context, loc, message);
-                        },
+                        onPressed: isBlocked
+                            ? null
+                            : () {
+                                _showEditMessageDialog(context, loc, message);
+                              },
                       ),
                     ),
 
@@ -369,7 +389,9 @@ class _ChatScreenState extends State<ChatScreen> {
                           icon: Icon(Icons.delete_outline, size: 14, color: Colors.red.shade400),
                           constraints: const BoxConstraints(),
                           padding: const EdgeInsets.all(2),
-                          onPressed: () => _onDeleteMessage(context, loc, theme, message.id),
+                          onPressed: isBlocked
+                              ? null
+                              : () => _onDeleteMessage(context, loc, theme, message.id),
                         ),
                       ),
                     ],
@@ -684,6 +706,7 @@ class _ChatScreenState extends State<ChatScreen> {
     AppLocalization loc,
     UserCard? userCard,
     List<UserCard>? availableCards,
+    bool isBlocked,
   ) {
     final theme = Theme.of(context);
     final hasUserCard = userCard != null;
@@ -693,12 +716,12 @@ class _ChatScreenState extends State<ChatScreen> {
       padding: const EdgeInsets.all(12),
       color: theme.appBarTheme.backgroundColor,
       child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Tooltip(
             message: hasUserCard ? loc.changeRoleButton : loc.selectRoleButton,
             child: InkWell(
-              onTap: () => _showChangeCardDialog(context, loc, availableCards),
+              onTap: () => isBlocked ? null : _showChangeCardDialog(context, loc, availableCards),
               borderRadius: BorderRadius.circular(22),
               child: Container(
                 width: 44,
@@ -734,7 +757,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 actions: <Type, Action<Intent>>{
                   SendMessageIntent: CallbackAction<SendMessageIntent>(
                     onInvoke: (SendMessageIntent intent) {
-                      _sendMessage(context);
+                      if (!isBlocked) _sendMessage(context);
                       return null;
                     },
                   ),
@@ -744,8 +767,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   maxLines: null,
                   controller: _textController,
                   style: const TextStyle(color: Colors.white),
+                  enabled: !isBlocked,
                   decoration: InputDecoration(
-                    hintText: loc.writeSomething,
+                    hintText: isBlocked ? loc.characterTyping : loc.writeSomething,
                     hintStyle: const TextStyle(color: Colors.grey),
                     fillColor: theme.cardColor,
                     filled: true,
@@ -755,15 +779,15 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   ),
-                  onSubmitted: (text) => _sendMessage(context),
+                  onSubmitted: (text) => isBlocked ? null : _sendMessage(context),
                 ),
               ),
             ),
           ),
           const SizedBox(width: 8),
           IconButton(
-            icon: Icon(Icons.send, color: theme.colorScheme.primary),
-            onPressed: () => _sendMessage(context),
+            icon: Icon(Icons.send, color: isBlocked ? Colors.grey : theme.colorScheme.primary),
+            onPressed: () => isBlocked ? null : _sendMessage(context),
           ),
         ],
       ),
