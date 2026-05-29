@@ -147,37 +147,39 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
                       controller: _nameController,
                       label: loc.charNameLabel,
                       hint: loc.charNameHint,
+                      minLines: 1,
+                      maxLines: 1,
                       validator: (v) => v!.trim().isEmpty ? loc.validationCharName : null,
                     ),
                     _buildTextField(
                       controller: _greetingController,
                       label: loc.greetingLabel,
                       hint: loc.greetingHint,
-                      maxLines: 3,
+                      minLines: 4,
                     ),
                     _buildTextField(
                       controller: _appearanceController,
                       label: loc.appearanceLabel,
                       hint: loc.appearanceHint,
-                      maxLines: 4,
+                      minLines: 4,
                     ),
                     _buildTextField(
                       controller: _personalityController,
                       label: loc.personalityLabel,
                       hint: loc.personalityHint,
-                      maxLines: 4,
+                      minLines: 4,
                     ),
                     _buildTextField(
                       controller: _scenarioController,
                       label: loc.scenarioLabel,
                       hint: loc.scenarioHint,
-                      maxLines: 3,
+                      minLines: 4,
                     ),
                     _buildTextField(
                       controller: _promptController,
                       label: loc.promptLabel,
                       hint: loc.promptHint,
-                      maxLines: 4,
+                      minLines: 3,
                     ),
                     const SizedBox(height: 12),
 
@@ -298,7 +300,8 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
     required TextEditingController controller,
     required String label,
     required String hint,
-    int maxLines = 1,
+    int? minLines,
+    int? maxLines,
     String? Function(String?)? validator,
   }) {
     final theme = Theme.of(context);
@@ -306,6 +309,7 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
       padding: const EdgeInsets.only(bottom: 20),
       child: TextFormField(
         controller: controller,
+        minLines: minLines,
         maxLines: maxLines,
         validator: validator,
         decoration: InputDecoration(
