@@ -8,18 +8,25 @@ part of 'message.dart';
 
 Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   id: (json['id'] as num).toInt(),
-  role: json['role'] as String,
+  role: $enumDecode(_$MessageRoleEnumMap, json['role']),
   content: json['content'] as String,
   createdAt: DateTime.parse(json['created_at'] as String),
   currentIndex: (json['current_index'] as num?)?.toInt() ?? 1,
   totalVariants: (json['total_variants'] as num?)?.toInt() ?? 1,
+  imagePath: json['image_path'] as String?,
 );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
   'id': instance.id,
-  'role': instance.role,
+  'role': _$MessageRoleEnumMap[instance.role]!,
   'content': instance.content,
   'created_at': instance.createdAt.toIso8601String(),
   'current_index': instance.currentIndex,
   'total_variants': instance.totalVariants,
+  'image_path': instance.imagePath,
+};
+
+const _$MessageRoleEnumMap = {
+  MessageRole.assistant: 'assistant',
+  MessageRole.user: 'user',
 };

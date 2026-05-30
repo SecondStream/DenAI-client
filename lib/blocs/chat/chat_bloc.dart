@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:chat_bot_client/application/config.dart';
 import 'package:chat_bot_client/application/l10n.dart';
+import 'package:chat_bot_client/consts/consts.dart';
 import 'package:chat_bot_client/models/models.dart';
 import 'package:chat_bot_client/repositories/characters_repository.dart';
 import 'package:chat_bot_client/repositories/chats_repository.dart';
@@ -11,8 +15,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final ChatsRepository _repository;
   final CharactersRepository _charactersRepository;
   final UserCardsRepository _userCardsRepository;
+  final AppConfig config;
 
-  ChatBloc(this._repository, this._charactersRepository, this._userCardsRepository)
+  ChatBloc(this._repository, this._charactersRepository, this._userCardsRepository, this.config)
     : super(ChatInitialState()) {
     on<LoadChatHistoryEvent>(_onLoadChatHistory);
     on<SendUserMessageEvent>(_onSendUserMessage);
@@ -26,6 +31,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<EditMessageEvent>(_onEditMessage);
     on<DeleteMessageEvent>(_onDeleteMessage);
     on<UpdateChatSummaryEvent>(_onUpdateChatSummary);
+    on<SelectImageEvent>(_onSelectImage);
   }
 
   void _onLoadChatHistory(LoadChatHistoryEvent event, Emitter<ChatState> emit) async {
@@ -80,10 +86,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     final updatedMessages = List<Message>.from(currentState.messages);
 
-    if (updatedMessages.last.role == "assistant") {
+    if (updatedMessages.last.role == MessageRole.assistant) {
       updatedMessages.removeLast();
     }
-    updatedMessages.add(Message(id: -2, role: "assistant", content: "", createdAt: DateTime.now()));
+    updatedMessages.add(
+      Message(id: -2, role: MessageRole.assistant, content: "", createdAt: DateTime.now()),
+    );
 
     emit(currentState.copyWith(messages: updatedMessages, isAiTyping: true));
 
@@ -157,7 +165,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
               if (char.greeting.isNotEmpty)
                 Message(
                   id: -99,
-                  role: "assistant",
+                  role: MessageRole.assistant,
                   content: char.greeting,
                   createdAt: DateTime.now(),
                 ),
@@ -183,17 +191,48 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   void _onSendUserMessage(SendUserMessageEvent event, Emitter<ChatState> emit) async {
     if (state is! ChatLoadedState) return;
     var currentState = state as ChatLoadedState;
+    final imageFile = currentState.selectedImageFile;
 
     var activeChatId = currentState.chatId;
     final updatedMessages = List<Message>.from(currentState.messages);
+    String localDisplayContent = event.text;
+    String? imagePath;
+    if (imageFile != null) {
+      imagePath = await _repository.uploadImage(imageFile);
+      if (imagePath != null) {
+        final String markdownTag = MessageTags.imgTemplate.replaceFirst(
+          MessageTags.urlMarker,
+          "${config.baseUrl}/$imagePath",
+        );
+
+        if (localDisplayContent.contains(MessageTags.img)) {
+          localDisplayContent = localDisplayContent.replaceFirst(MessageTags.img, markdownTag);
+        } else {
+          localDisplayContent = "$localDisplayContent\n$markdownTag";
+        }
+      }
+    }
 
     updatedMessages.add(
-      Message(id: -1, role: "user", content: event.text, createdAt: DateTime.now()),
+      Message(
+        id: -1,
+        role: MessageRole.user,
+        content: localDisplayContent,
+        createdAt: DateTime.now(),
+        imagePath: imagePath,
+      ),
     );
 
-    updatedMessages.add(Message(id: -2, role: "assistant", content: "", createdAt: DateTime.now()));
+    updatedMessages.add(
+      Message(id: -2, role: MessageRole.assistant, content: "", createdAt: DateTime.now()),
+    );
 
-    currentState = currentState.copyWith(messages: updatedMessages, isAiTyping: true);
+    currentState = currentState.copyWith(
+      messages: updatedMessages,
+      isAiTyping: true,
+      selectedImageFile: null,
+      isResetImage: true,
+    );
     emit(currentState);
 
     try {
@@ -206,7 +245,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         currentState = currentState.copyWith(chatId: activeChatId);
         emit(currentState);
       }
-      final tokenStream = await _repository.sendMessage(currentState.chatId, event.text);
+
+      final tokenStream = await _repository.sendMessage(currentState.chatId, event.text, imagePath);
 
       if (tokenStream != null) {
         await for (final token in tokenStream) {
@@ -268,7 +308,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         summary: '',
         messages: [
           if (char.greeting.isNotEmpty)
-            Message(id: -99, role: "assistant", content: char.greeting, createdAt: DateTime.now()),
+            Message(
+              id: -99,
+              role: MessageRole.assistant,
+              content: char.greeting,
+              createdAt: DateTime.now(),
+            ),
         ],
       ),
     );
@@ -289,5 +334,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     } catch (e) {
       emit(ChatErrorState(ErrType.saveSummary, e));
     }
+  }
+
+  void _onSelectImage(SelectImageEvent event, Emitter<ChatState> emit) {
+    if (state is! ChatLoadedState) return;
+    final currentState = state as ChatLoadedState;
+    emit(currentState.copyWith(selectedImageFile: event.fileImage, isResetImage: true));
   }
 }

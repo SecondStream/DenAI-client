@@ -14,6 +14,7 @@ class CheckOrCreateVirtualChatEvent extends ChatEvent {
 
 class SendUserMessageEvent extends ChatEvent {
   final String text;
+
   SendUserMessageEvent(this.text);
 }
 
@@ -38,7 +39,7 @@ class StartNewChatSessionEvent extends ChatEvent {
 
 class SwitchMessageBranchEvent extends ChatEvent {
   final int messageId;
-  final String direction; // "left" или "right"
+  final MessageDirection direction;
 
   SwitchMessageBranchEvent({required this.messageId, required this.direction});
 }
@@ -59,4 +60,9 @@ class DeleteMessageEvent extends ChatEvent {
 class UpdateChatSummaryEvent extends ChatEvent {
   final String newSummary;
   UpdateChatSummaryEvent({required this.newSummary});
+}
+
+class SelectImageEvent extends ChatEvent {
+  final File? fileImage;
+  SelectImageEvent(this.fileImage);
 }

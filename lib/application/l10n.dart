@@ -57,6 +57,7 @@ class AppLocalization {
       'history_subtitle':
           'A condensed history of your messages.\nYou can correct facts, fix AI issues, or add new lore details.',
       'history_title': 'Results of history',
+      'attach_image': 'Attach an image',
       //  --- Экран списка чатов ---
       'chats_list_title': 'My AI Companions',
       'add_chat_button': '+',
@@ -158,6 +159,7 @@ class AppLocalization {
       'history_subtitle':
           'Сжатая история ваших сообщений.\nВы можете скорректировать факты, исправить косяки ИИ или вписать новые детали лора.',
       'history_title': 'Итоги истории',
+      'attach_image': 'Прикрепить изображение',
       //  --- Экран списка чатов ---
       'chats_list_title': 'Мои ИИ-Компаньоны',
       'add_chat_button': '+',
@@ -314,6 +316,7 @@ class AppLocalization {
   String get emptyHistory => _localizedValues[locale.languageCode]?['empty_history'] ?? '';
   String get historySubtitle => _localizedValues[locale.languageCode]?['history_subtitle'] ?? '';
   String get historyTitle => _localizedValues[locale.languageCode]?['history_title'] ?? '';
+  String get attachImage => _localizedValues[locale.languageCode]?['attach_image'] ?? '';
 
   String getError(ErrType type, Object exception) {
     switch (type) {

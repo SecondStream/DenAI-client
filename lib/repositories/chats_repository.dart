@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
-
-import 'package:chat_bot_client/models/chat.dart';
 import 'package:chat_bot_client/repositories/provider/remote_provider.dart';
 import 'package:dio/dio.dart';
+
+import '../models/models.dart';
 
 class ChatsRepository {
   static const String _baseEndpoint = '/chats';
@@ -29,10 +30,10 @@ class ChatsRepository {
     return null;
   }
 
-  Future<Chat> switchMessageBranch(int messageId, String direction) async {
+  Future<Chat> switchMessageBranch(int messageId, MessageDirection direction) async {
     final response = await _remote.patch(
       "$_baseEndpoint/switch/$messageId",
-      data: {"direction": direction},
+      data: {"direction": direction.name},
     );
     return Chat.fromJson(response);
   }
@@ -75,17 +76,27 @@ class ChatsRepository {
     return Chat.fromJson(res);
   }
 
-  Future<Stream<String>?> sendMessage(int chatId, String text) async {
-    final ResponseBody? r = await _remote.post<ResponseBody, Map<String, dynamic>>(
+  Future<String?> uploadImage(File file) async {
+    final formData = FormData.fromMap({
+      'image_file': await MultipartFile.fromFile(
+        file.path,
+        filename: file.path.split(Platform.pathSeparator).last,
+      ),
+    });
+
+    final response = await _remote.post("$_baseEndpoint/upload-image", data: formData);
+    return response['image_path'];
+  }
+
+  Future<Stream<String>?> sendMessage(int chatId, String text, String? imagePath) async {
+    final ResponseBody? r = await _remote.post<ResponseBody, dynamic>(
       '$_baseEndpoint/$chatId/send',
-      data: {"content": text},
+      data: {"content": text, "image_path": imagePath},
       options: Options(responseType: ResponseType.stream),
     );
 
     if (r != null) {
-      final stream = r.stream.transform(unit8BufferToString).cast<String>();
-
-      return stream;
+      return r.stream.transform(unit8BufferToString).cast<String>();
     }
     return null;
   }

@@ -15,6 +15,7 @@ class ChatLoadedState extends ChatState {
   final List<UserCard>? availableCards;
   final String summary;
   final bool isAiTyping;
+  final File? selectedImageFile;
 
   ChatLoadedState({
     required this.chatId,
@@ -24,6 +25,7 @@ class ChatLoadedState extends ChatState {
     this.background,
     this.userCard,
     this.availableCards,
+    this.selectedImageFile,
     this.isAiTyping = false,
   });
 
@@ -34,7 +36,9 @@ class ChatLoadedState extends ChatState {
     UserCard? userCard,
     String? summary,
     List<UserCard>? availableCards,
+    File? selectedImageFile,
     bool? isAiTyping,
+    bool isResetImage = false,
   }) {
     return ChatLoadedState(
       chatId: chatId ?? this.chatId,
@@ -44,6 +48,7 @@ class ChatLoadedState extends ChatState {
       summary: summary ?? this.summary,
       userCard: userCard ?? this.userCard,
       availableCards: availableCards ?? this.availableCards,
+      selectedImageFile: selectedImageFile ?? (!isResetImage ? this.selectedImageFile : null),
       isAiTyping: isAiTyping ?? this.isAiTyping,
     );
   }

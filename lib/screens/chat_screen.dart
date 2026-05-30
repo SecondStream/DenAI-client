@@ -1,8 +1,12 @@
+import 'dart:io';
+
 import 'package:chat_bot_client/application/config.dart';
 import 'package:chat_bot_client/application/l10n.dart';
 import 'package:chat_bot_client/blocs/chat/chat_bloc.dart';
+import 'package:chat_bot_client/consts/consts.dart';
 import 'package:chat_bot_client/extensions/navigation_ext.dart';
 import 'package:chat_bot_client/models/models.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -52,9 +56,15 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
+    final config = AppConfig.of(context);
     return BlocProvider<ChatBloc>(
       create: (context) {
-        final bloc = ChatBloc(GetIt.instance.get(), GetIt.instance.get(), GetIt.instance.get());
+        final bloc = ChatBloc(
+          GetIt.instance.get(),
+          GetIt.instance.get(),
+          GetIt.instance.get(),
+          config,
+        );
         if (widget.chatId != null) {
           bloc.add(LoadChatHistoryEvent(widget.chatId!));
         } else {
@@ -119,26 +129,19 @@ class _ChatScreenState extends State<ChatScreen> {
       final bgUrl = state.background;
       final baseUrl = AppConfig.of(context).baseUrl;
       return Container(
-        // 1. Накатываем фоновое изображение
         decoration: BoxDecoration(
-          color: theme.scaffoldBackgroundColor, // Если фона нет, останется твоя стильная темнота
+          color: theme.scaffoldBackgroundColor,
           image: bgUrl != null
-              ? DecorationImage(
-                  image: NetworkImage('$baseUrl/$bgUrl'),
-                  fit: BoxFit.cover, // Растягиваем на весь экран чата
-                )
+              ? DecorationImage(image: NetworkImage('$baseUrl/$bgUrl'), fit: BoxFit.cover)
               : null,
         ),
         child: Stack(
           children: [
-            // 2. Если фон есть, размываем его и накладываем темный фильтр для идеальной читаемости текста
             // if (bgUrl != null)
             //   Positioned.fill(
             //     child: BackdropFilter(
-            //       // Степень размытия (сигма 5-7 — идеальный кинематографичный баланс)
             //       filter: ImageFilter.blur(sigmaX: 7, sigmaY: 7),
             //       child: Container(
-            //         // Накладываем 40% затемнение сверху, чтобы белый текст баблов не сливался с ярким артом
             //         color: Colors.black.withValues(alpha: 0.4),
             //       ),
             //     ),
@@ -152,7 +155,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     itemCount: state.messages.length,
                     itemBuilder: (context, index) {
                       final message = state.messages[index];
-                      final isUser = message.role == "user";
+                      final isUser = message.role == MessageRole.user;
 
                       return _buildMessageBubble(
                         context,
@@ -185,6 +188,51 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ],
             ),
+
+            if (state.selectedImageFile != null)
+              Positioned(
+                left: 112,
+                bottom: 76,
+                child: Stack(
+                  clipBehavior: Clip.none,
+                  children: [
+                    Container(
+                      height: 110,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.5),
+                            blurRadius: 12,
+                            spreadRadius: 2,
+                            offset: const Offset(0, 4), // Тень падает вниз
+                          ),
+                        ],
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: Image.file(state.selectedImageFile!, fit: BoxFit.contain),
+                    ),
+
+                    Positioned(
+                      top: -6,
+                      right: -6,
+                      child: InkWell(
+                        onTap: () {
+                          context.read<ChatBloc>().add(SelectImageEvent(null));
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.all(4),
+                          decoration: const BoxDecoration(
+                            color: Colors.black87,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.close, size: 12, color: Colors.white),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
           ],
         ),
       );
@@ -255,7 +303,6 @@ class _ChatScreenState extends State<ChatScreen> {
                         ? loc.characterTyping
                         : '',
                     style: TextStyle(
-                      // Базовый цвет текста (для ИИ — мягкий белый, для юзера — чистый белый)
                       color: isUser ? Colors.white70 : Colors.white,
                       fontSize: 15,
                       height: 1.4,
@@ -273,12 +320,10 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
 
               if (message.id > 0) ...[
-                // Фейковые сообщения (типа ID -99 или лоадеры) игнорируем
                 const SizedBox(height: 4),
                 Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // 💥 1. БЛОК СВАЙПОВ БОТА (Только для !isUser и если вариантов > 1)
                     if (!isUser && message.totalVariants > 1) ...[
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
@@ -299,7 +344,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                       context.read<ChatBloc>().add(
                                         SwitchMessageBranchEvent(
                                           messageId: message.id,
-                                          direction: "left",
+                                          direction: MessageDirection.left,
                                         ),
                                       );
                                     },
@@ -324,7 +369,7 @@ class _ChatScreenState extends State<ChatScreen> {
                                       context.read<ChatBloc>().add(
                                         SwitchMessageBranchEvent(
                                           messageId: message.id,
-                                          direction: "right",
+                                          direction: MessageDirection.right,
                                         ),
                                       );
                                     },
@@ -334,8 +379,6 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                       const SizedBox(width: 8),
                     ],
-
-                    // 💥 2. РЕГЕНЕРАЦИЯ БОТА (Только для самого последнего сообщения бота)
                     if (!isUser && isLastMessage) ...[
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -356,8 +399,6 @@ class _ChatScreenState extends State<ChatScreen> {
                       ),
                       const SizedBox(width: 8),
                     ],
-
-                    // 💥 3. КАНЦЕЛЯРСКИЙ КАРАНДАШ (Редактирование — у ВСЕХ сообщений)
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
@@ -375,8 +416,6 @@ class _ChatScreenState extends State<ChatScreen> {
                               },
                       ),
                     ),
-
-                    // 💥 4. КОРЗИНА УДАЛЕНИЯ (Только для сообщений ПОЛЬЗОВАТЕЛЯ)
                     if (isUser) ...[
                       const SizedBox(width: 8),
                       Container(
@@ -419,8 +458,6 @@ class _ChatScreenState extends State<ChatScreen> {
   void _showSummaryEditDialog(BuildContext context, AppLocalization loc, String currentSummary) {
     final theme = Theme.of(context);
     final chatBloc = context.read<ChatBloc>();
-
-    // Инициализируем контроллер текущим текстом синопсиса из твоего обновленного стейта
     final controller = TextEditingController(text: currentSummary);
 
     showDialog(
@@ -436,7 +473,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           ),
           content: SizedBox(
-            width: 600, // Делаем окно просторным для десктопного монитора
+            width: 600,
             child: Column(
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -447,11 +484,10 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
                 const SizedBox(height: 16),
 
-                // Многострочное поле для редактирования синопсиса
                 Flexible(
                   child: TextField(
                     controller: controller,
-                    maxLines: 12, // Даем много места под текст
+                    maxLines: 12,
                     minLines: 6,
                     keyboardType: TextInputType.multiline,
                     style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
@@ -473,7 +509,6 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
           actions: [
-            // Кнопка Отмены
             TextButton(
               onPressed: () => dialogContext.pop(),
               child: Text(
@@ -481,8 +516,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
               ),
             ),
-
-            // Кнопка Сохранения хроник
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
@@ -491,10 +524,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
               onPressed: () {
-                dialogContext.pop(); // Закрываем блокнот
+                dialogContext.pop();
 
                 final newText = controller.text.trim();
-                // Шлем апдейт в Блок, только если текст реально изменился
                 if (newText != currentSummary.trim()) {
                   chatBloc.add(UpdateChatSummaryEvent(newSummary: newText));
                 }
@@ -520,14 +552,14 @@ class _ChatScreenState extends State<ChatScreen> {
           builder: (context, setDialogState) {
             return AlertDialog(
               backgroundColor: theme.scaffoldBackgroundColor,
-              title: Text("Удалить сообщение?", textAlign: TextAlign.center),
+              title: Text(loc.removeMessageTitle, textAlign: TextAlign.center),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 10),
                     child: Text(
-                      "Вся история после этого сообщения будет удалена",
+                      loc.removeMessageAlert,
                       textAlign: TextAlign.center,
                       style: TextStyle(color: Colors.white70),
                     ),
@@ -577,8 +609,20 @@ class _ChatScreenState extends State<ChatScreen> {
     final theme = Theme.of(context);
     final chatBloc = context.read<ChatBloc>();
 
-    // Контроллер подтягивает старый текст
-    final controller = TextEditingController(text: message.content);
+    String editableContent = message.content;
+    if (message.imagePath != null && message.imagePath!.isNotEmpty) {
+      final regExp = RegExp(r'!\[.*?\]\((.*?)\)');
+      final matches = regExp.allMatches(editableContent);
+
+      for (final match in matches) {
+        final String extractedUrl = match.group(1) ?? '';
+        if (extractedUrl.contains(message.imagePath!)) {
+          editableContent = editableContent.replaceRange(match.start, match.end, MessageTags.img);
+          break;
+        }
+      }
+    }
+    final controller = TextEditingController(text: editableContent);
 
     showDialog(
       context: context,
@@ -594,10 +638,10 @@ class _ChatScreenState extends State<ChatScreen> {
             ],
           ),
           content: SizedBox(
-            width: 600, // Аккуратная десктопная ширина (не огромная и не мелкая)
+            width: 600,
             child: TextField(
               controller: controller,
-              maxLines: null, // Поле будет само расширяться вниз, если текст длинный
+              maxLines: null,
               minLines: 2,
               keyboardType: TextInputType.multiline,
               style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.4),
@@ -614,7 +658,6 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
           actions: [
-            // Кнопка отмены
             TextButton(
               onPressed: () => dialogContext.pop(),
               child: Text(
@@ -622,8 +665,6 @@ class _ChatScreenState extends State<ChatScreen> {
                 style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
               ),
             ),
-
-            // Кнопка сохранения
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: theme.colorScheme.primary,
@@ -634,8 +675,6 @@ class _ChatScreenState extends State<ChatScreen> {
               onPressed: () {
                 dialogContext.pop();
                 final text = controller.text.trim();
-
-                // Шлем апдейт, только если текст изменился и он не пустой
                 if (text.isNotEmpty && text != message.content) {
                   chatBloc.add(EditMessageEvent(messageId: message.id, newContent: text));
                 }
@@ -719,6 +758,14 @@ class _ChatScreenState extends State<ChatScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Tooltip(
+            message: loc.cancel,
+            child: IconButton(
+              icon: const Icon(Icons.attach_file, color: Colors.grey, size: 22),
+              onPressed: isBlocked ? null : () => _pickImage(context),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Tooltip(
             message: hasUserCard ? loc.changeRoleButton : loc.selectRoleButton,
             child: InkWell(
               onTap: () => isBlocked ? null : _showChangeCardDialog(context, loc, availableCards),
@@ -785,6 +832,7 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           const SizedBox(width: 8),
+
           IconButton(
             icon: Icon(Icons.send, color: isBlocked ? Colors.grey : theme.colorScheme.primary),
             onPressed: () => isBlocked ? null : _sendMessage(context),
@@ -792,6 +840,13 @@ class _ChatScreenState extends State<ChatScreen> {
         ],
       ),
     );
+  }
+
+  Future<void> _pickImage(BuildContext context) async {
+    final result = await FilePicker.pickFiles(type: FileType.image);
+    if (result != null && result.files.single.path != null && context.mounted) {
+      context.read<ChatBloc>().add(SelectImageEvent(File(result.files.single.path!)));
+    }
   }
 
   void _showChangeCardDialog(
@@ -962,16 +1017,11 @@ class CustomItalicComponent extends ItalicMd {
   CustomItalicComponent({this.italicColor = Colors.grey});
 
   @override
-  // Добавлено: (?:$|...) — если закрывающей звездочки нет,
-  // регулярка всё равно захватит текст до конца строки, что идеально для стриминга.
   RegExp get exp => RegExp(r"(?:(?<!\*)\*(?<!\s)(.+?)(?:(?<!\s)\*(?!\*)|$))", dotAll: true);
 
   @override
   InlineSpan span(BuildContext context, String text, final GptMarkdownConfig config) {
-    // Безопасный поиск совпадения без принудительного trim()
     final match = exp.firstMatch(text);
-
-    // Защита от null: если группа пустая, берем весь текст или пустую строку
     final data = match?[1] ?? text.replaceAll('*', '');
 
     final conf = config.copyWith(
@@ -984,19 +1034,3 @@ class CustomItalicComponent extends ItalicMd {
     return TextSpan(text: data, style: conf.style);
   }
 }
-// class CustomItalicComponent extends InlineMd {
-//   final Color italicColor;
-
-//   CustomItalicComponent({this.italicColor = Colors.grey});
-
-//   @override
-//   RegExp get exp => RegExp(r'(?<!\*)\*(?!\*)(.*?)(?:(?<!\*)\*(?!\*)|$)');
-
-//   @override
-//   InlineSpan span(BuildContext context, String text, GptMarkdownConfig config) {
-//     return TextSpan(
-//       text: text,
-//       style: TextStyle(fontStyle: FontStyle.italic, color: italicColor),
-//     );
-//   }
-// }
