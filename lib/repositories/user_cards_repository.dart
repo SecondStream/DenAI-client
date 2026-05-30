@@ -2,22 +2,20 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:chat_bot_client/models/models.dart';
+import 'package:chat_bot_client/repositories/base_repository.dart';
 import 'package:chat_bot_client/repositories/provider/remote_provider.dart';
 import 'package:dio/dio.dart';
 
-class UserCardsRepository {
-  static const String _baseEndpoint = '/user_cards';
-  final RemoteProvider _remote;
-
+class UserCardsRepository extends BaseRepository {
   List<UserCard>? _cache;
   UserCard? _defaultCard;
 
-  UserCardsRepository(this._remote);
+  UserCardsRepository(RemoteProvider remote) : super(remote, '/user_cards');
 
   Future<List<UserCard>> getUserCards() async {
     var cache = _cache;
     if (cache == null) {
-      final list = await _remote.get<List<dynamic>>('$_baseEndpoint/');
+      final list = await remote.get<List<dynamic>>('$endpoint/');
       if (list == null) {
         cache = [];
       } else {
@@ -30,14 +28,14 @@ class UserCardsRepository {
 
   Future<UserCard> getDefaultUserCard() async {
     if (_defaultCard == null) {
-      final res = await _remote.get("$_baseEndpoint/default");
+      final res = await remote.get("$endpoint/default");
       return _defaultCard = UserCard.fromJson(res);
     }
     return _defaultCard!;
   }
 
   Future<void> deleteUserCard(int id) async {
-    await _remote.delete("$_baseEndpoint/del/$id");
+    await remote.delete("$endpoint/del/$id");
     _clearCache();
   }
 
@@ -66,7 +64,7 @@ class UserCardsRepository {
     }
 
     final formData = FormData.fromMap(formMap);
-    final response = await _remote.put('$_baseEndpoint/save', data: formData);
+    final response = await remote.put('$endpoint/save', data: formData);
     final saved = UserCard.fromJson(response);
     _clearCache();
     return saved;

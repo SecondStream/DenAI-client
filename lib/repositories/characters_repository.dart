@@ -2,28 +2,26 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:chat_bot_client/models/models.dart';
+import 'package:chat_bot_client/repositories/base_repository.dart';
 import 'package:chat_bot_client/repositories/provider/remote_provider.dart';
 import 'package:dio/dio.dart';
 
-class CharactersRepository {
-  static const String _baseEndpoint = '/chars';
-  final RemoteProvider _remote;
-
-  CharactersRepository(this._remote);
+class CharactersRepository extends BaseRepository {
+  CharactersRepository(RemoteProvider remote) : super(remote, '/chars');
 
   Future<List<Char>> getCharacters() async {
-    final list = await _remote.get<List<dynamic>>('$_baseEndpoint/');
+    final list = await remote.get<List<dynamic>>(endpoint);
     if (list == null) return [];
     return list.map((json) => Char.fromJson(json)).toList();
   }
 
   Future<Char> getCharacterById(int characterId) async {
-    final res = await _remote.get("$_baseEndpoint/$characterId");
+    final res = await remote.get("$endpoint/$characterId");
     return Char.fromJson(res);
   }
 
   Future<void> deleteCharacter(int charId) async {
-    await _remote.delete("$_baseEndpoint/del/$charId");
+    await remote.delete("$endpoint/del/$charId");
   }
 
   Future<Char> saveCharacter({
@@ -65,7 +63,7 @@ class CharactersRepository {
     }
 
     final formData = FormData.fromMap(formMap);
-    final response = await _remote.put('$_baseEndpoint/save', data: formData);
+    final response = await remote.put('$endpoint/save', data: formData);
     return Char.fromJson(response);
   }
 }
