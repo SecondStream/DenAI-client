@@ -111,7 +111,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             onChanged: (v) => setState(() => _selectedVisionModel = v),
                           ),
 
-                          _buildDropdown(
+                          _buildDropdownTokenizers(
                             label: loc.labelTokenizer,
                             value: _selectedTokenizer,
                             items: state.tokenizers,
@@ -264,7 +264,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildDropdown({
+  Widget _buildDropdownTokenizers({
     required String label,
     required String? value,
     required List items,
@@ -288,6 +288,59 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ),
         dropdownColor: theme.cardColor,
         items: items.map((m) => DropdownMenuItem<String>(value: m, child: Text(m))).toList(),
+      ),
+    );
+  }
+
+  Widget _buildDropdown({
+    required String label,
+    required String? value,
+    required List<ModelInfo> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    final theme = Theme.of(context);
+
+    final List<String> itemNames = items.map((e) => e.name).toList();
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: DropdownButtonFormField<String>(
+        initialValue: itemNames.contains(value)
+            ? value
+            : (itemNames.isNotEmpty ? itemNames.first : null),
+        onChanged: onChanged,
+        style: const TextStyle(color: Colors.white, fontSize: 14),
+        decoration: InputDecoration(
+          labelText: label,
+          fillColor: theme.cardColor,
+          filled: true,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        dropdownColor: theme.cardColor,
+
+        items: items.map((m) {
+          return DropdownMenuItem<String>(
+            value: m.name,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(m.name, style: const TextStyle(fontWeight: FontWeight.w500)),
+                const SizedBox(width: 12),
+                Text(
+                  m.sizeGb,
+                  style: TextStyle(
+                    color: theme.colorScheme.primary.withValues(alpha: 0.7),
+                    fontSize: 12,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }).toList(),
       ),
     );
   }

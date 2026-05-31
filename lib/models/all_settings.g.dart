@@ -7,7 +7,9 @@ part of 'all_settings.dart';
 // **************************************************************************
 
 AllSettings _$AllSettingsFromJson(Map<String, dynamic> json) => AllSettings(
-  models: (json['models'] as List<dynamic>).map((e) => e as String).toList(),
+  models: (json['models'] as List<dynamic>)
+      .map((e) => ModelInfo.fromJson(e as Map<String, dynamic>))
+      .toList(),
   tokenizers: (json['tokenizers'] as List<dynamic>)
       .map((e) => e as String)
       .toList(),

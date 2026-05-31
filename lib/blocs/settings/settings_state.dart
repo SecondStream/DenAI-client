@@ -14,14 +14,14 @@ class SettingsErrorState extends SettingsState {
 }
 
 class SettingsLoadedState extends SettingsState {
-  final List<String> models;
+  final List<ModelInfo> models;
   final List<String> tokenizers;
   final SettingsBase settings;
 
   SettingsLoadedState({required this.models, required this.tokenizers, required this.settings});
 
   SettingsLoadedState copyWith({
-    List<String>? models,
+    List<ModelInfo>? models,
     List<String>? tokenizers,
     SettingsBase? settings,
   }) {
