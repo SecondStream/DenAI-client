@@ -27,6 +27,7 @@ class AppLocalization {
       'err_save_summary': 'Error saving history.',
       'err_load_settings': 'Failed to load settings.',
       'err_save_settings': 'Error saving settings.',
+      'err_delete_chat': 'Error deleting chat.',
       'error_network': 'Network error. Check your connection.',
       'error_unknown': 'An unknown error occurred.',
       'edit_text': 'Edit text',
@@ -68,6 +69,10 @@ class AppLocalization {
       'no_chats':
           'You don\'t have any active chats yet.\nPress \'+\' at the top to select a character!',
       'no_last_message': 'No messages',
+      'delete_chat_tooltip': 'Delete chat',
+      'delete_chat_dialog_title': 'Deleting the chat',
+      'delete_chat_dialog_message':
+          'Are you sure you want to permanently delete the chat?\nAll chat history will be permanently deleted.',
       // --- Экран персонажей ---
       'characters_title': 'Choose Companion',
       'add_character_button': '+',
@@ -152,6 +157,7 @@ class AppLocalization {
       'err_save_summary': 'Ошибка при сохранении истории.',
       'err_load_settings': 'Ошибка при загрузке настроек.',
       'err_save_settings': 'Ошибка при сохранении настроек.',
+      'err_delete_chat': 'При удалении чата возникла ошибка.',
       'error_network': 'Ошибка сети. Проверьте подключение.',
       'error_unknown': 'Произошла неизвестная ошибка.',
       'edit_text': 'Редактировать текст',
@@ -192,6 +198,10 @@ class AppLocalization {
       'add_chat_button': '+',
       'no_chats': 'У вас еще нет активных чатов.\nНажмите \'+\' сверху, чтобы выбрать персонажа.',
       'no_last_message': 'Нет сообщений',
+      'delete_chat_tooltip': 'Удалить чат.',
+      'delete_chat_dialog_title': 'Удаление чата',
+      'delete_chat_dialog_message':
+          'Вы уверены, что хотите навсегда удалить чат?\nВся история переписки будут безвозвратно стёрты.',
       // --- Экран персонажей ---
       'characters_title': 'Выбор Компаньона',
       'add_character_button': '+',
@@ -338,6 +348,12 @@ class AppLocalization {
   String get noChats => _localizedValues[locale.languageCode]?['no_chats'] ?? '';
   String get noLastMessage => _localizedValues[locale.languageCode]?['no_last_message'] ?? '';
   String get chatTitle => _localizedValues[locale.languageCode]?['chat_title'] ?? '';
+  String get deleteChatTooltip =>
+      _localizedValues[locale.languageCode]?['delete_chat_tooltip'] ?? '';
+  String get deleteChatDialogTitle =>
+      _localizedValues[locale.languageCode]?['delete_chat_dialog_title'] ?? '';
+  String get deleteChatDialogMessage =>
+      _localizedValues[locale.languageCode]?['delete_chat_dialog_message'] ?? '';
   String get newChatTooltip => _localizedValues[locale.languageCode]?['new_chat_tooltip'] ?? '';
   String get historyTooltip => _localizedValues[locale.languageCode]?['history_tooltip'] ?? '';
   String get characterTyping => _localizedValues[locale.languageCode]?['character_typing'] ?? '';
@@ -424,6 +440,8 @@ class AppLocalization {
         return _localizedValues[locale.languageCode]?['err_load_settings'] ?? type.name;
       case ErrType.saveSettings:
         return _localizedValues[locale.languageCode]?['err_save_settings'] ?? type.name;
+      case ErrType.deleteChat:
+        return _localizedValues[locale.languageCode]?['err_delete_chat'] ?? type.name;
     }
   }
 }
@@ -445,6 +463,7 @@ enum ErrType {
   saveSummary,
   loadSettings,
   saveSettings,
+  deleteChat,
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalization> {

@@ -10,18 +10,31 @@ class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
 
   ChatsListBloc(this._repository) : super(ChatsListInitialState()) {
     on<LoadAllChatsEvent>(_onLoadAllChats);
+    on<DeleteChatEvent>(_onDeleteChat);
   }
 
-  void _onLoadAllChats(
-    LoadAllChatsEvent event,
-    Emitter<ChatsListState> emit,
-  ) async {
+  void _onLoadAllChats(LoadAllChatsEvent event, Emitter<ChatsListState> emit) async {
     emit(ChatsListLoadingState());
     try {
       final chats = await _repository.getChats();
       emit(ChatsListLoadedState(chats));
     } catch (e) {
       emit(ChatsListErrorState(ErrType.loadChats, e));
+    }
+  }
+
+  void _onDeleteChat(DeleteChatEvent event, Emitter<ChatsListState> emit) async {
+    if (state is! ChatsListLoadedState) return;
+    final currentState = state as ChatsListLoadedState;
+
+    try {
+      await _repository.deleteChat(event.chatId);
+      final updatedChats = List<Chat>.from(currentState.chats)
+        ..removeWhere((c) => c.id == event.chatId);
+
+      emit(currentState.copyWith(chats: updatedChats));
+    } catch (e) {
+      emit(ChatsListErrorState(ErrType.deleteChat, e));
     }
   }
 }

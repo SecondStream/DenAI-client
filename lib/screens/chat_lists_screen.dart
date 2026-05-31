@@ -1,10 +1,10 @@
-import 'package:chat_bot_client/application/config.dart';
 import 'package:chat_bot_client/application/l10n.dart';
 import 'package:chat_bot_client/application/routes.dart';
 import 'package:chat_bot_client/blocs/chat_list/chat_list_bloc.dart';
 import 'package:chat_bot_client/extensions/navigation_ext.dart';
 import 'package:chat_bot_client/screens/chat_screen.dart';
 import 'package:chat_bot_client/widgets/app_drawer.dart';
+import 'package:chat_bot_client/widgets/chat_item.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -14,7 +14,6 @@ class ChatsListScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
 
     return BlocProvider<ChatsListBloc>(
@@ -56,39 +55,19 @@ class ChatsListScreen extends StatelessWidget {
                 itemCount: state.chats.length,
                 itemBuilder: (context, index) {
                   final chat = state.chats[index];
-                  final avatarUrl = chat.char.getAvatar(AppConfig.of(context).baseUrl);
-                  return Card(
-                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                    color: theme.cardColor,
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.15),
-                        backgroundImage: avatarUrl == null ? null : NetworkImage(avatarUrl),
-                        child: avatarUrl == null
-                            ? Text(
-                                chat.char.name[0].toUpperCase(),
-                                style: const TextStyle(color: Colors.white),
-                              )
-                            : null,
-                      ),
-                      title: Text(chat.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(
-                        chat.messages.isNotEmpty ? chat.messages.last.content : loc.noLastMessage,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      trailing: const Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey),
-                      onTap: () {
-                        context
-                            .push(AppRoutes.chat, arguments: ChatScreenArgs(chatId: chat.id))
-                            .then((_) {
-                              if (context.mounted) {
-                                context.read<ChatsListBloc>().add(LoadAllChatsEvent());
-                              }
-                            });
-                      },
-                    ),
+
+                  return ChatItem(
+                    chat: chat,
+                    onPressed: (_) {
+                      context.push(AppRoutes.chat, arguments: ChatScreenArgs(chatId: chat.id)).then(
+                        (_) {
+                          if (context.mounted) {
+                            context.read<ChatsListBloc>().add(LoadAllChatsEvent());
+                          }
+                        },
+                      );
+                    },
+                    onRemovePressed: (_) => _onDeleteChat(context, chat.id),
                   );
                 },
               );
@@ -97,6 +76,70 @@ class ChatsListScreen extends StatelessWidget {
           },
         ),
       ),
+    );
+  }
+
+  void _onDeleteChat(BuildContext context, int chatId) async {
+    final chatsListBloc = context.read<ChatsListBloc>();
+    final res = await _showDeleteChatConfirmation(context);
+    if (res == true) chatsListBloc.add(DeleteChatEvent(chatId));
+  }
+
+  Future<bool?> _showDeleteChatConfirmation(BuildContext context) {
+    final theme = Theme.of(context);
+    final loc = AppLocalization.of(context);
+
+    return showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              backgroundColor: theme.scaffoldBackgroundColor,
+              title: Text(loc.deleteChatDialogTitle, textAlign: TextAlign.center),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: Text(
+                      loc.deleteChatDialogMessage,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+              actions: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton(
+                        onPressed: () => dialogContext.pop(),
+                        style: TextButton.styleFrom(minimumSize: Size(double.infinity, 50)),
+                        child: Text(loc.no),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: theme.colorScheme.primary,
+                          foregroundColor: Colors.white,
+                          minimumSize: Size(double.infinity, 50),
+                        ),
+                        onPressed: () => dialogContext.pop(true),
+                        child: Text(loc.yes, style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }
