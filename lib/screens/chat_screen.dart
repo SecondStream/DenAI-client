@@ -170,15 +170,6 @@ class _ChatScreenState extends State<ChatScreen> {
                     },
                   ),
                 ),
-
-                // if (state.isAiTyping && state.messages.last.content.isEmpty)
-                //   Padding(
-                //     padding: EdgeInsets.all(8.0),
-                //     child: Text(
-                //       loc.characterTyping,
-                //       style: TextStyle(fontStyle: FontStyle.italic, color: Colors.grey),
-                //     ),
-                //   ),
                 _buildInputZone(
                   context,
                   loc,
@@ -299,8 +290,8 @@ class _ChatScreenState extends State<ChatScreen> {
                   child: GptMarkdown(
                     message.content.isNotEmpty
                         ? message.content
-                        : isLastMessage && isBlocked
-                        ? loc.characterTyping
+                        : isLastMessage && isBlocked && !isUser
+                        ? loc.charTyping(char.name)
                         : '',
                     style: TextStyle(
                       color: isUser ? Colors.white70 : Colors.white,

@@ -3,6 +3,7 @@ import 'package:chat_bot_client/screens/character_form_screen.dart';
 import 'package:chat_bot_client/screens/characters_screen.dart';
 import 'package:chat_bot_client/screens/chat_lists_screen.dart';
 import 'package:chat_bot_client/screens/chat_screen.dart';
+import 'package:chat_bot_client/screens/settings_screen.dart';
 import 'package:chat_bot_client/screens/user_card_form_screen.dart';
 import 'package:chat_bot_client/screens/user_cards_screen.dart';
 import 'package:flutter/material.dart';
@@ -15,6 +16,7 @@ class AppRoutes {
   static const String userCards = '/user_cards';
   static const String characterEdit = '/characters/edit';
   static const String userCardEdit = '/user_cards/edit';
+  static const String settings = '/settings';
 
   static Route<dynamic> createRoute(String? route, {required RouteSettings settings}) {
     return _createRoute(route ?? '', settings);
@@ -34,6 +36,8 @@ class AppRoutes {
         return ChatScreen(args: args as ChatScreenArgs);
       case userCardEdit:
         return UserCardFormScreen(card: args as UserCard?);
+      case settings:
+        return SettingsScreen();
     }
     throw Exception('Unknown route: $route');
   }

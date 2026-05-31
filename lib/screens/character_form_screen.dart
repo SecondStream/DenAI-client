@@ -208,8 +208,8 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
                                 ),
                               ),
                               icon: const Icon(Icons.delete_outline, size: 22),
-                              label: const Text(
-                                "Удалить",
+                              label: Text(
+                                loc.delete,
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               ),
                               onPressed: () {

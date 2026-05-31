@@ -2,6 +2,7 @@ import 'package:chat_bot_client/repositories/characters_repository.dart';
 import 'package:chat_bot_client/repositories/chats_repository.dart';
 import 'package:chat_bot_client/repositories/provider/remote_provider.dart';
 import 'package:chat_bot_client/repositories/provider/interceptor.dart';
+import 'package:chat_bot_client/repositories/settings_repository.dart';
 import 'package:chat_bot_client/repositories/user_cards_repository.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
@@ -20,5 +21,6 @@ class DiInitializer {
     di.registerSingleton(ChatsRepository(remoteProvider));
     di.registerSingleton(CharactersRepository(remoteProvider));
     di.registerSingleton(UserCardsRepository(remoteProvider));
+    di.registerSingleton(SettingsRepository(remoteProvider));
   }
 }

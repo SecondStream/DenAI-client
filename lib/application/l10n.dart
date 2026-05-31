@@ -12,8 +12,6 @@ class AppLocalization {
   static const Map<String, Map<String, String>> _localizedValues = {
     'en': {
       // --- Базовые сообщения ---
-      'hello': 'Hello World!',
-      'welcome': 'Welcome, {user}!',
       'err_load_chats': 'Failed to load chat list.',
       'err_load_chat': 'Failed to load chat.',
       'err_load_characters': 'Failed to load character list.',
@@ -24,24 +22,30 @@ class AppLocalization {
       'err_update_card': 'Error updating card.',
       'err_switch_message': 'Error switching message.',
       'err_edit_message': 'Error editing message.',
+      'err_save_message': 'Error saving message.',
       'errRemoveMessage': 'Error deleting message.',
       'err_save_summary': 'Error saving history.',
+      'err_load_settings': 'Failed to load settings.',
+      'err_save_settings': 'Error saving settings.',
       'error_network': 'Network error. Check your connection.',
       'error_unknown': 'An unknown error occurred.',
       'edit_text': 'Edit text',
       'cancel': 'Cancel',
       'save': 'Save',
+      'delete': 'Delete',
       'no': 'No',
       'yes': 'Yes',
       // --- Меню ---
       'my_chats': 'My chats',
       'characters': 'Characters',
       'my_cards': 'My profiles',
+      'settings': 'Settings',
       // --- Экран чата ---
       'chat_title': 'Chat with Character',
       'new_chat_tooltip': 'Start New Chat',
-      'history_tooltip': 'Редактировать историю.',
+      'history_tooltip': 'Edit history',
       'character_typing': 'Character is typing...',
+      'character_named_typing': '{name} is typing...',
       'select_chat': 'Select Chat',
       'change_role_button': 'Change Role',
       'select_role_button': 'Select Role',
@@ -111,11 +115,28 @@ class AppLocalization {
       'default_switch_title': 'Use as Default',
       'default_switch_subtitle': 'This role will be automatically selected for all new chats',
       'card_create_button': 'Create Profile',
+
+      // --- Экран настроек ---
+      'global_settings_title': 'General AI settings',
+      'section_ollama_tokenizer': 'Selecting a model and tokenizer',
+      'section_context_window': 'Context window size',
+      'section_sampling_params': 'Sampling Parameters',
+      'section_system_prompt': 'Global System Instructions',
+      'label_main_model': 'Primary Text Model',
+      'label_vision_model': 'Vision Model',
+      'label_tokenizer': 'Local Tokenizer Dictionary',
+      'label_context_limit': 'Context Token Limit',
+      'label_context_size': '{num} tokens',
+      'label_temperature': 'Temperature',
+      'label_min_p': 'Min P',
+      'label_top_p': 'Top P',
+      'label_repeat_penalty': 'Repetition Penalty',
+      'hint_system_prompt': 'Enter instructions that will be mixed into all chats...',
+      'button_save_settings': 'Save Settings',
+      'message_settings_saved': 'Settings saved successfully!',
     },
     'ru': {
       // --- Базовые сообщения ---
-      'hello': 'Привет, мир!',
-      'welcome': 'Добро пожаловать, {user}!',
       'err_load_chats': 'Не удалось загрузить список чатов.',
       'err_load_chat': 'Не удалось загрузить чат.',
       'err_load_characters': 'Не удалось загрузить список персонажей.',
@@ -126,24 +147,30 @@ class AppLocalization {
       'err_update_card': 'При обновлении карточки возникла ошибка.',
       'err_switch_message': 'При переключении сообщения возникла ошибка.',
       'err_edit_message': 'При редактировании сообщения возникла ошибка.',
+      'err_save_message': 'При сохранении сообщения возникла ошибка.',
       'errRemoveMessage': 'При удалении сообщения возникла ошибка.',
       'err_save_summary': 'Ошибка при сохранении истории.',
+      'err_load_settings': 'Ошибка при загрузке настроек.',
+      'err_save_settings': 'Ошибка при сохранении настроек.',
       'error_network': 'Ошибка сети. Проверьте подключение.',
       'error_unknown': 'Произошла неизвестная ошибка.',
       'edit_text': 'Редактировать текст',
       'cancel': 'Отмена',
       'save': 'Сохранить',
+      'delete': 'Удалить',
       'no': 'Нет',
       'yes': 'Да',
       // --- Меню ---
       'my_chats': 'Мои чаты',
       'characters': 'Персонажи',
       'my_cards': 'Мои профили',
+      'settings': 'Настройки',
       // --- Экран чата ---
       'chat_title': 'Чат с персонажем',
       'new_chat_tooltip': 'Начать новый чат',
       'history_tooltip': 'Edit history',
       'character_typing': 'Персонаж отвечает...',
+      'character_named_typing': '{name} отвечает...',
       'select_chat': 'Выберите чат',
       'change_role_button': 'Сменить роль',
       'select_role_button': 'Выбрать роль',
@@ -213,14 +240,36 @@ class AppLocalization {
       'default_switch_title': 'Использовать по умолчанию',
       'default_switch_subtitle': 'Эта роль будет автоматически выбираться для всех новых чатов',
       'card_create_button': 'Создать профиль',
+
+      // --- Экран настроек ---
+      'global_settings_title': 'Общие настройки ИИ',
+      'section_ollama_tokenizer': 'Выбор модели и токенизатора',
+      'section_context_window': 'Размер контекстного окна',
+      'section_sampling_params': 'Параметры сэмплинга',
+      'section_system_prompt': 'Глобальные системные инструкции',
+      'label_main_model': 'Основная текстовая модель',
+      'label_vision_model': 'Vision модель',
+      'label_tokenizer': 'Локальный словарь токенизатора',
+      'label_context_limit': 'Лимит токенов контекста',
+      'label_context_size': '{num} tokens',
+      'label_temperature': 'Temperature',
+      'label_min_p': 'Min P',
+      'label_top_p': 'Top P',
+      'label_repeat_penalty': 'Repetition Penalty',
+      'hint_system_prompt': 'Введите инструкции, которые будут подмешиваться ко всем чатам...',
+      'button_save_settings': 'Сохранить настройки',
+      'message_settings_saved': 'Настройки успешно сохранены!',
     },
   };
 
-  String get hello => _localizedValues[locale.languageCode]?['hello'] ?? '';
+  String contextSize(int tokens) {
+    final template = _localizedValues[locale.languageCode]?['label_context_size'] ?? '';
+    return template.replaceAll('{num}', tokens.toString());
+  }
 
-  String welcome(String name) {
-    final template = _localizedValues[locale.languageCode]?['welcome'] ?? '';
-    return template.replaceAll('{user}', name);
+  String charTyping(String name) {
+    final template = _localizedValues[locale.languageCode]?['character_named_typing'] ?? '';
+    return template.replaceAll('{name}', name);
   }
 
   String get chatPlaceholder => _localizedValues[locale.languageCode]?['chat_placeholder'] ?? '';
@@ -304,11 +353,13 @@ class AppLocalization {
   String get editText => _localizedValues[locale.languageCode]?['edit_text'] ?? '';
   String get cancel => _localizedValues[locale.languageCode]?['cancel'] ?? '';
   String get save => _localizedValues[locale.languageCode]?['save'] ?? '';
+  String get delete => _localizedValues[locale.languageCode]?['delete'] ?? '';
   String get no => _localizedValues[locale.languageCode]?['no'] ?? '';
   String get yes => _localizedValues[locale.languageCode]?['yes'] ?? '';
   String get myChats => _localizedValues[locale.languageCode]?['my_chats'] ?? '';
   String get characters => _localizedValues[locale.languageCode]?['characters'] ?? '';
   String get myCards => _localizedValues[locale.languageCode]?['my_cards'] ?? '';
+  String get settings => _localizedValues[locale.languageCode]?['settings'] ?? '';
   String get removeMessageTitle =>
       _localizedValues[locale.languageCode]?['remove_message_title'] ?? '';
   String get removeMessageAlert =>
@@ -317,6 +368,31 @@ class AppLocalization {
   String get historySubtitle => _localizedValues[locale.languageCode]?['history_subtitle'] ?? '';
   String get historyTitle => _localizedValues[locale.languageCode]?['history_title'] ?? '';
   String get attachImage => _localizedValues[locale.languageCode]?['attach_image'] ?? '';
+  String get globalSettingsTitle =>
+      _localizedValues[locale.languageCode]?['global_settings_title'] ?? '';
+  String get sectionOllamaTokenizer =>
+      _localizedValues[locale.languageCode]?['section_ollama_tokenizer'] ?? '';
+  String get sectionContextWindow =>
+      _localizedValues[locale.languageCode]?['section_context_window'] ?? '';
+  String get sectionSamplingParams =>
+      _localizedValues[locale.languageCode]?['section_sampling_params'] ?? '';
+  String get sectionSystemPrompt =>
+      _localizedValues[locale.languageCode]?['section_system_prompt'] ?? '';
+  String get labelMainModel => _localizedValues[locale.languageCode]?['label_main_model'] ?? '';
+  String get labelVisionModel => _localizedValues[locale.languageCode]?['label_vision_model'] ?? '';
+  String get labelTokenizer => _localizedValues[locale.languageCode]?['label_tokenizer'] ?? '';
+  String get labelContextLimit =>
+      _localizedValues[locale.languageCode]?['label_context_limit'] ?? '';
+  String get labelTemperature => _localizedValues[locale.languageCode]?['label_temperature'] ?? '';
+  String get labelMinP => _localizedValues[locale.languageCode]?['label_min_p'] ?? '';
+  String get labelTopP => _localizedValues[locale.languageCode]?['label_top_p'] ?? '';
+  String get labelRepeatPenalty =>
+      _localizedValues[locale.languageCode]?['label_repeat_penalty'] ?? '';
+  String get hintSystemPrompt => _localizedValues[locale.languageCode]?['hint_system_prompt'] ?? '';
+  String get buttonSettingsSaved =>
+      _localizedValues[locale.languageCode]?['button_save_settings'] ?? '';
+  String get messageSettingsSaved =>
+      _localizedValues[locale.languageCode]?['message_settings_saved'] ?? '';
 
   String getError(ErrType type, Object exception) {
     switch (type) {
@@ -344,6 +420,10 @@ class AppLocalization {
         return _localizedValues[locale.languageCode]?['err_save_message'] ?? type.name;
       case ErrType.saveSummary:
         return _localizedValues[locale.languageCode]?['err_save_summary'] ?? type.name;
+      case ErrType.loadSettings:
+        return _localizedValues[locale.languageCode]?['err_load_settings'] ?? type.name;
+      case ErrType.saveSettings:
+        return _localizedValues[locale.languageCode]?['err_save_settings'] ?? type.name;
     }
   }
 }
@@ -363,6 +443,8 @@ enum ErrType {
   editMessage,
   removeMessage,
   saveSummary,
+  loadSettings,
+  saveSettings,
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalization> {

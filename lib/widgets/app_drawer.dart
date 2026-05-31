@@ -42,6 +42,7 @@ class AppDrawer extends StatelessWidget {
               title: Text(loc.myChats, style: TextStyle(color: Colors.white)),
               selected: currentRoute == AppRoutes.chats || currentRoute == AppRoutes.home,
               selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.15),
+              titleAlignment: ListTileTitleAlignment.center,
               onTap: () {
                 context.pop();
                 context.replace(AppRoutes.chats);
@@ -52,6 +53,7 @@ class AppDrawer extends StatelessWidget {
               title: Text(loc.characters, style: TextStyle(color: Colors.white)),
               selected: currentRoute == AppRoutes.characters,
               selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.15),
+              titleAlignment: ListTileTitleAlignment.center,
               onTap: () {
                 context.pop(context);
                 context.replace(AppRoutes.characters);
@@ -62,9 +64,21 @@ class AppDrawer extends StatelessWidget {
               title: Text(loc.myCards, style: TextStyle(color: Colors.white)),
               selected: currentRoute == AppRoutes.userCards,
               selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.15),
+              titleAlignment: ListTileTitleAlignment.center,
               onTap: () {
                 context.pop();
                 context.replace(AppRoutes.userCards);
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.settings, color: Colors.white70),
+              title: Text(loc.settings, style: TextStyle(color: Colors.white)),
+              selected: currentRoute == AppRoutes.settings,
+              selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.15),
+              titleAlignment: ListTileTitleAlignment.center,
+              onTap: () {
+                context.pop();
+                context.replace(AppRoutes.settings);
               },
             ),
           ],
