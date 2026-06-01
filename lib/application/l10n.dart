@@ -174,7 +174,7 @@ class AppLocalization {
       // --- Экран чата ---
       'chat_title': 'Чат с персонажем',
       'new_chat_tooltip': 'Начать новый чат',
-      'history_tooltip': 'Edit history',
+      'history_tooltip': 'Редактировать историю',
       'character_typing': 'Персонаж отвечает...',
       'character_named_thinking': '{name} думает...',
       'select_chat': 'Выберите чат',
@@ -273,142 +273,154 @@ class AppLocalization {
   };
 
   String contextSize(int tokens) {
-    final template = _localizedValues[locale.languageCode]?['label_context_size'] ?? '';
+    final template = _localizedValues[locale.languageCode]?['label_context_size'] ?? empty;
     return template.replaceAll('{num}', tokens.toString());
   }
 
   String charThinking(String name) {
-    final template = _localizedValues[locale.languageCode]?['character_named_thinking'] ?? '';
+    final template = _localizedValues[locale.languageCode]?['character_named_thinking'] ?? empty;
     return template.replaceAll('{name}', name);
   }
 
-  String get chatPlaceholder => _localizedValues[locale.languageCode]?['chat_placeholder'] ?? '';
-  String get sendButton => _localizedValues[locale.languageCode]?['send_button'] ?? '';
-  String get noMessages => _localizedValues[locale.languageCode]?['no_messages'] ?? '';
-  String get errorNetwork => _localizedValues[locale.languageCode]?['error_network'] ?? '';
+  String get empty => '';
+  String get chatPlaceholder => _localizedValues[locale.languageCode]?['chat_placeholder'] ?? empty;
+  String get sendButton => _localizedValues[locale.languageCode]?['send_button'] ?? empty;
+  String get noMessages => _localizedValues[locale.languageCode]?['no_messages'] ?? empty;
+  String get errorNetwork => _localizedValues[locale.languageCode]?['error_network'] ?? empty;
   String get errorEmptyMessage =>
-      _localizedValues[locale.languageCode]?['error_empty_message'] ?? '';
-  String get errorTooLong => _localizedValues[locale.languageCode]?['error_too_long'] ?? '';
-  String get typingIndicator => _localizedValues[locale.languageCode]?['typing_indicator'] ?? '';
-  String get errorUnknown => _localizedValues[locale.languageCode]?['error_unknown'] ?? '';
+      _localizedValues[locale.languageCode]?['error_empty_message'] ?? empty;
+  String get errorTooLong => _localizedValues[locale.languageCode]?['error_too_long'] ?? empty;
+  String get typingIndicator => _localizedValues[locale.languageCode]?['typing_indicator'] ?? empty;
+  String get errorUnknown => _localizedValues[locale.languageCode]?['error_unknown'] ?? empty;
   String get characterFormTitleCreate =>
-      _localizedValues[locale.languageCode]?['character_form_title_create'] ?? '';
+      _localizedValues[locale.languageCode]?['character_form_title_create'] ?? empty;
   String get characterFormTitleEdit =>
-      _localizedValues[locale.languageCode]?['character_form_title_edit'] ?? '';
-  String get avatarLabel => _localizedValues[locale.languageCode]?['avatar_label'] ?? '';
-  String get backgroundLabel => _localizedValues[locale.languageCode]?['background_label'] ?? '';
-  String get selectBackground => _localizedValues[locale.languageCode]?['select_background'] ?? '';
+      _localizedValues[locale.languageCode]?['character_form_title_edit'] ?? empty;
+  String get avatarLabel => _localizedValues[locale.languageCode]?['avatar_label'] ?? empty;
+  String get backgroundLabel => _localizedValues[locale.languageCode]?['background_label'] ?? empty;
+  String get selectBackground =>
+      _localizedValues[locale.languageCode]?['select_background'] ?? empty;
 
-  String get charNameLabel => _localizedValues[locale.languageCode]?['char_name_label'] ?? '';
-  String get charNameHint => _localizedValues[locale.languageCode]?['char_name_hint'] ?? '';
-  String get greetingLabel => _localizedValues[locale.languageCode]?['greeting_label'] ?? '';
-  String get greetingHint => _localizedValues[locale.languageCode]?['greeting_hint'] ?? '';
-  String get appearanceLabel => _localizedValues[locale.languageCode]?['appearance_label'] ?? '';
-  String get appearanceHint => _localizedValues[locale.languageCode]?['appearance_hint'] ?? '';
-  String get personalityLabel => _localizedValues[locale.languageCode]?['personality_label'] ?? '';
-  String get personalityHint => _localizedValues[locale.languageCode]?['personality_hint'] ?? '';
-  String get scenarioLabel => _localizedValues[locale.languageCode]?['scenario_label'] ?? '';
-  String get scenarioHint => _localizedValues[locale.languageCode]?['scenario_hint'] ?? '';
-  String get promptLabel => _localizedValues[locale.languageCode]?['prompt_label'] ?? '';
-  String get promptHint => _localizedValues[locale.languageCode]?['prompt_hint'] ?? '';
-  String get deleteButton => _localizedValues[locale.languageCode]?['delete_button'] ?? '';
-  String get saveButton => _localizedValues[locale.languageCode]?['save_button'] ?? '';
-  String get charCreateButton => _localizedValues[locale.languageCode]?['char_create_button'] ?? '';
-  String get userCardsTitle => _localizedValues[locale.languageCode]?['user_cards_title'] ?? '';
+  String get charNameLabel => _localizedValues[locale.languageCode]?['char_name_label'] ?? empty;
+  String get charNameHint => _localizedValues[locale.languageCode]?['char_name_hint'] ?? empty;
+  String get greetingLabel => _localizedValues[locale.languageCode]?['greeting_label'] ?? empty;
+  String get greetingHint => _localizedValues[locale.languageCode]?['greeting_hint'] ?? empty;
+  String get appearanceLabel => _localizedValues[locale.languageCode]?['appearance_label'] ?? empty;
+  String get appearanceHint => _localizedValues[locale.languageCode]?['appearance_hint'] ?? empty;
+  String get personalityLabel =>
+      _localizedValues[locale.languageCode]?['personality_label'] ?? empty;
+  String get personalityHint => _localizedValues[locale.languageCode]?['personality_hint'] ?? empty;
+  String get scenarioLabel => _localizedValues[locale.languageCode]?['scenario_label'] ?? empty;
+  String get scenarioHint => _localizedValues[locale.languageCode]?['scenario_hint'] ?? empty;
+  String get promptLabel => _localizedValues[locale.languageCode]?['prompt_label'] ?? empty;
+  String get promptHint => _localizedValues[locale.languageCode]?['prompt_hint'] ?? empty;
+  String get deleteButton => _localizedValues[locale.languageCode]?['delete_button'] ?? empty;
+  String get saveButton => _localizedValues[locale.languageCode]?['save_button'] ?? empty;
+  String get charCreateButton =>
+      _localizedValues[locale.languageCode]?['char_create_button'] ?? empty;
+  String get userCardsTitle => _localizedValues[locale.languageCode]?['user_cards_title'] ?? empty;
   String get addUserCardButton =>
-      _localizedValues[locale.languageCode]?['add_user_card_button'] ?? '';
+      _localizedValues[locale.languageCode]?['add_user_card_button'] ?? empty;
   String get noUserCardsMessage =>
-      _localizedValues[locale.languageCode]?['no_user_cards_message'] ?? '';
-  String get defaultStatus => _localizedValues[locale.languageCode]?['default_status'] ?? '';
-  String get additionalStatus => _localizedValues[locale.languageCode]?['additional_status'] ?? '';
+      _localizedValues[locale.languageCode]?['no_user_cards_message'] ?? empty;
+  String get defaultStatus => _localizedValues[locale.languageCode]?['default_status'] ?? empty;
+  String get additionalStatus =>
+      _localizedValues[locale.languageCode]?['additional_status'] ?? empty;
   String get userCardFormTitleCreate =>
-      _localizedValues[locale.languageCode]?['user_card_form_title_create'] ?? '';
+      _localizedValues[locale.languageCode]?['user_card_form_title_create'] ?? empty;
   String get userCardFormTitleEdit =>
-      _localizedValues[locale.languageCode]?['user_card_form_title_edit'] ?? '';
-  String get cardNameLabel => _localizedValues[locale.languageCode]?['card_name_label'] ?? '';
-  String get cardNameHint => _localizedValues[locale.languageCode]?['card_name_hint'] ?? '';
-  String get descriptionLabel => _localizedValues[locale.languageCode]?['description_label'] ?? '';
-  String get descriptionHint => _localizedValues[locale.languageCode]?['description_hint'] ?? '';
+      _localizedValues[locale.languageCode]?['user_card_form_title_edit'] ?? empty;
+  String get cardNameLabel => _localizedValues[locale.languageCode]?['card_name_label'] ?? empty;
+  String get cardNameHint => _localizedValues[locale.languageCode]?['card_name_hint'] ?? empty;
+  String get descriptionLabel =>
+      _localizedValues[locale.languageCode]?['description_label'] ?? empty;
+  String get descriptionHint => _localizedValues[locale.languageCode]?['description_hint'] ?? empty;
   String get defaultSwitchTitle =>
-      _localizedValues[locale.languageCode]?['default_switch_title'] ?? '';
+      _localizedValues[locale.languageCode]?['default_switch_title'] ?? empty;
   String get defaultSwitchSubtitle =>
-      _localizedValues[locale.languageCode]?['default_switch_subtitle'] ?? '';
-  String get cardCreateButton => _localizedValues[locale.languageCode]?['card_create_button'] ?? '';
+      _localizedValues[locale.languageCode]?['default_switch_subtitle'] ?? empty;
+  String get cardCreateButton =>
+      _localizedValues[locale.languageCode]?['card_create_button'] ?? empty;
   String get validationCharName =>
-      _localizedValues[locale.languageCode]?['validation_сhar_name'] ?? '';
-  String get charactersTitle => _localizedValues[locale.languageCode]?['characters_title'] ?? '';
+      _localizedValues[locale.languageCode]?['validation_сhar_name'] ?? empty;
+  String get charactersTitle => _localizedValues[locale.languageCode]?['characters_title'] ?? empty;
   String get addCharacterButton =>
-      _localizedValues[locale.languageCode]?['add_character_button'] ?? '';
+      _localizedValues[locale.languageCode]?['add_character_button'] ?? empty;
   String get noCharactersMessage =>
-      _localizedValues[locale.languageCode]?['no_characters_message'] ?? '';
-  String get editPrompts => _localizedValues[locale.languageCode]?['edit_prompts'] ?? '';
-  String get chat => _localizedValues[locale.languageCode]?['chat'] ?? '';
-  String get chatsListTitle => _localizedValues[locale.languageCode]?['chats_list_title'] ?? '';
-  String get addChatButton => _localizedValues[locale.languageCode]?['add_chat_button'] ?? '';
-  String get noChats => _localizedValues[locale.languageCode]?['no_chats'] ?? '';
-  String get noLastMessage => _localizedValues[locale.languageCode]?['no_last_message'] ?? '';
-  String get chatTitle => _localizedValues[locale.languageCode]?['chat_title'] ?? '';
+      _localizedValues[locale.languageCode]?['no_characters_message'] ?? empty;
+  String get editPrompts => _localizedValues[locale.languageCode]?['edit_prompts'] ?? empty;
+  String get chat => _localizedValues[locale.languageCode]?['chat'] ?? empty;
+  String get chatsListTitle => _localizedValues[locale.languageCode]?['chats_list_title'] ?? empty;
+  String get addChatButton => _localizedValues[locale.languageCode]?['add_chat_button'] ?? empty;
+  String get noChats => _localizedValues[locale.languageCode]?['no_chats'] ?? empty;
+  String get noLastMessage => _localizedValues[locale.languageCode]?['no_last_message'] ?? empty;
+  String get chatTitle => _localizedValues[locale.languageCode]?['chat_title'] ?? empty;
   String get deleteChatTooltip =>
-      _localizedValues[locale.languageCode]?['delete_chat_tooltip'] ?? '';
+      _localizedValues[locale.languageCode]?['delete_chat_tooltip'] ?? empty;
   String get deleteChatDialogTitle =>
-      _localizedValues[locale.languageCode]?['delete_chat_dialog_title'] ?? '';
+      _localizedValues[locale.languageCode]?['delete_chat_dialog_title'] ?? empty;
   String get deleteChatDialogMessage =>
-      _localizedValues[locale.languageCode]?['delete_chat_dialog_message'] ?? '';
-  String get newChatTooltip => _localizedValues[locale.languageCode]?['new_chat_tooltip'] ?? '';
-  String get historyTooltip => _localizedValues[locale.languageCode]?['history_tooltip'] ?? '';
-  String get characterTyping => _localizedValues[locale.languageCode]?['character_typing'] ?? '';
-  String get selectChat => _localizedValues[locale.languageCode]?['select_chat'] ?? '';
-  String get changeRoleButton => _localizedValues[locale.languageCode]?['change_role_button'] ?? '';
-  String get selectRoleButton => _localizedValues[locale.languageCode]?['select_role_button'] ?? '';
-  String get writeSomething => _localizedValues[locale.languageCode]?['write_something'] ?? '';
-  String get selectRoleText => _localizedValues[locale.languageCode]?['select_role_text'] ?? '';
-  String get noRolesText => _localizedValues[locale.languageCode]?['no_roles_text'] ?? '';
-  String get startNewChat => _localizedValues[locale.languageCode]?['start_new_chat'] ?? '';
-  String get confirmNewChat => _localizedValues[locale.languageCode]?['confirm_new_chat'] ?? '';
-  String get deleteChat => _localizedValues[locale.languageCode]?['delete_chat'] ?? '';
-  String get editText => _localizedValues[locale.languageCode]?['edit_text'] ?? '';
-  String get cancel => _localizedValues[locale.languageCode]?['cancel'] ?? '';
-  String get save => _localizedValues[locale.languageCode]?['save'] ?? '';
-  String get delete => _localizedValues[locale.languageCode]?['delete'] ?? '';
-  String get no => _localizedValues[locale.languageCode]?['no'] ?? '';
-  String get yes => _localizedValues[locale.languageCode]?['yes'] ?? '';
-  String get myChats => _localizedValues[locale.languageCode]?['my_chats'] ?? '';
-  String get characters => _localizedValues[locale.languageCode]?['characters'] ?? '';
-  String get myCards => _localizedValues[locale.languageCode]?['my_cards'] ?? '';
-  String get settings => _localizedValues[locale.languageCode]?['settings'] ?? '';
+      _localizedValues[locale.languageCode]?['delete_chat_dialog_message'] ?? empty;
+  String get newChatTooltip => _localizedValues[locale.languageCode]?['new_chat_tooltip'] ?? empty;
+  String get historyTooltip => _localizedValues[locale.languageCode]?['history_tooltip'] ?? empty;
+  String get characterTyping => _localizedValues[locale.languageCode]?['character_typing'] ?? empty;
+  String get selectChat => _localizedValues[locale.languageCode]?['select_chat'] ?? empty;
+  String get changeRoleButton =>
+      _localizedValues[locale.languageCode]?['change_role_button'] ?? empty;
+  String get selectRoleButton =>
+      _localizedValues[locale.languageCode]?['select_role_button'] ?? empty;
+  String get writeSomething => _localizedValues[locale.languageCode]?['write_something'] ?? empty;
+  String get selectRoleText => _localizedValues[locale.languageCode]?['select_role_text'] ?? empty;
+  String get noRolesText => _localizedValues[locale.languageCode]?['no_roles_text'] ?? empty;
+  String get startNewChat => _localizedValues[locale.languageCode]?['start_new_chat'] ?? empty;
+  String get confirmNewChat => _localizedValues[locale.languageCode]?['confirm_new_chat'] ?? empty;
+  String get deleteChat => _localizedValues[locale.languageCode]?['delete_chat'] ?? empty;
+  String get editText => _localizedValues[locale.languageCode]?['edit_text'] ?? empty;
+  String get cancel => _localizedValues[locale.languageCode]?['cancel'] ?? empty;
+  String get save => _localizedValues[locale.languageCode]?['save'] ?? empty;
+  String get delete => _localizedValues[locale.languageCode]?['delete'] ?? empty;
+  String get no => _localizedValues[locale.languageCode]?['no'] ?? empty;
+  String get yes => _localizedValues[locale.languageCode]?['yes'] ?? empty;
+  String get myChats => _localizedValues[locale.languageCode]?['my_chats'] ?? empty;
+  String get characters => _localizedValues[locale.languageCode]?['characters'] ?? empty;
+  String get myCards => _localizedValues[locale.languageCode]?['my_cards'] ?? empty;
+  String get settings => _localizedValues[locale.languageCode]?['settings'] ?? empty;
   String get removeMessageTitle =>
-      _localizedValues[locale.languageCode]?['remove_message_title'] ?? '';
+      _localizedValues[locale.languageCode]?['remove_message_title'] ?? empty;
   String get removeMessageAlert =>
-      _localizedValues[locale.languageCode]?['remove_message_alert'] ?? '';
-  String get emptyHistory => _localizedValues[locale.languageCode]?['empty_history'] ?? '';
-  String get historySubtitle => _localizedValues[locale.languageCode]?['history_subtitle'] ?? '';
-  String get historyTitle => _localizedValues[locale.languageCode]?['history_title'] ?? '';
-  String get attachImage => _localizedValues[locale.languageCode]?['attach_image'] ?? '';
+      _localizedValues[locale.languageCode]?['remove_message_alert'] ?? empty;
+  String get emptyHistory => _localizedValues[locale.languageCode]?['empty_history'] ?? empty;
+  String get historySubtitle => _localizedValues[locale.languageCode]?['history_subtitle'] ?? empty;
+  String get historyTitle => _localizedValues[locale.languageCode]?['history_title'] ?? empty;
+  String get attachImage => _localizedValues[locale.languageCode]?['attach_image'] ?? empty;
   String get globalSettingsTitle =>
-      _localizedValues[locale.languageCode]?['global_settings_title'] ?? '';
+      _localizedValues[locale.languageCode]?['global_settings_title'] ?? empty;
   String get sectionOllamaTokenizer =>
-      _localizedValues[locale.languageCode]?['section_ollama_tokenizer'] ?? '';
+      _localizedValues[locale.languageCode]?['section_ollama_tokenizer'] ?? empty;
   String get sectionContextWindow =>
-      _localizedValues[locale.languageCode]?['section_context_window'] ?? '';
+      _localizedValues[locale.languageCode]?['section_context_window'] ?? empty;
   String get sectionSamplingParams =>
-      _localizedValues[locale.languageCode]?['section_sampling_params'] ?? '';
+      _localizedValues[locale.languageCode]?['section_sampling_params'] ?? empty;
   String get sectionSystemPrompt =>
-      _localizedValues[locale.languageCode]?['section_system_prompt'] ?? '';
-  String get labelMainModel => _localizedValues[locale.languageCode]?['label_main_model'] ?? '';
-  String get labelVisionModel => _localizedValues[locale.languageCode]?['label_vision_model'] ?? '';
-  String get labelTokenizer => _localizedValues[locale.languageCode]?['label_tokenizer'] ?? '';
+      _localizedValues[locale.languageCode]?['section_system_prompt'] ?? empty;
+  String get labelMainModel => _localizedValues[locale.languageCode]?['label_main_model'] ?? empty;
+  String get labelVisionModel =>
+      _localizedValues[locale.languageCode]?['label_vision_model'] ?? empty;
+  String get labelTokenizer => _localizedValues[locale.languageCode]?['label_tokenizer'] ?? empty;
   String get labelContextLimit =>
-      _localizedValues[locale.languageCode]?['label_context_limit'] ?? '';
-  String get labelTemperature => _localizedValues[locale.languageCode]?['label_temperature'] ?? '';
-  String get labelMinP => _localizedValues[locale.languageCode]?['label_min_p'] ?? '';
-  String get labelTopP => _localizedValues[locale.languageCode]?['label_top_p'] ?? '';
+      _localizedValues[locale.languageCode]?['label_context_limit'] ?? empty;
+  String get labelTemperature =>
+      _localizedValues[locale.languageCode]?['label_temperature'] ?? empty;
+  String get labelMinP => _localizedValues[locale.languageCode]?['label_min_p'] ?? empty;
+  String get labelTopP => _localizedValues[locale.languageCode]?['label_top_p'] ?? empty;
   String get labelRepeatPenalty =>
-      _localizedValues[locale.languageCode]?['label_repeat_penalty'] ?? '';
-  String get hintSystemPrompt => _localizedValues[locale.languageCode]?['hint_system_prompt'] ?? '';
+      _localizedValues[locale.languageCode]?['label_repeat_penalty'] ?? empty;
+  String get hintSystemPrompt =>
+      _localizedValues[locale.languageCode]?['hint_system_prompt'] ?? empty;
   String get buttonSettingsSaved =>
-      _localizedValues[locale.languageCode]?['button_save_settings'] ?? '';
+      _localizedValues[locale.languageCode]?['button_save_settings'] ?? empty;
   String get messageSettingsSaved =>
-      _localizedValues[locale.languageCode]?['message_settings_saved'] ?? '';
+      _localizedValues[locale.languageCode]?['message_settings_saved'] ?? empty;
 
   String getError(ErrType type, Object exception) {
     switch (type) {

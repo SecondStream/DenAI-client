@@ -82,28 +82,31 @@ class _ChatScreenState extends State<ChatScreen> {
           }
         },
         builder: (context, state) {
+          final isActionsBlocked = state is! ChatLoadedState || state.isAiTyping;
           return Scaffold(
             appBar: AppBar(
               title: Text(state is! ChatLoadedState ? loc.chatTitle : state.char.name),
               actions: [
                 Tooltip(
-                  message: loc.historyTooltip,
+                  message: isActionsBlocked ? loc.empty : loc.historyTooltip,
                   child: IconButton(
                     icon: const Icon(Icons.menu_book, color: Colors.white, size: 24),
-                    onPressed: () {
-                      if (state is! ChatLoadedState || state.isAiTyping) return;
-                      _showSummaryEditDialog(context, loc, state.summary);
-                    },
+                    onPressed: isActionsBlocked
+                        ? null
+                        : () {
+                            _showSummaryEditDialog(context, loc, state.summary);
+                          },
                   ),
                 ),
                 Tooltip(
-                  message: loc.newChatTooltip,
+                  message: isActionsBlocked ? loc.empty : loc.newChatTooltip,
                   child: IconButton(
                     icon: const Icon(Icons.add_comment, color: Colors.white, size: 26),
-                    onPressed: () {
-                      if (state is! ChatLoadedState || state.isAiTyping) return;
-                      _showNewChatConfirmationDialog(context, loc);
-                    },
+                    onPressed: isActionsBlocked
+                        ? null
+                        : () {
+                            _showNewChatConfirmationDialog(context, loc);
+                          },
                   ),
                 ),
               ],
@@ -591,7 +594,7 @@ class _ChatScreenState extends State<ChatScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Tooltip(
-            message: loc.cancel,
+            message: isBlocked ? loc.empty : loc.cancel,
             child: IconButton(
               icon: const Icon(Icons.attach_file, color: Colors.grey, size: 22),
               onPressed: isBlocked ? null : () => _pickImage(context),
@@ -599,9 +602,13 @@ class _ChatScreenState extends State<ChatScreen> {
           ),
           const SizedBox(width: 4),
           Tooltip(
-            message: hasUserCard ? loc.changeRoleButton : loc.selectRoleButton,
+            message: isBlocked
+                ? loc.empty
+                : hasUserCard
+                ? loc.changeRoleButton
+                : loc.selectRoleButton,
             child: InkWell(
-              onTap: () => isBlocked ? null : _showChangeCardDialog(context, loc, availableCards),
+              onTap: isBlocked ? null : () => _showChangeCardDialog(context, loc, availableCards),
               borderRadius: BorderRadius.circular(22),
               child: Container(
                 width: 44,
@@ -668,7 +675,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
           IconButton(
             icon: Icon(Icons.send, color: isBlocked ? Colors.grey : theme.colorScheme.primary),
-            onPressed: () => isBlocked ? null : _sendMessage(context),
+            onPressed: isBlocked ? null : () => _sendMessage(context),
           ),
         ],
       ),
