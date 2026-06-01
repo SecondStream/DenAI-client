@@ -1,13 +1,13 @@
 import 'dart:io';
 
-import 'package:chat_bot_client/application/config.dart';
-import 'package:chat_bot_client/application/l10n.dart';
-import 'package:chat_bot_client/blocs/chat/chat_bloc.dart';
-import 'package:chat_bot_client/consts/consts.dart';
-import 'package:chat_bot_client/extensions/navigation_ext.dart';
-import 'package:chat_bot_client/models/models.dart';
-import 'package:chat_bot_client/widgets/character_message.dart';
-import 'package:chat_bot_client/widgets/user_message.dart';
+import 'package:den_ai/application/config.dart';
+import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/blocs/chat/chat_bloc.dart';
+import 'package:den_ai/consts/consts.dart';
+import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/models/models.dart';
+import 'package:den_ai/widgets/character_message.dart';
+import 'package:den_ai/widgets/user_message.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';

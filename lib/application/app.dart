@@ -1,6 +1,6 @@
-import 'package:chat_bot_client/application/l10n.dart';
-import 'package:chat_bot_client/application/routes.dart';
-import 'package:chat_bot_client/screens/chat_lists_screen.dart';
+import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/application/routes.dart';
+import 'package:den_ai/screens/chat_lists_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 

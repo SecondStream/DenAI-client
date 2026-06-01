@@ -1,5 +1,5 @@
-import 'package:chat_bot_client/models/user_card.dart';
-import 'package:chat_bot_client/repositories/user_cards_repository.dart';
+import 'package:den_ai/models/user_card.dart';
+import 'package:den_ai/repositories/user_cards_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'drawer_event.dart';

@@ -1,11 +1,11 @@
-import 'package:chat_bot_client/models/models.dart';
-import 'package:chat_bot_client/screens/character_form_screen.dart';
-import 'package:chat_bot_client/screens/characters_screen.dart';
-import 'package:chat_bot_client/screens/chat_lists_screen.dart';
-import 'package:chat_bot_client/screens/chat_screen.dart';
-import 'package:chat_bot_client/screens/settings_screen.dart';
-import 'package:chat_bot_client/screens/user_card_form_screen.dart';
-import 'package:chat_bot_client/screens/user_cards_screen.dart';
+import 'package:den_ai/models/models.dart';
+import 'package:den_ai/screens/character_form_screen.dart';
+import 'package:den_ai/screens/characters_screen.dart';
+import 'package:den_ai/screens/chat_lists_screen.dart';
+import 'package:den_ai/screens/chat_screen.dart';
+import 'package:den_ai/screens/settings_screen.dart';
+import 'package:den_ai/screens/user_card_form_screen.dart';
+import 'package:den_ai/screens/user_cards_screen.dart';
 import 'package:flutter/material.dart';
 
 class AppRoutes {

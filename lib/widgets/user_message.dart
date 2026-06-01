@@ -1,6 +1,6 @@
-import 'package:chat_bot_client/application/config.dart';
-import 'package:chat_bot_client/models/models.dart';
-import 'package:chat_bot_client/widgets/message_bubble.dart';
+import 'package:den_ai/application/config.dart';
+import 'package:den_ai/models/models.dart';
+import 'package:den_ai/widgets/message_bubble.dart';
 import 'package:flutter/material.dart';
 
 class UserMessage extends StatelessWidget {

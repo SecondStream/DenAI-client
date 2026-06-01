@@ -1,8 +1,8 @@
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:chat_bot_client/application/l10n.dart';
-import 'package:chat_bot_client/models/models.dart';
-import 'package:chat_bot_client/repositories/user_cards_repository.dart';
+import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/models/models.dart';
+import 'package:den_ai/repositories/user_cards_repository.dart';
 
 part 'user_card_form_event.dart';
 part 'user_card_form_state.dart';

@@ -1,6 +1,6 @@
-import 'package:chat_bot_client/application/app.dart';
-import 'package:chat_bot_client/application/config.dart';
-import 'package:chat_bot_client/application/di_initializer.dart';
+import 'package:den_ai/application/app.dart';
+import 'package:den_ai/application/config.dart';
+import 'package:den_ai/application/di_initializer.dart';
 import 'package:flutter/material.dart';
 import 'dart:io';
 

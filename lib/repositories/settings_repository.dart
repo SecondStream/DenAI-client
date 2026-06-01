@@ -1,6 +1,6 @@
-import 'package:chat_bot_client/models/models.dart';
-import 'package:chat_bot_client/repositories/base_repository.dart';
-import 'package:chat_bot_client/repositories/provider/remote_provider.dart';
+import 'package:den_ai/models/models.dart';
+import 'package:den_ai/repositories/base_repository.dart';
+import 'package:den_ai/repositories/provider/remote_provider.dart';
 
 class SettingsRepository extends BaseRepository {
   SettingsRepository(RemoteProvider remote) : super(remote, '/settings');

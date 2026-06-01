@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:chat_bot_client/repositories/base_repository.dart';
-import 'package:chat_bot_client/repositories/provider/remote_provider.dart';
+import 'package:den_ai/repositories/base_repository.dart';
+import 'package:den_ai/repositories/provider/remote_provider.dart';
 import 'package:dio/dio.dart';
 
 import '../models/models.dart';

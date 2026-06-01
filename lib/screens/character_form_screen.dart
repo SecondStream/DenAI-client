@@ -1,13 +1,13 @@
 import 'dart:io';
-import 'package:chat_bot_client/application/config.dart';
-import 'package:chat_bot_client/blocs/character_form/character_form_bloc.dart';
-import 'package:chat_bot_client/extensions/navigation_ext.dart';
+import 'package:den_ai/application/config.dart';
+import 'package:den_ai/blocs/character_form/character_form_bloc.dart';
+import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:chat_bot_client/application/l10n.dart';
-import 'package:chat_bot_client/models/models.dart';
+import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/models/models.dart';
 
 class CharacterFormScreen extends StatefulWidget {
   final Char? character;

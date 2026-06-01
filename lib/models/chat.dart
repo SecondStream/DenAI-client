@@ -1,4 +1,4 @@
-import 'package:chat_bot_client/models/models.dart';
+import 'package:den_ai/models/models.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'chat.g.dart';

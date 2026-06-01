@@ -1,9 +1,9 @@
-import 'package:chat_bot_client/models/models.dart';
-import 'package:chat_bot_client/widgets/app_drawer.dart';
+import 'package:den_ai/models/models.dart';
+import 'package:den_ai/widgets/app_drawer.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:chat_bot_client/blocs/settings/settings_bloc.dart';
-import 'package:chat_bot_client/application/l10n.dart';
+import 'package:den_ai/blocs/settings/settings_bloc.dart';
+import 'package:den_ai/application/l10n.dart';
 import 'package:get_it/get_it.dart';
 
 class SettingsScreen extends StatefulWidget {

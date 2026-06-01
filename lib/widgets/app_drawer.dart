@@ -1,9 +1,9 @@
-import 'package:chat_bot_client/application/config.dart';
-import 'package:chat_bot_client/application/l10n.dart';
-import 'package:chat_bot_client/application/routes.dart';
-import 'package:chat_bot_client/blocs/drawer/drawer_bloc.dart';
-import 'package:chat_bot_client/extensions/navigation_ext.dart';
-import 'package:chat_bot_client/models/user_card.dart';
+import 'package:den_ai/application/config.dart';
+import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/application/routes.dart';
+import 'package:den_ai/blocs/drawer/drawer_bloc.dart';
+import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/models/user_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';

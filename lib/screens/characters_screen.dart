@@ -1,10 +1,10 @@
-import 'package:chat_bot_client/application/l10n.dart';
-import 'package:chat_bot_client/application/routes.dart';
-import 'package:chat_bot_client/blocs/characters/characters_bloc.dart';
-import 'package:chat_bot_client/extensions/navigation_ext.dart';
-import 'package:chat_bot_client/models/models.dart';
-import 'package:chat_bot_client/screens/chat_screen.dart';
-import 'package:chat_bot_client/widgets/character_card.dart';
+import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/application/routes.dart';
+import 'package:den_ai/blocs/characters/characters_bloc.dart';
+import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/models/models.dart';
+import 'package:den_ai/screens/chat_screen.dart';
+import 'package:den_ai/widgets/character_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
