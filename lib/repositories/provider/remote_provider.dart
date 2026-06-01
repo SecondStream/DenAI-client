@@ -1,7 +1,8 @@
+import 'package:den_ai/env.dart';
 import 'package:dio/dio.dart';
 
 class RemoteProvider {
-  static const String _baseUrl = 'http://127.0.0.1:8000';
+  static const String _baseUrl = Env.apiUrl;
   final Dio _dio;
 
   RemoteProvider(this._dio);

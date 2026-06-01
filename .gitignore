@@ -4,6 +4,7 @@
 *.log
 *.pyc
 *.swp
+*.env
 .buildlog/
 .history
 
@@ -123,4 +124,5 @@ app.*.symbols
 *.iml
 *.ipr
 *.iws
+.vscode/
 
