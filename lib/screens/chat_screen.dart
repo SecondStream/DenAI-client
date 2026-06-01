@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
@@ -7,9 +5,9 @@ import 'package:den_ai/blocs/chat/chat_bloc.dart';
 import 'package:den_ai/consts/consts.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:den_ai/models/models.dart';
+import 'package:den_ai/tools/file_tool.dart';
 import 'package:den_ai/widgets/character_message.dart';
 import 'package:den_ai/widgets/user_message.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -683,9 +681,9 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _pickImage(BuildContext context) async {
-    final result = await FilePicker.pickFiles(type: FileType.image);
-    if (result != null && result.files.single.path != null && context.mounted) {
-      context.read<ChatBloc>().add(SelectImageEvent(File(result.files.single.path!)));
+    final image = await FileTool.pickImage();
+    if (image != null && context.mounted) {
+      context.read<ChatBloc>().add(SelectImageEvent(image));
     }
   }
 

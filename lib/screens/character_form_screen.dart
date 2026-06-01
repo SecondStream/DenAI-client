@@ -2,7 +2,7 @@ import 'dart:io';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/blocs/character_form/character_form_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:den_ai/tools/file_tool.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -53,19 +53,19 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
   }
 
   Future<void> _pickAvatar() async {
-    final result = await FilePicker.pickFiles(type: FileType.image);
-    if (result != null && result.files.single.path != null) {
+    final image = await FileTool.pickImage();
+    if (image != null) {
       setState(() {
-        _selectedAvatarFile = File(result.files.single.path!);
+        _selectedAvatarFile = image;
       });
     }
   }
 
   Future<void> _pickBackground() async {
-    final result = await FilePicker.pickFiles(type: FileType.image);
-    if (result != null && result.files.single.path != null) {
+    final image = await FileTool.pickImage();
+    if (image != null) {
       setState(() {
-        _selectedBackgroundFile = File(result.files.single.path!);
+        _selectedBackgroundFile = image;
       });
     }
   }
