@@ -46,7 +46,7 @@ class AppLocalization {
       'new_chat_tooltip': 'Start New Chat',
       'history_tooltip': 'Edit history',
       'character_typing': 'Character is typing...',
-      'character_named_typing': '{name} is typing...',
+      'character_named_thinking': '{name} is thinking...',
       'select_chat': 'Select Chat',
       'change_role_button': 'Change Role',
       'select_role_button': 'Select Role',
@@ -176,7 +176,7 @@ class AppLocalization {
       'new_chat_tooltip': 'Начать новый чат',
       'history_tooltip': 'Edit history',
       'character_typing': 'Персонаж отвечает...',
-      'character_named_typing': '{name} отвечает...',
+      'character_named_thinking': '{name} думает...',
       'select_chat': 'Выберите чат',
       'change_role_button': 'Сменить роль',
       'select_role_button': 'Выбрать роль',
@@ -277,8 +277,8 @@ class AppLocalization {
     return template.replaceAll('{num}', tokens.toString());
   }
 
-  String charTyping(String name) {
-    final template = _localizedValues[locale.languageCode]?['character_named_typing'] ?? '';
+  String charThinking(String name) {
+    final template = _localizedValues[locale.languageCode]?['character_named_thinking'] ?? '';
     return template.replaceAll('{name}', name);
   }
 

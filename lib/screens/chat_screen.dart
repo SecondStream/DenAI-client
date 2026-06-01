@@ -6,6 +6,8 @@ import 'package:chat_bot_client/blocs/chat/chat_bloc.dart';
 import 'package:chat_bot_client/consts/consts.dart';
 import 'package:chat_bot_client/extensions/navigation_ext.dart';
 import 'package:chat_bot_client/models/models.dart';
+import 'package:chat_bot_client/widgets/character_message.dart';
+import 'package:chat_bot_client/widgets/user_message.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -155,17 +157,14 @@ class _ChatScreenState extends State<ChatScreen> {
                     itemCount: state.messages.length,
                     itemBuilder: (context, index) {
                       final message = state.messages[index];
-                      final isUser = message.role == MessageRole.user;
-
                       return _buildMessageBubble(
                         context,
                         loc,
                         message,
-                        isUser,
                         state.char,
                         state.userCard,
-                        state.messages.last.id == message.id,
                         state.isAiTyping,
+                        state.messages.last.id == message.id,
                       );
                     },
                   ),
@@ -236,214 +235,49 @@ class _ChatScreenState extends State<ChatScreen> {
     BuildContext context,
     AppLocalization loc,
     Message message,
-    bool isUser,
     Char char,
     UserCard? user,
+    bool isTyping,
     bool isLastMessage,
-    bool isBlocked,
   ) {
     final theme = Theme.of(context);
-    final baseUrl = AppConfig.of(context).baseUrl;
+    late Widget messageWidget;
+    if (message.role == MessageRole.user) {
+      messageWidget = UserMessage(
+        message: message,
+        card: user,
+        onEditMessage: isTyping
+            ? null
+            : (_) => _showEditMessageDialog(context, loc, theme, message),
+        onDeleteMessage: isTyping
+            ? null
+            : (messageId) => _onDeleteMessage(context, loc, theme, messageId),
+      );
+    } else {
+      messageWidget = CharacterMessage(
+        char: char,
+        message: message,
+        isThinking: isTyping,
+        onEditMessage: isTyping
+            ? null
+            : (_) => _showEditMessageDialog(context, loc, theme, message),
 
-    final String? userAvatar = user?.getAvatar(baseUrl);
-    final String? charAvatar = char.getAvatar(baseUrl);
+        onSwitchMessage: isTyping
+            ? null
+            : (messageId, direction) {
+                context.read<ChatBloc>().add(
+                  SwitchMessageBranchEvent(messageId: messageId, direction: direction),
+                );
+              },
+        onRegenerateMessage: isTyping || !isLastMessage
+            ? null
+            : (messageId) {
+                context.read<ChatBloc>().add(RegenerateLastAiMessageEvent());
+              },
+      );
+    }
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (!isUser) ...[
-            CircleAvatar(
-              radius: 25,
-              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.15),
-              backgroundImage: charAvatar == null ? null : NetworkImage(charAvatar),
-              child: charAvatar == null
-                  ? Text(
-                      char.name.toUpperCase(),
-                      style: const TextStyle(fontSize: 12, color: Colors.white),
-                    )
-                  : null,
-            ),
-            const SizedBox(width: 8),
-          ],
-
-          Column(
-            crossAxisAlignment: isUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                decoration: BoxDecoration(
-                  color: isUser
-                      ? theme.scaffoldBackgroundColor.withValues(alpha: .95)
-                      : theme.cardColor.withValues(alpha: .95),
-                  borderRadius: BorderRadius.only(
-                    topLeft: const Radius.circular(12),
-                    topRight: const Radius.circular(12),
-                    bottomLeft: Radius.circular(isUser ? 12 : 0),
-                    bottomRight: Radius.circular(isUser ? 0 : 12),
-                  ),
-                ),
-                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.65),
-                child: SelectionArea(
-                  child: GptMarkdown(
-                    message.content.isNotEmpty
-                        ? message.content
-                        : isLastMessage && isBlocked && !isUser
-                        ? loc.charTyping(char.name)
-                        : '',
-                    style: TextStyle(
-                      color: isUser ? Colors.white70 : Colors.white,
-                      fontSize: 15,
-                      height: 1.4,
-                    ),
-                    inlineComponents: [
-                      ATagMd(),
-                      ImageMd(),
-                      StrikeMd(),
-                      BoldMd(),
-                      CustomItalicComponent(italicColor: isUser ? Colors.white38 : Colors.white54),
-                      UnderLineMd(),
-                    ],
-                  ),
-                ),
-              ),
-
-              if (message.id > 0) ...[
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    if (!isUser && message.totalVariants > 1) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.arrow_left, size: 20, color: Colors.grey),
-                              constraints: const BoxConstraints(),
-                              padding: EdgeInsets.zero,
-                              onPressed: isBlocked
-                                  ? null
-                                  : () {
-                                      context.read<ChatBloc>().add(
-                                        SwitchMessageBranchEvent(
-                                          messageId: message.id,
-                                          direction: MessageDirection.left,
-                                        ),
-                                      );
-                                    },
-                            ),
-                            const SizedBox(width: 4),
-                            Text(
-                              "${message.currentIndex} / ${message.totalVariants}",
-                              style: TextStyle(
-                                color: theme.colorScheme.primary,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            IconButton(
-                              icon: const Icon(Icons.arrow_right, size: 20, color: Colors.grey),
-                              constraints: const BoxConstraints(),
-                              padding: EdgeInsets.zero,
-                              onPressed: isBlocked
-                                  ? null
-                                  : () {
-                                      context.read<ChatBloc>().add(
-                                        SwitchMessageBranchEvent(
-                                          messageId: message.id,
-                                          direction: MessageDirection.right,
-                                        ),
-                                      );
-                                    },
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    if (!isUser && isLastMessage) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: IconButton(
-                          icon: Icon(Icons.refresh, size: 16, color: theme.colorScheme.primary),
-                          constraints: const BoxConstraints(),
-                          padding: const EdgeInsets.all(2),
-                          onPressed: isBlocked
-                              ? null
-                              : () {
-                                  context.read<ChatBloc>().add(RegenerateLastAiMessageEvent());
-                                },
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.3),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: IconButton(
-                        icon: const Icon(Icons.edit, size: 14, color: Colors.grey),
-                        constraints: const BoxConstraints(),
-                        padding: const EdgeInsets.all(2),
-                        onPressed: isBlocked
-                            ? null
-                            : () {
-                                _showEditMessageDialog(context, loc, message);
-                              },
-                      ),
-                    ),
-                    if (isUser) ...[
-                      const SizedBox(width: 8),
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: IconButton(
-                          icon: Icon(Icons.delete_outline, size: 14, color: Colors.red.shade400),
-                          constraints: const BoxConstraints(),
-                          padding: const EdgeInsets.all(2),
-                          onPressed: isBlocked
-                              ? null
-                              : () => _onDeleteMessage(context, loc, theme, message.id),
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ],
-          ),
-          if (isUser) ...[
-            const SizedBox(width: 8),
-            CircleAvatar(
-              radius: 25,
-              backgroundColor: theme.colorScheme.secondary.withValues(alpha: 0.15),
-              backgroundImage: userAvatar == null ? null : NetworkImage(userAvatar),
-              child: userAvatar == null
-                  ? const Icon(Icons.person, size: 18, color: Colors.grey)
-                  : null,
-            ),
-          ],
-        ],
-      ),
-    );
+    return Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: messageWidget);
   }
 
   void _showSummaryEditDialog(BuildContext context, AppLocalization loc, String currentSummary) {
@@ -596,8 +430,12 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _showEditMessageDialog(BuildContext context, AppLocalization loc, Message message) {
-    final theme = Theme.of(context);
+  void _showEditMessageDialog(
+    BuildContext context,
+    AppLocalization loc,
+    ThemeData theme,
+    Message message,
+  ) {
     final chatBloc = context.read<ChatBloc>();
 
     String editableContent = message.content;
