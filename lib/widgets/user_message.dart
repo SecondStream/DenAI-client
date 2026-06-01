@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/widgets/message_bubble.dart';
@@ -73,7 +74,7 @@ class UserMessage extends StatelessWidget {
         CircleAvatar(
           radius: 25,
           backgroundColor: theme.colorScheme.secondary.withValues(alpha: 0.15),
-          backgroundImage: userAvatar == null ? null : NetworkImage(userAvatar),
+          backgroundImage: userAvatar == null ? null : CachedNetworkImageProvider(userAvatar),
           child: userAvatar == null ? const Icon(Icons.person, size: 18, color: Colors.grey) : null,
         ),
       ],

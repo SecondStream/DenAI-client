@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
@@ -35,7 +36,7 @@ class CharacterMessage extends StatelessWidget {
         CircleAvatar(
           radius: 25,
           backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.15),
-          backgroundImage: charAvatar == null ? null : NetworkImage(charAvatar),
+          backgroundImage: charAvatar == null ? null : CachedNetworkImageProvider(charAvatar),
           child: charAvatar == null
               ? Text(
                   char.name.toUpperCase(),

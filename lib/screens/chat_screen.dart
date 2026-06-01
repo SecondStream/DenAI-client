@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/blocs/chat/chat_bloc.dart';
@@ -39,10 +40,10 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
-      _scrollController.animateTo(
-        _scrollController.position.maxScrollExtent + 100,
-        duration: const Duration(milliseconds: 100),
-        curve: Curves.easeOut,
+      _scrollController.jumpTo(
+        _scrollController.position.maxScrollExtent,
+        // duration: const Duration(milliseconds: 100),
+        // curve: Curves.easeOut,
       );
     }
   }
@@ -134,7 +135,10 @@ class _ChatScreenState extends State<ChatScreen> {
         decoration: BoxDecoration(
           color: theme.scaffoldBackgroundColor,
           image: bgUrl != null
-              ? DecorationImage(image: NetworkImage('$baseUrl/$bgUrl'), fit: BoxFit.cover)
+              ? DecorationImage(
+                  image: CachedNetworkImageProvider('$baseUrl/$bgUrl'),
+                  fit: BoxFit.cover,
+                )
               : null,
         ),
         child: Stack(
@@ -729,7 +733,9 @@ class _ChatScreenState extends State<ChatScreen> {
                           : theme.cardColor,
                       child: ListTile(
                         leading: CircleAvatar(
-                          backgroundImage: avatarUrl == null ? null : NetworkImage(avatarUrl),
+                          backgroundImage: avatarUrl == null
+                              ? null
+                              : CachedNetworkImageProvider(avatarUrl),
                           child: card.avatar.isEmpty ? const Icon(Icons.person) : null,
                         ),
                         title: Text(card.name, style: const TextStyle(fontWeight: FontWeight.bold)),
