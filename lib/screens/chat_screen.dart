@@ -7,6 +7,7 @@ import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/tools/file_tool.dart';
 import 'package:den_ai/widgets/character_message.dart';
+import 'package:den_ai/widgets/persona_avatar.dart';
 import 'package:den_ai/widgets/user_message.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -521,59 +522,6 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  // ignore: unused_element
-  void _showEditMessageDialogOld(BuildContext context, AppLocalization loc, message) {
-    final theme = Theme.of(context);
-    final chatBloc = context.read<ChatBloc>();
-    final controller = TextEditingController(text: message.content);
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          title: Text(loc.editText),
-          content: TextField(
-            controller: controller,
-            maxLines: null,
-            keyboardType: TextInputType.multiline,
-            style: const TextStyle(color: Colors.white),
-            decoration: InputDecoration(
-              fillColor: theme.cardColor,
-              filled: true,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => context.pop(),
-              child: Text(loc.cancel, style: TextStyle(color: Colors.grey)),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.primary),
-              onPressed: () {
-                context.pop();
-                if (controller.text.trim().isNotEmpty &&
-                    controller.text.trim() != message.content) {
-                  chatBloc.add(
-                    EditMessageEvent(messageId: message.id, newContent: controller.text.trim()),
-                  );
-                }
-              },
-              child: Text(
-                loc.save,
-                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Widget _buildInputZone(
     BuildContext context,
     AppLocalization loc,
@@ -583,7 +531,6 @@ class _ChatScreenState extends State<ChatScreen> {
   ) {
     final theme = Theme.of(context);
     final hasUserCard = userCard != null;
-    final avatarUrl = userCard?.getAvatar(AppConfig.of(context).baseUrl);
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -608,23 +555,7 @@ class _ChatScreenState extends State<ChatScreen> {
             child: InkWell(
               onTap: isBlocked ? null : () => _showChangeCardDialog(context, loc, availableCards),
               borderRadius: BorderRadius.circular(22),
-              child: Container(
-                width: 44,
-                height: 44,
-                margin: const EdgeInsets.only(bottom: 2),
-                decoration: BoxDecoration(shape: BoxShape.circle, color: theme.cardColor),
-                clipBehavior: Clip.antiAlias,
-                child: !hasUserCard
-                    ? const Icon(Icons.account_circle, color: Colors.grey, size: 28)
-                    : avatarUrl == null
-                    ? const Icon(Icons.person, color: Colors.grey, size: 24)
-                    : Image.network(
-                        avatarUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Icon(Icons.broken_image, color: Colors.grey, size: 24),
-                      ),
-              ),
+              child: PersonaAvatar(userCard, size: 50),
             ),
           ),
           const SizedBox(width: 12),
@@ -730,19 +661,13 @@ class _ChatScreenState extends State<ChatScreen> {
                   itemBuilder: (context, index) {
                     final card = cards[index];
                     final isCurrent = dialogState.userCard?.id == card.id;
-                    final avatarUrl = card.getAvatar(AppConfig.of(context).baseUrl);
 
                     return Card(
                       color: isCurrent
                           ? theme.colorScheme.primary.withValues(alpha: 0.2)
                           : theme.cardColor,
                       child: ListTile(
-                        leading: CircleAvatar(
-                          backgroundImage: avatarUrl == null
-                              ? null
-                              : CachedNetworkImageProvider(avatarUrl),
-                          child: card.avatar.isEmpty ? const Icon(Icons.person) : null,
-                        ),
+                        leading: PersonaAvatar(card, size: 40),
                         title: Text(card.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                         trailing: isCurrent
                             ? const Icon(Icons.check_circle, color: Colors.green)

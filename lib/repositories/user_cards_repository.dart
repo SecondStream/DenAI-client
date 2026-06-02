@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:den_ai/models/models.dart';
@@ -26,12 +27,14 @@ class UserCardsRepository extends BaseRepository {
     return _cache = cache;
   }
 
-  Future<UserCard> getDefaultUserCard() async {
+  Future<UserCard?> getDefaultUserCard() async {
     if (_defaultCard == null) {
       final res = await remote.get("$endpoint/default");
-      return _defaultCard = UserCard.fromJson(res);
+      if (res != null) {
+        return _defaultCard = UserCard.fromJson(res);
+      }
     }
-    return _defaultCard!;
+    return _defaultCard;
   }
 
   Future<void> deleteUserCard(int id) async {
@@ -45,11 +48,13 @@ class UserCardsRepository extends BaseRepository {
     required String description,
     bool isDefault = false,
     File? avatarFile,
+    CropData? cropData,
   }) async {
     final Map<String, dynamic> formMap = {
       'name': name,
       'description': description,
       'is_default': isDefault,
+      'crop': cropData != null ? jsonEncode(cropData.toJson()) : null,
     };
 
     if (id != null && id > 0) {

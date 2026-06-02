@@ -1,8 +1,7 @@
-import 'package:cached_network_image/cached_network_image.dart';
-import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/widgets/message_bubble.dart';
+import 'package:den_ai/widgets/persona_avatar.dart';
 import 'package:flutter/material.dart';
 
 class CharacterMessage extends StatelessWidget {
@@ -27,25 +26,13 @@ class CharacterMessage extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
-    final String? charAvatar = char.getAvatar(AppConfig.of(context).baseUrl);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        CircleAvatar(
-          radius: 25,
-          backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.15),
-          backgroundImage: charAvatar == null ? null : CachedNetworkImageProvider(charAvatar),
-          child: charAvatar == null
-              ? Text(
-                  char.name.toUpperCase(),
-                  style: const TextStyle(fontSize: 12, color: Colors.white),
-                )
-              : null,
-        ),
+        PersonaAvatar(char, size: 50),
         const SizedBox(width: 8),
-
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

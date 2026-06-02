@@ -24,6 +24,7 @@ class UserCardFormBloc extends Bloc<UserCardFormEvent, UserCardFormState> {
         description: event.description,
         isDefault: event.isDefault,
         avatarFile: event.avatarFile,
+        cropData: event.cropData,
       );
       emit(UserCardFormSuccessState(savedCard));
     } catch (e) {

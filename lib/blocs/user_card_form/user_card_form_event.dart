@@ -8,6 +8,7 @@ class SubmitUserCardFormEvent extends UserCardFormEvent {
   final String description;
   final bool isDefault;
   final File? avatarFile;
+  final CropData? cropData;
 
   SubmitUserCardFormEvent({
     this.id,
@@ -15,6 +16,7 @@ class SubmitUserCardFormEvent extends UserCardFormEvent {
     required this.description,
     required this.isDefault,
     this.avatarFile,
+    this.cropData,
   });
 }
 

@@ -36,6 +36,7 @@ class AppLocalization {
       'delete': 'Delete',
       'no': 'No',
       'yes': 'Yes',
+      'ready': 'Ready',
       // --- Меню ---
       'my_chats': 'My chats',
       'characters': 'Characters',
@@ -139,6 +140,10 @@ class AppLocalization {
       'hint_system_prompt': 'Enter instructions that will be mixed into all chats...',
       'button_save_settings': 'Save Settings',
       'message_settings_saved': 'Settings saved successfully!',
+
+      // --- Окна ---
+      'crop_avatar_title': 'Setting up an avatar',
+      'replace_avatar_hint': 'Change your avatar image',
     },
     'ru': {
       // --- Базовые сообщения ---
@@ -166,6 +171,7 @@ class AppLocalization {
       'delete': 'Удалить',
       'no': 'Нет',
       'yes': 'Да',
+      'ready': 'Готово',
       // --- Меню ---
       'my_chats': 'Мои чаты',
       'characters': 'Персонажи',
@@ -269,6 +275,10 @@ class AppLocalization {
       'hint_system_prompt': 'Введите инструкции, которые будут подмешиваться ко всем чатам...',
       'button_save_settings': 'Сохранить настройки',
       'message_settings_saved': 'Настройки успешно сохранены!',
+
+      // --- Окна ---
+      'crop_avatar_title': 'Настройка аватара',
+      'replace_avatar_hint': 'Заменить изображение аватара',
     },
   };
 
@@ -381,6 +391,7 @@ class AppLocalization {
   String get delete => _localizedValues[locale.languageCode]?['delete'] ?? empty;
   String get no => _localizedValues[locale.languageCode]?['no'] ?? empty;
   String get yes => _localizedValues[locale.languageCode]?['yes'] ?? empty;
+  String get ready => _localizedValues[locale.languageCode]?['ready'] ?? empty;
   String get myChats => _localizedValues[locale.languageCode]?['my_chats'] ?? empty;
   String get characters => _localizedValues[locale.languageCode]?['characters'] ?? empty;
   String get myCards => _localizedValues[locale.languageCode]?['my_cards'] ?? empty;
@@ -421,6 +432,10 @@ class AppLocalization {
       _localizedValues[locale.languageCode]?['button_save_settings'] ?? empty;
   String get messageSettingsSaved =>
       _localizedValues[locale.languageCode]?['message_settings_saved'] ?? empty;
+  String get cropAvatarTitle =>
+      _localizedValues[locale.languageCode]?['crop_avatar_title'] ?? empty;
+  String get replaceAvatarHint =>
+      _localizedValues[locale.languageCode]?['replace_avatar_hint'] ?? empty;
 
   String getError(ErrType type, Object exception) {
     switch (type) {

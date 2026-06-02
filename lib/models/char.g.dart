@@ -7,21 +7,23 @@ part of 'char.dart';
 // **************************************************************************
 
 Char _$CharFromJson(Map<String, dynamic> json) => Char(
-  (json['id'] as num).toInt(),
-  json['name'] as String,
-  json['avatar'] as String,
-  json['background'] as String?,
-  json['appearance'] as String? ?? '',
-  json['personality'] as String? ?? '',
-  json['scenario'] as String? ?? '',
-  json['greeting'] as String? ?? '',
-  json['prompt'] as String? ?? '',
+  id: (json['id'] as num).toInt(),
+  name: json['name'] as String,
+  avatar: json['avatar'] as String,
+  crop: json['crop'] as String?,
+  background: json['background'] as String?,
+  appearance: json['appearance'] as String? ?? '',
+  personality: json['personality'] as String? ?? '',
+  scenario: json['scenario'] as String? ?? '',
+  greeting: json['greeting'] as String? ?? '',
+  prompt: json['prompt'] as String? ?? '',
 );
 
 Map<String, dynamic> _$CharToJson(Char instance) => <String, dynamic>{
   'id': instance.id,
   'name': instance.name,
   'avatar': instance.avatar,
+  'crop': instance.crop,
   'background': instance.background,
   'appearance': instance.appearance,
   'personality': instance.personality,

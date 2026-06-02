@@ -1,7 +1,7 @@
-import 'dart:io';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
-import 'package:den_ai/tools/file_tool.dart';
+import 'package:den_ai/screens/persona_form_screen.dart';
+import 'package:den_ai/widgets/persona_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -18,14 +18,12 @@ class UserCardFormScreen extends StatefulWidget {
   State<UserCardFormScreen> createState() => _UserCardFormScreenState();
 }
 
-class _UserCardFormScreenState extends State<UserCardFormScreen> {
+class _UserCardFormScreenState extends PersonaFormScreenState<UserCardFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _nameController;
   late final TextEditingController _descriptionController;
   late bool _isDefault;
-
-  File? _selectedAvatarFile;
 
   @override
   void initState() {
@@ -40,15 +38,6 @@ class _UserCardFormScreenState extends State<UserCardFormScreen> {
     _nameController.dispose();
     _descriptionController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickAvatar() async {
-    final image = await FileTool.pickImage();
-    if (image != null) {
-      setState(() {
-        _selectedAvatarFile = image;
-      });
-    }
   }
 
   @override
@@ -182,27 +171,12 @@ class _UserCardFormScreenState extends State<UserCardFormScreen> {
   }
 
   Widget _buildAvatarPicker(BuildContext context, ThemeData theme) {
-    final avatarUrl = widget.card?.getAvatar(AppConfig.of(context).baseUrl);
+    final card = widget.card;
+    final avatarUrl = selectedAvatarFile?.path ?? card?.getAvatar(AppConfig.of(context).baseUrl);
     return InkWell(
-      onTap: _pickAvatar,
+      onTap: () => handleAvatarClick(context, card),
       borderRadius: BorderRadius.circular(60),
-      child: Container(
-        width: 120,
-        height: 120,
-        decoration: BoxDecoration(
-          color: theme.colorScheme.primary.withValues(alpha: 0.15),
-          shape: BoxShape.circle,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: _selectedAvatarFile != null
-            ? Image.file(_selectedAvatarFile!, fit: BoxFit.cover)
-            : avatarUrl != null
-            ? Image.network(
-                "${AppConfig.of(context).baseUrl}/${widget.card!.avatar}",
-                fit: BoxFit.cover,
-              )
-            : const Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
-      ),
+      child: PersonaAvatar.form(avatarUrl, currentCropData ?? card?.getCropData()),
     );
   }
 
@@ -244,7 +218,8 @@ class _UserCardFormScreenState extends State<UserCardFormScreen> {
         name: _nameController.text.trim(),
         description: _descriptionController.text.trim(),
         isDefault: _isDefault,
-        avatarFile: _selectedAvatarFile,
+        cropData: currentCropData,
+        avatarFile: selectedAvatarFile,
       ),
     );
   }

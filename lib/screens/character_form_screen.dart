@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/blocs/character_form/character_form_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/screens/persona_form_screen.dart';
 import 'package:den_ai/tools/file_tool.dart';
+import 'package:den_ai/widgets/persona_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -17,7 +19,7 @@ class CharacterFormScreen extends StatefulWidget {
   State<CharacterFormScreen> createState() => _CharacterFormScreenState();
 }
 
-class _CharacterFormScreenState extends State<CharacterFormScreen> {
+class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _nameController;
@@ -27,7 +29,6 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
   late final TextEditingController _greetingController;
   late final TextEditingController _promptController;
 
-  File? _selectedAvatarFile;
   File? _selectedBackgroundFile;
 
   @override
@@ -50,15 +51,6 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
     _greetingController.dispose();
     _promptController.dispose();
     super.dispose();
-  }
-
-  Future<void> _pickAvatar() async {
-    final image = await FileTool.pickImage();
-    if (image != null) {
-      setState(() {
-        _selectedAvatarFile = image;
-      });
-    }
   }
 
   Future<void> _pickBackground() async {
@@ -253,24 +245,11 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
 
   Widget _buildAvatarPicker(BuildContext context, ThemeData theme) {
     final char = widget.character;
-    final avatarUrl = char?.getAvatar(AppConfig.of(context).baseUrl);
+    final avatarUrl = selectedAvatarFile?.path ?? char?.getAvatar(AppConfig.of(context).baseUrl);
     return InkWell(
-      onTap: _pickAvatar,
+      onTap: () => handleAvatarClick(context, widget.character),
       borderRadius: BorderRadius.circular(60),
-      child: Container(
-        width: 120,
-        height: 120,
-        decoration: BoxDecoration(
-          color: theme.colorScheme.primary.withValues(alpha: 0.15),
-          shape: BoxShape.circle,
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: _selectedAvatarFile != null
-            ? Image.file(_selectedAvatarFile!, fit: BoxFit.cover)
-            : avatarUrl != null
-            ? Image.network(avatarUrl, fit: BoxFit.cover)
-            : const Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
-      ),
+      child: PersonaAvatar.form(avatarUrl, currentCropData ?? char?.getCropData()),
     );
   }
 
@@ -339,7 +318,8 @@ class _CharacterFormScreenState extends State<CharacterFormScreen> {
         scenario: _scenarioController.text.trim(),
         greeting: _greetingController.text.trim(),
         prompt: _promptController.text.trim(),
-        avatarFile: _selectedAvatarFile,
+        cropData: currentCropData,
+        avatarFile: selectedAvatarFile,
         backgroundFile: _selectedBackgroundFile,
       ),
     );

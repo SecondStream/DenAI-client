@@ -27,6 +27,7 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
         greeting: event.greeting,
         prompt: event.prompt,
         avatarFile: event.avatarFile,
+        cropData: event.cropData,
         backgroundFile: event.backgroundFile,
       );
       emit(CharacterFormSuccessState(savedChar));

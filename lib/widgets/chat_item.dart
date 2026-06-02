@@ -1,6 +1,6 @@
-import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
+import 'package:den_ai/widgets/persona_avatar.dart';
 import 'package:flutter/material.dart';
 
 class ChatItem extends StatelessWidget {
@@ -17,19 +17,12 @@ class ChatItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final avatarUrl = chat.char.getAvatar(AppConfig.of(context).baseUrl);
     final loc = AppLocalization.of(context);
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       color: theme.cardColor,
       child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.15),
-          backgroundImage: avatarUrl == null ? null : NetworkImage(avatarUrl),
-          child: avatarUrl == null
-              ? Text(chat.char.name[0].toUpperCase(), style: const TextStyle(color: Colors.white))
-              : null,
-        ),
+        leading: PersonaAvatar(chat.char),
         title: Text(chat.title, style: const TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(
           chat.messages.isNotEmpty ? chat.messages.last.content : loc.noLastMessage,

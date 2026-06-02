@@ -1,12 +1,10 @@
+import 'package:den_ai/models/persona.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'char.g.dart';
 
 @JsonSerializable(fieldRename: FieldRename.snake)
-class Char {
-  final int id;
-  final String name;
-  final String avatar;
+class Char extends Persona {
   final String? background;
   @JsonKey(defaultValue: "")
   final String appearance;
@@ -19,23 +17,22 @@ class Char {
   @JsonKey(defaultValue: "")
   final String prompt;
 
-  Char(
-    this.id,
-    this.name,
-    this.avatar,
-    this.background,
-    this.appearance,
-    this.personality,
-    this.scenario,
-    this.greeting,
-    this.prompt,
-  );
-
   factory Char.fromJson(Map<String, dynamic> json) => _$CharFromJson(json);
+
+  Char({
+    required super.id,
+    required super.name,
+    required super.avatar,
+    super.crop,
+    this.background,
+    required this.appearance,
+    required this.personality,
+    required this.scenario,
+    required this.greeting,
+    required this.prompt,
+  });
   Map<String, dynamic> toJson() => _$CharToJson(this);
 
-  String? getAvatar(String baseUrl) =>
-      avatar.isNotEmpty && !avatar.contains('default_user.png') ? '$baseUrl/$avatar' : null;
   String? getBackground(String baseUrl) =>
       background != null && background!.isNotEmpty ? '$baseUrl/$background' : null;
 }

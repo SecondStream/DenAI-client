@@ -11,6 +11,7 @@ class SubmitCharacterFormEvent extends CharacterFormEvent {
   final String greeting;
   final String prompt;
   final File? avatarFile;
+  final CropData? cropData;
   final File? backgroundFile;
 
   SubmitCharacterFormEvent({
@@ -22,6 +23,7 @@ class SubmitCharacterFormEvent extends CharacterFormEvent {
     required this.greeting,
     required this.prompt,
     this.avatarFile,
+    this.cropData,
     this.backgroundFile,
   });
 }

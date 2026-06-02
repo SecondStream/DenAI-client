@@ -1,6 +1,7 @@
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
+import 'package:den_ai/widgets/cropped_card_image.dart';
 import 'package:flutter/material.dart';
 
 class CharacterCard extends StatelessWidget {
@@ -38,7 +39,7 @@ class CharacterCard extends StatelessWidget {
                     height: double.infinity,
                     child: avatarUrl == null
                         ? const Icon(Icons.person, size: 54, color: Colors.grey)
-                        : Image.network(avatarUrl, fit: BoxFit.cover),
+                        : CroppedCardImage(imageUrl: avatarUrl, cropData: character.getCropData()),
                   ),
                 ),
                 Positioned(

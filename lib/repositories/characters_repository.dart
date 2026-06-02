@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:den_ai/models/models.dart';
@@ -32,6 +33,7 @@ class CharactersRepository extends BaseRepository {
     required String scenario,
     required String greeting,
     required String prompt,
+    CropData? cropData,
     File? avatarFile,
     File? backgroundFile,
   }) async {
@@ -42,6 +44,7 @@ class CharactersRepository extends BaseRepository {
       'scenario': scenario,
       'greeting': greeting,
       'prompt': prompt,
+      'crop': cropData != null ? jsonEncode(cropData.toJson()) : null,
     };
 
     if (id != null && id > 0) {

@@ -1,6 +1,7 @@
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
+import 'package:den_ai/widgets/cropped_card_image.dart';
 import 'package:flutter/material.dart';
 
 class UserCardView extends StatelessWidget {
@@ -32,12 +33,7 @@ class UserCardView extends StatelessWidget {
                     height: double.infinity,
                     child: avatarUrl == null
                         ? const Icon(Icons.person, size: 54, color: Colors.grey)
-                        : Image.network(
-                            avatarUrl,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.broken_image, size: 54, color: Colors.grey),
-                          ),
+                        : CroppedCardImage(imageUrl: avatarUrl, cropData: card.getCropData()),
                   ),
                   if (card.isDefault)
                     Positioned(
