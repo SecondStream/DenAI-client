@@ -1,4 +1,5 @@
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:flutter/material.dart';
 
@@ -116,7 +117,7 @@ class _AvatarClipperDialogState extends State<AvatarClipperDialog> {
               child: IconButton(
                 icon: Icon(Icons.photo_library, color: theme.colorScheme.primary, size: 22),
                 onPressed: () {
-                  Navigator.pop(context, null);
+                  context.pop();
                   widget.onFilePickRequested!();
                 },
               ),
@@ -184,7 +185,7 @@ class _AvatarClipperDialogState extends State<AvatarClipperDialog> {
       ),
       actions: [
         TextButton(
-          onPressed: () => Navigator.pop(context, null),
+          onPressed: () => context.pop(),
           child: Text(loc.cancel, style: TextStyle(color: Colors.grey)),
         ),
         ElevatedButton(
@@ -204,8 +205,7 @@ class _AvatarClipperDialogState extends State<AvatarClipperDialog> {
     final double cropLeft = _circleCenter.dx - radius;
     final double cropTop = _circleCenter.dy - radius;
 
-    Navigator.pop(
-      context,
+    context.pop(
       CropData(
         l: (cropLeft / _boxWidth).clamp(0.0, 1.0),
         t: (cropTop / _boxHeight).clamp(0.0, 1.0),
