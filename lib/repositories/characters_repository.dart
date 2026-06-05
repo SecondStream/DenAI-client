@@ -22,7 +22,7 @@ class CharactersRepository extends BaseRepository {
   }
 
   Future<void> deleteCharacter(int charId) async {
-    await remote.delete("$endpoint/del/$charId");
+    await remote.delete("$endpoint/$charId");
   }
 
   Future<Char> saveCharacter({
@@ -66,7 +66,7 @@ class CharactersRepository extends BaseRepository {
     }
 
     final formData = FormData.fromMap(formMap);
-    final response = await remote.put('$endpoint/save', data: formData);
+    final response = await remote.put('$endpoint/', data: formData);
     return Char.fromJson(response);
   }
 }
