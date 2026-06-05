@@ -5,6 +5,7 @@ import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:den_ai/screens/chat_screen.dart';
 import 'package:den_ai/widgets/app_drawer.dart';
 import 'package:den_ai/widgets/chat_item.dart';
+import 'package:den_ai/widgets/dialogs/confirmation_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -67,7 +68,7 @@ class ChatsListScreen extends StatelessWidget {
                         },
                       );
                     },
-                    onRemovePressed: (_) => _onDeleteChat(context, chat.id),
+                    onRemovePressed: (_) => _onDeleteChat(context, loc, chat.id),
                   );
                 },
               );
@@ -79,67 +80,13 @@ class ChatsListScreen extends StatelessWidget {
     );
   }
 
-  void _onDeleteChat(BuildContext context, int chatId) async {
+  void _onDeleteChat(BuildContext context, AppLocalization loc, int chatId) async {
     final chatsListBloc = context.read<ChatsListBloc>();
-    final res = await _showDeleteChatConfirmation(context);
-    if (res == true) chatsListBloc.add(DeleteChatEvent(chatId));
-  }
-
-  Future<bool?> _showDeleteChatConfirmation(BuildContext context) {
-    final theme = Theme.of(context);
-    final loc = AppLocalization.of(context);
-
-    return showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return StatefulBuilder(
-          builder: (context, setDialogState) {
-            return AlertDialog(
-              backgroundColor: theme.scaffoldBackgroundColor,
-              title: Text(loc.deleteChatDialogTitle, textAlign: TextAlign.center),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
-                    child: Text(
-                      loc.deleteChatDialogMessage,
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: Colors.white70),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                ],
-              ),
-              actions: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: TextButton(
-                        onPressed: () => dialogContext.pop(),
-                        style: TextButton.styleFrom(minimumSize: Size(double.infinity, 50)),
-                        child: Text(loc.no),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: theme.colorScheme.primary,
-                          foregroundColor: Colors.white,
-                          minimumSize: Size(double.infinity, 50),
-                        ),
-                        onPressed: () => dialogContext.pop(true),
-                        child: Text(loc.yes, style: TextStyle(fontWeight: FontWeight.bold)),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        );
-      },
+    final res = await ConfirmationDialog.open(
+      context,
+      loc.deleteChatDialogTitle,
+      loc.deleteChatDialogMessage,
     );
+    if (res == true) chatsListBloc.add(DeleteChatEvent(chatId));
   }
 }

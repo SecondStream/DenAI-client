@@ -32,6 +32,10 @@ class ChatApp extends StatelessWidget {
           secondary: Colors.purple.shade300,
           surface: const Color(0xFF2A2A32),
         ),
+
+        dialogTheme: DialogThemeData(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        ),
       ),
       supportedLocales: const [Locale('en'), Locale('ru')],
       localizationsDelegates: const [

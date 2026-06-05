@@ -58,7 +58,8 @@ class AppLocalization {
       'confirm_new_chat': 'Do you really want to start a new chat with the character?',
       'delete_chat': 'Delete Current Chat',
       'remove_message_title': 'Delete message?',
-      'remove_message_alert': 'The chat history after this message will also be deleted.',
+      'remove_message_alert':
+          'Are you sure you want to delete the message?\nThe correspondence history after this message will also be deleted.',
       'empty_history': 'The story is still empty...',
       'history_subtitle':
           'A condensed history of your messages.\nYou can correct facts, fix AI issues, or add new lore details.',
@@ -193,7 +194,8 @@ class AppLocalization {
       'confirm_new_chat': 'Вы действительно хотите начать новый чат с персонажем?',
       'delete_chat': 'Удалить текущий чат',
       'remove_message_title': 'Удалить сообщение?',
-      'remove_message_alert': 'История переписки после этого сообщения так же будет удалена.',
+      'remove_message_alert':
+          'Вы уверены, что хотите удалить сообщение?\nИстория переписки после этого сообщения так же будет удалена.',
       'empty_history': 'История пока пуста...',
       'history_subtitle':
           'Сжатая история ваших сообщений.\nВы можете скорректировать факты, исправить косяки ИИ или вписать новые детали лора.',
