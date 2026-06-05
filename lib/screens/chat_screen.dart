@@ -8,6 +8,7 @@ import 'package:den_ai/models/models.dart';
 import 'package:den_ai/tools/file_tool.dart';
 import 'package:den_ai/widgets/character_message.dart';
 import 'package:den_ai/widgets/dialogs/confirmation_dialog.dart';
+import 'package:den_ai/widgets/dialogs/text_edit_dialog.dart';
 import 'package:den_ai/widgets/dialogs/new_chat_confirmation_dialog.dart';
 import 'package:den_ai/widgets/persona_avatar.dart';
 import 'package:den_ai/widgets/user_message.dart';
@@ -248,27 +249,20 @@ class _ChatScreenState extends State<ChatScreen> {
     bool isTyping,
     bool isLastMessage,
   ) {
-    final theme = Theme.of(context);
     late Widget messageWidget;
     if (message.role == MessageRole.user) {
       messageWidget = UserMessage(
         message: message,
         card: user,
-        onEditMessage: isTyping
-            ? null
-            : (_) => _showEditMessageDialog(context, loc, theme, message),
-        onDeleteMessage: isTyping
-            ? null
-            : (messageId) => _onDeleteMessage(context, loc, theme, messageId),
+        onEditMessage: isTyping ? null : (_) => _showEditMessageDialog(context, loc, message),
+        onDeleteMessage: isTyping ? null : (messageId) => _onDeleteMessage(context, loc, messageId),
       );
     } else {
       messageWidget = CharacterMessage(
         char: char,
         message: message,
         isThinking: isTyping,
-        onEditMessage: isTyping
-            ? null
-            : (_) => _showEditMessageDialog(context, loc, theme, message),
+        onEditMessage: isTyping ? null : (_) => _showEditMessageDialog(context, loc, message),
 
         onSwitchMessage: isTyping
             ? null
@@ -288,96 +282,26 @@ class _ChatScreenState extends State<ChatScreen> {
     return Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: messageWidget);
   }
 
-  void _showSummaryEditDialog(BuildContext context, AppLocalization loc, String currentSummary) {
-    final theme = Theme.of(context);
-    final chatBloc = context.read<ChatBloc>();
-    final controller = TextEditingController(text: currentSummary);
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          title: Row(
-            children: [
-              Icon(Icons.auto_stories, color: theme.colorScheme.primary, size: 22),
-              const SizedBox(width: 10),
-              Text(loc.historyTitle),
-            ],
-          ),
-          content: SizedBox(
-            width: 600,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  loc.historySubtitle,
-                  style: TextStyle(color: Colors.grey, fontSize: 13, height: 1.3),
-                ),
-                const SizedBox(height: 16),
-
-                Flexible(
-                  child: TextField(
-                    controller: controller,
-                    maxLines: 12,
-                    minLines: 6,
-                    keyboardType: TextInputType.multiline,
-                    style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
-                    decoration: InputDecoration(
-                      hintText: loc.emptyHistory,
-                      hintStyle: TextStyle(color: Colors.grey.shade600),
-                      fillColor: theme.cardColor,
-                      filled: true,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide.none,
-                      ),
-                      contentPadding: const EdgeInsets.all(16),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-          actions: [
-            TextButton(
-              onPressed: () => dialogContext.pop(),
-              child: Text(
-                loc.cancel,
-                style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
-              ),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              ),
-              onPressed: () {
-                dialogContext.pop();
-
-                final newText = controller.text.trim();
-                if (newText != currentSummary.trim()) {
-                  chatBloc.add(UpdateChatSummaryEvent(newSummary: newText));
-                }
-              },
-              child: Text(loc.save, style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _onDeleteMessage(
+  void _showSummaryEditDialog(
     BuildContext context,
     AppLocalization loc,
-    ThemeData theme,
-    int messageId,
+    String currentSummary,
   ) async {
+    final chatBloc = context.read<ChatBloc>();
+    final newText = await TextEditDialog.open(
+      context,
+      currentSummary,
+      title: loc.historyTitle,
+      description: loc.historySubtitle,
+      hint: loc.emptyHistory,
+      icon: Icons.auto_stories,
+    );
+    if (newText != null && newText != currentSummary.trim()) {
+      chatBloc.add(UpdateChatSummaryEvent(newSummary: newText));
+    }
+  }
+
+  void _onDeleteMessage(BuildContext context, AppLocalization loc, int messageId) async {
     final res = await ConfirmationDialog.open(
       context,
       loc.removeMessageTitle,
@@ -388,12 +312,7 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _showEditMessageDialog(
-    BuildContext context,
-    AppLocalization loc,
-    ThemeData theme,
-    Message message,
-  ) {
+  void _showEditMessageDialog(BuildContext context, AppLocalization loc, Message message) async {
     final chatBloc = context.read<ChatBloc>();
 
     String editableContent = message.content;
@@ -404,74 +323,24 @@ class _ChatScreenState extends State<ChatScreen> {
       for (final match in matches) {
         final String extractedUrl = match.group(1) ?? '';
         if (extractedUrl.contains(message.imagePath!)) {
-          editableContent = editableContent.replaceRange(match.start, match.end, MessageTags.img);
+          editableContent = editableContent
+              .replaceRange(match.start, match.end, MessageTags.img)
+              .trim();
           break;
         }
       }
     }
-    final controller = TextEditingController(text: editableContent);
 
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Row(
-            children: [
-              Icon(Icons.edit_note, color: theme.colorScheme.primary, size: 24),
-              const SizedBox(width: 10),
-              Text(loc.editText, style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            ],
-          ),
-          content: SizedBox(
-            width: 600,
-            child: TextField(
-              controller: controller,
-              maxLines: null,
-              minLines: 2,
-              keyboardType: TextInputType.multiline,
-              style: const TextStyle(color: Colors.white, fontSize: 15, height: 1.4),
-              decoration: InputDecoration(
-                fillColor: theme.cardColor,
-                filled: true,
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: const EdgeInsets.all(16),
-              ),
-            ),
-          ),
-          actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-          actions: [
-            TextButton(
-              onPressed: () => dialogContext.pop(),
-              child: Text(
-                loc.cancel,
-                style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
-              ),
-            ),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: theme.colorScheme.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              ),
-              onPressed: () {
-                dialogContext.pop();
-                final text = controller.text.trim();
-                if (text.isNotEmpty && text != message.content) {
-                  chatBloc.add(EditMessageEvent(messageId: message.id, newContent: text));
-                }
-              },
-              child: Text(loc.save, style: TextStyle(fontWeight: FontWeight.bold)),
-            ),
-          ],
-        );
-      },
+    final newText = await TextEditDialog.open(
+      context,
+      editableContent,
+      title: loc.editText,
+      icon: Icons.edit_note,
     );
+
+    if (newText != null && newText.isNotEmpty && newText != editableContent) {
+      chatBloc.add(EditMessageEvent(messageId: message.id, newContent: newText));
+    }
   }
 
   Widget _buildInputZone(
