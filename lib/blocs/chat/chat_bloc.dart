@@ -298,7 +298,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         // ignore: empty_catches
       } catch (e) {}
     }
-    final char = currentState.char;
+    final Char char = await _charactersRepository.getCharacterById(currentState.char.id);
     emit(
       ChatLoadedState(
         chatId: -99,
