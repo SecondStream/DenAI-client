@@ -8,21 +8,21 @@ import 'package:den_ai/repositories/provider/remote_provider.dart';
 import 'package:dio/dio.dart';
 
 class CharactersRepository extends BaseRepository {
+  List<Char>? _cache;
   CharactersRepository(RemoteProvider remote) : super(remote, '/chars');
 
-  Future<List<Char>> getCharacters() async {
-    final list = await remote.get<List<dynamic>>(endpoint);
-    if (list == null) return [];
-    return list.map((json) => Char.fromJson(json)).toList();
+  Future<List<Char>> getCharacters() {
+    return _getCharacters();
   }
 
-  Future<Char> getCharacterById(int characterId) async {
-    final res = await remote.get("$endpoint/$characterId");
-    return Char.fromJson(res);
+  Future<Char?> getCharacterById(int characterId) async {
+    final characters = await _getCharacters();
+    return characters.where((e) => e.id == characterId).firstOrNull;
   }
 
   Future<void> deleteCharacter(int charId) async {
     await remote.delete("$endpoint/$charId");
+    _clearCache();
   }
 
   Future<Char> saveCharacter({
@@ -67,6 +67,25 @@ class CharactersRepository extends BaseRepository {
 
     final formData = FormData.fromMap(formMap);
     final response = await remote.put('$endpoint/', data: formData);
+    _clearCache();
     return Char.fromJson(response);
+  }
+
+  Future<List<Char>> _getCharacters() async {
+    var cache = _cache;
+    if (cache == null) {
+      final list = await remote.get<List<dynamic>>('$endpoint/');
+      if (list == null) {
+        cache = [];
+      } else {
+        cache = list.map((json) => Char.fromJson(json)).toList();
+      }
+    }
+
+    return _cache = cache;
+  }
+
+  void _clearCache() {
+    _cache = null;
   }
 }

@@ -147,7 +147,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           ),
         );
       } else {
-        final Char char = await _charactersRepository.getCharacterById(event.charId);
+        final char = await _charactersRepository.getCharacterById(event.charId);
+        if (char == null) {
+          emit(ChatErrorState(ErrType.loadChat, 'Character not found'));
+          return;
+        }
 
         UserCard? defaultUserCard;
         try {
@@ -298,7 +302,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         // ignore: empty_catches
       } catch (e) {}
     }
-    final Char char = await _charactersRepository.getCharacterById(currentState.char.id);
+    final char = await _charactersRepository.getCharacterById(currentState.char.id);
+    if (char == null) {
+      emit(ChatErrorState(ErrType.loadChat, 'Character not found'));
+      return;
+    }
     emit(
       ChatLoadedState(
         chatId: -99,
