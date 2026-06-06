@@ -64,7 +64,7 @@ class _AvatarClipperDialogState extends State<AvatarClipperDialog> {
             final double aspect = imgWidth / imgHeight;
 
             setState(() {
-              const double maxSize = 400.0;
+              const double maxSize = 350.0;
 
               if (aspect > 1.0) {
                 _boxWidth = maxSize;

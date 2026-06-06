@@ -198,13 +198,13 @@ class _ChatScreenState extends State<ChatScreen> {
                     Container(
                       height: 110,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(8),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.5),
-                            blurRadius: 12,
-                            spreadRadius: 2,
-                            offset: const Offset(0, 4), // Тень падает вниз
+                            color: Colors.black.withValues(alpha: 0.25),
+                            blurRadius: 3,
+                            spreadRadius: 3,
+                            offset: const Offset(1, -1),
                           ),
                         ],
                       ),

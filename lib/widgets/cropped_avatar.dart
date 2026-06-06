@@ -6,8 +6,15 @@ class CroppedAvatar extends StatefulWidget {
   final String imageUrl;
   final CropData? cropData;
   final double size;
+  final bool isCircle;
 
-  const CroppedAvatar({super.key, required this.imageUrl, this.cropData, this.size = 44});
+  const CroppedAvatar({
+    super.key,
+    required this.imageUrl,
+    this.cropData,
+    this.size = 44,
+    this.isCircle = true,
+  });
 
   @override
   State<CroppedAvatar> createState() => _CroppedAvatarState();
@@ -67,7 +74,10 @@ class _CroppedAvatarState extends State<CroppedAvatar> {
       return Container(
         width: widget.size,
         height: widget.size,
-        decoration: const BoxDecoration(shape: BoxShape.circle),
+        decoration: BoxDecoration(
+          shape: widget.isCircle ? BoxShape.circle : BoxShape.rectangle,
+          color: theme.cardColor,
+        ),
         child: const Center(child: CircularProgressIndicator(strokeWidth: 2)),
       );
     }
@@ -77,7 +87,7 @@ class _CroppedAvatarState extends State<CroppedAvatar> {
         width: widget.size,
         height: widget.size,
         decoration: BoxDecoration(
-          shape: BoxShape.circle,
+          shape: widget.isCircle ? BoxShape.circle : BoxShape.rectangle,
           color: theme.cardColor,
           image: DecorationImage(image: _imageProvider, fit: BoxFit.cover),
         ),
@@ -85,7 +95,6 @@ class _CroppedAvatarState extends State<CroppedAvatar> {
     }
 
     final crop = widget.cropData!;
-
     double targetImageWidth;
     double targetImageHeight;
 
@@ -97,31 +106,28 @@ class _CroppedAvatarState extends State<CroppedAvatar> {
       targetImageWidth = targetImageHeight * _imageAspect;
     }
 
-    return Container(
+    Widget avatarChild = SizedBox(
       width: widget.size,
       height: widget.size,
-      decoration: const BoxDecoration(shape: BoxShape.circle),
-      clipBehavior: Clip.antiAlias,
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return Stack(
-            children: [
-              Positioned(
-                left: -crop.l * targetImageWidth,
-                top: -crop.t * targetImageHeight,
-                width: targetImageWidth,
-                height: targetImageHeight,
-                child: Image(
-                  image: _imageProvider,
-                  fit: BoxFit.fill,
-                  errorBuilder: (context, error, stackTrace) =>
-                      const Icon(Icons.broken_image, color: Colors.grey),
-                ),
-              ),
-            ],
-          );
-        },
+      child: Stack(
+        children: [
+          Positioned(
+            left: -crop.l * targetImageWidth,
+            top: -crop.t * targetImageHeight,
+            width: targetImageWidth,
+            height: targetImageHeight,
+            child: Image(
+              image: _imageProvider,
+              fit: BoxFit.fill,
+              filterQuality: FilterQuality.high,
+              errorBuilder: (context, error, stackTrace) =>
+                  const Icon(Icons.broken_image, color: Colors.grey),
+            ),
+          ),
+        ],
       ),
     );
+
+    return widget.isCircle ? ClipOval(child: avatarChild) : avatarChild;
   }
 }

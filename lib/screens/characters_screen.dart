@@ -67,7 +67,7 @@ class CharactersScreen extends StatelessWidget {
                       maxCrossAxisExtent: 220,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,
-                      childAspectRatio: 0.75,
+                      childAspectRatio: 0.68,
                     ),
                     itemCount: state.characters.length,
                     itemBuilder: (context, index) {

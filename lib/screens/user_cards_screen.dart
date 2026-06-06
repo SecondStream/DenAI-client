@@ -62,7 +62,7 @@ class UserCardsScreen extends StatelessWidget {
                       maxCrossAxisExtent: 220,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,
-                      childAspectRatio: 0.70,
+                      childAspectRatio: 0.68,
                     ),
                     itemCount: state.cards.length,
                     itemBuilder: (context, index) {
