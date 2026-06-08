@@ -1,6 +1,13 @@
 part of 'character_form_bloc.dart';
 
-abstract class CharacterFormEvent {}
+abstract class CharacterFormEvent {
+  const CharacterFormEvent();
+}
+
+class InitCharacterFormEvent extends CharacterFormEvent {
+  final int? characterId;
+  const InitCharacterFormEvent(this.characterId);
+}
 
 class SubmitCharacterFormEvent extends CharacterFormEvent {
   final int? id;
@@ -13,8 +20,9 @@ class SubmitCharacterFormEvent extends CharacterFormEvent {
   final File? avatarFile;
   final CropData? cropData;
   final File? backgroundFile;
+  final List<int> lorebookIds;
 
-  SubmitCharacterFormEvent({
+  const SubmitCharacterFormEvent({
     this.id,
     required this.name,
     required this.appearance,
@@ -22,6 +30,7 @@ class SubmitCharacterFormEvent extends CharacterFormEvent {
     required this.scenario,
     required this.greeting,
     required this.prompt,
+    required this.lorebookIds,
     this.avatarFile,
     this.cropData,
     this.backgroundFile,
@@ -30,5 +39,5 @@ class SubmitCharacterFormEvent extends CharacterFormEvent {
 
 class DeleteCharacterEvent extends CharacterFormEvent {
   final int id;
-  DeleteCharacterEvent(this.id);
+  const DeleteCharacterEvent(this.id);
 }

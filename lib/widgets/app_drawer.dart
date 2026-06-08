@@ -71,6 +71,17 @@ class AppDrawer extends StatelessWidget {
               },
             ),
             ListTile(
+              leading: const Icon(Icons.menu_book, color: Colors.white70),
+              title: Text(loc.lorebooks, style: TextStyle(color: Colors.white)),
+              selected: currentRoute == AppRoutes.lorebooks,
+              selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.15),
+              titleAlignment: ListTileTitleAlignment.center,
+              onTap: () {
+                context.pop();
+                context.replace(AppRoutes.lorebooks);
+              },
+            ),
+            ListTile(
               leading: const Icon(Icons.settings, color: Colors.white70),
               title: Text(loc.settings, style: TextStyle(color: Colors.white)),
               selected: currentRoute == AppRoutes.settings,

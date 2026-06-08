@@ -9,7 +9,7 @@ part of 'user_card.dart';
 UserCard _$UserCardFromJson(Map<String, dynamic> json) => UserCard(
   id: (json['id'] as num).toInt(),
   name: json['name'] as String,
-  avatar: json['avatar'] as String,
+  avatar: json['avatar'] as String?,
   crop: json['crop'] as String?,
   description: json['description'] as String? ?? '',
   isDefault: json['is_default'] as bool? ?? false,

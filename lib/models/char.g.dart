@@ -9,7 +9,7 @@ part of 'char.dart';
 Char _$CharFromJson(Map<String, dynamic> json) => Char(
   id: (json['id'] as num).toInt(),
   name: json['name'] as String,
-  avatar: json['avatar'] as String,
+  avatar: json['avatar'] as String?,
   crop: json['crop'] as String?,
   background: json['background'] as String?,
   appearance: json['appearance'] as String? ?? '',
@@ -17,6 +17,11 @@ Char _$CharFromJson(Map<String, dynamic> json) => Char(
   scenario: json['scenario'] as String? ?? '',
   greeting: json['greeting'] as String? ?? '',
   prompt: json['prompt'] as String? ?? '',
+  lorebooks:
+      (json['lorebooks'] as List<dynamic>?)
+          ?.map((e) => Lorebook.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      [],
 );
 
 Map<String, dynamic> _$CharToJson(Char instance) => <String, dynamic>{
@@ -30,4 +35,5 @@ Map<String, dynamic> _$CharToJson(Char instance) => <String, dynamic>{
   'scenario': instance.scenario,
   'greeting': instance.greeting,
   'prompt': instance.prompt,
+  'lorebooks': instance.lorebooks,
 };

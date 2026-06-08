@@ -1,3 +1,4 @@
+import 'package:den_ai/models/lorebook.dart';
 import 'package:den_ai/models/persona.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -16,6 +17,8 @@ class Char extends Persona {
   final String greeting;
   @JsonKey(defaultValue: "")
   final String prompt;
+  @JsonKey(defaultValue: [])
+  final List<Lorebook> lorebooks;
 
   factory Char.fromJson(Map<String, dynamic> json) => _$CharFromJson(json);
 
@@ -30,6 +33,7 @@ class Char extends Persona {
     required this.scenario,
     required this.greeting,
     required this.prompt,
+    required this.lorebooks,
   });
   Map<String, dynamic> toJson() => _$CharToJson(this);
 

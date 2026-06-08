@@ -7,3 +7,5 @@ export 'all_settings.dart';
 export 'model_info.dart';
 export 'crop_data.dart';
 export 'persona.dart';
+export 'lore_entry.dart';
+export 'lorebook.dart';

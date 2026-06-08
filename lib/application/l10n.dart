@@ -15,6 +15,7 @@ class AppLocalization {
       'err_load_chats': 'Failed to load chat list.',
       'err_load_chat': 'Failed to load chat.',
       'err_load_characters': 'Failed to load character list.',
+      'err_load_character': 'Failed to load character.',
       'err_save_character': 'Error saving character.',
       'err_send_message': 'Error sending message.',
       'err_load_user_cards': 'Failed to load user cards list.',
@@ -28,6 +29,9 @@ class AppLocalization {
       'err_load_settings': 'Failed to load settings.',
       'err_save_settings': 'Error saving settings.',
       'err_delete_chat': 'Error deleting chat.',
+      'err_save_lorebook': 'Error saving lorebook.',
+      'err_delete_lorebook': 'Error deleting lorebook.',
+      'err_load_lore_entries': 'Failed to load entries list.',
       'error_network': 'Network error. Check your connection.',
       'error_unknown': 'An unknown error occurred.',
       'edit_text': 'Edit text',
@@ -37,6 +41,7 @@ class AppLocalization {
       'no': 'No',
       'yes': 'Yes',
       'ready': 'Ready',
+      'create_button': 'Create',
       // --- Меню ---
       'my_chats': 'My chats',
       'characters': 'Characters',
@@ -141,6 +146,34 @@ class AppLocalization {
       'hint_system_prompt': 'Enter instructions that will be mixed into all chats...',
       'button_save_settings': 'Save Settings',
       'message_settings_saved': 'Settings saved successfully!',
+      // --- Экраны книг ---
+      'lorebooks': 'Lorebooks',
+      'lorebooks_title': 'Lorebooks',
+      'no_lorebooks_message':
+          'You don\'t have any books...\nClick the \'+\' button above to create a new one.',
+      'lorebook_form_title_create': 'Creation of a lorebook',
+      'lorebook_form_title_edit': 'Editing the lorebook',
+      'lorebook_name_label': 'The name of the lorebook',
+      'lorebook_name_hint': 'For example: The World of Magic',
+      'lorebook_about_label': 'Lorebook Description',
+      'lorebook_about_hint': 'Describe the book',
+      'loading_chronicles': 'Loading knowledge books...',
+      'no_lorebook_entries':
+          'There are no entries in this book yet.\nClick the "+" above to add content!',
+      'lorebook_entry_number': '#',
+      'title_add_lorebook_entry': 'Registering Knowledge Book Entry',
+      'title_edit_lorebook_entry': 'Editing Knowledge Book Entry',
+      'lore_hint_title': 'Knowledge block title (e.g., Water Magic)',
+      'lore_hint_content': 'Description, facts, historical data, and information...',
+      'lore_error_title_empty': 'Enter the knowledge book entry title',
+      'lore_error_content_empty': 'Fill in the knowledge content',
+      'lore_action_delete_entry': 'Delete entry',
+      'lorebook_selection_title': 'Connecting Knowledge Bases',
+      'no_lorebooks_warning':
+          'No knowledge books have been created in the system yet.\nFirst, create a book in the Knowledge Book Manager.',
+      'char_lorebooks': 'Knowledge Bases (Local RAG)',
+      'char_lorebooks_count': 'Connected: {num} pcs.',
+      'char_no_lorebooks_count': 'No connected books',
 
       // --- Окна ---
       'crop_avatar_title': 'Setting up an avatar',
@@ -151,6 +184,7 @@ class AppLocalization {
       'err_load_chats': 'Не удалось загрузить список чатов.',
       'err_load_chat': 'Не удалось загрузить чат.',
       'err_load_characters': 'Не удалось загрузить список персонажей.',
+      'err_load_character': 'Не удалось загрузить персонажа.',
       'err_save_character': 'При сохранении персонажа возникла ошибка.',
       'err_send_message': 'При отправке сообщения возникла ошибка.',
       'err_load_user_cards': 'При загрузке списка профилей возникла ошибка.',
@@ -164,6 +198,9 @@ class AppLocalization {
       'err_load_settings': 'Ошибка при загрузке настроек.',
       'err_save_settings': 'Ошибка при сохранении настроек.',
       'err_delete_chat': 'При удалении чата возникла ошибка.',
+      'err_save_lorebook': 'Ошибка сохранения книги знаний.',
+      'err_delete_lorebook': 'Ошибка удаления книги знаний.',
+      'err_load_lore_entries': 'Ошибка при загрузке записей.',
       'error_network': 'Ошибка сети. Проверьте подключение.',
       'error_unknown': 'Произошла неизвестная ошибка.',
       'edit_text': 'Редактировать текст',
@@ -173,6 +210,7 @@ class AppLocalization {
       'no': 'Нет',
       'yes': 'Да',
       'ready': 'Готово',
+      'create_button': 'Создать',
       // --- Меню ---
       'my_chats': 'Мои чаты',
       'characters': 'Персонажи',
@@ -278,6 +316,34 @@ class AppLocalization {
       'button_save_settings': 'Сохранить настройки',
       'message_settings_saved': 'Настройки успешно сохранены!',
 
+      // --- Экраны книг ---
+      'lorebooks': 'Книги знаний',
+      'lorebooks_title': 'Книги знаний',
+      'no_lorebooks_message': 'У вас нет книг...\nНажмите \'+\' сверху, чтобы создать новую.',
+      'lorebook_form_title_create': 'Создание книги знаний',
+      'lorebook_form_title_edit': 'Редактирование книги знаний',
+      'lorebook_name_label': 'Название книги знаний',
+      'lorebook_name_hint': 'Например: Мир магии',
+      'lorebook_about_label': 'Описание книги',
+      'lorebook_about_hint': 'Опишите книгу',
+      'loading_chronicles': 'Загрузка книг знаний...',
+      'no_lorebook_entries':
+          'В этой книге еще нет записей.\nНажмите на «+» сверху, чтобы добавить контент!',
+      'lorebook_entry_number': '#',
+      'title_add_lorebook_entry': 'Регистрация записи в книге знаний',
+      'title_edit_lorebook_entry': 'Редактирование записи в книге знаний',
+      'lore_hint_title': 'Название информационного блока (например: Магия воды)',
+      'lore_hint_content': 'Описание, факты, исторические справки и информация...',
+      'lore_error_title_empty': 'Введите название записи',
+      'lore_error_content_empty': 'Заполните контент записи',
+      'lore_action_delete_entry': 'Удалить запись',
+      'lorebook_selection_title': 'Подключение баз знаний',
+      'no_lorebooks_warning':
+          'В системе еще не создано ни одной книги знаний.\nСначала создайте книгу в Менеджере книг знаний.',
+      'char_lorebooks': 'Базы знаний (Локальная информация)',
+      'char_lorebooks_count': 'Подключено: {num} шт.',
+      'char_no_lorebooks_count': 'Нет подключенных книг',
+
       // --- Окна ---
       'crop_avatar_title': 'Настройка аватара',
       'replace_avatar_hint': 'Заменить изображение аватара',
@@ -292,6 +358,11 @@ class AppLocalization {
   String charThinking(String name) {
     final template = _localizedValues[locale.languageCode]?['character_named_thinking'] ?? empty;
     return template.replaceAll('{name}', name);
+  }
+
+  String charLorebookCount(int count) {
+    final template = _localizedValues[locale.languageCode]?['char_lorebooks_count'] ?? empty;
+    return template.replaceAll('{num}', count.toString());
   }
 
   String get empty => '';
@@ -438,6 +509,49 @@ class AppLocalization {
       _localizedValues[locale.languageCode]?['crop_avatar_title'] ?? empty;
   String get replaceAvatarHint =>
       _localizedValues[locale.languageCode]?['replace_avatar_hint'] ?? empty;
+  String get lorebooks => _localizedValues[locale.languageCode]?['lorebooks'] ?? empty;
+  String get lorebooksTitle => _localizedValues[locale.languageCode]?['lorebooks_title'] ?? empty;
+  String get noLorebooksMessage =>
+      _localizedValues[locale.languageCode]?['no_lorebooks_message'] ?? empty;
+  String get lorebookFormTitleEdit =>
+      _localizedValues[locale.languageCode]?['lorebook_form_title_edit'] ?? empty;
+  String get lorebookFormTitleCreate =>
+      _localizedValues[locale.languageCode]?['lorebook_form_title_create'] ?? empty;
+  String get lorebookNameLabel =>
+      _localizedValues[locale.languageCode]?['lorebook_name_label'] ?? empty;
+  String get lorebookNameHint =>
+      _localizedValues[locale.languageCode]?['lorebook_name_hint'] ?? empty;
+  String get lorebookAboutLabel =>
+      _localizedValues[locale.languageCode]?['lorebook_about_label'] ?? empty;
+  String get lorebookAboutHint =>
+      _localizedValues[locale.languageCode]?['lorebook_about_hint'] ?? empty;
+  String get createButton => _localizedValues[locale.languageCode]?['create_button'] ?? empty;
+  String get loadingChronicles =>
+      _localizedValues[locale.languageCode]?['loading_chronicles'] ?? empty;
+  String get noLorebookEntries =>
+      _localizedValues[locale.languageCode]?['no_lorebook_entries'] ?? empty;
+  String get lorebookEntryNumber =>
+      _localizedValues[locale.languageCode]?['lorebook_entry_number'] ?? empty;
+  String get titleAddLorebookEntry =>
+      _localizedValues[locale.languageCode]?['title_add_lorebook_entry'] ?? empty;
+  String get titleEditLorebookEntry =>
+      _localizedValues[locale.languageCode]?['title_edit_lorebook_entry'] ?? empty;
+  String get loreHintTitle => _localizedValues[locale.languageCode]?['lore_hint_title'] ?? empty;
+  String get loreHintContent =>
+      _localizedValues[locale.languageCode]?['lore_hint_content'] ?? empty;
+  String get loreErrorTitleEmpty =>
+      _localizedValues[locale.languageCode]?['lore_error_title_empty'] ?? empty;
+  String get loreErrorContentEmpty =>
+      _localizedValues[locale.languageCode]?['lore_error_content_empty'] ?? empty;
+  String get loreActionDeleteEntry =>
+      _localizedValues[locale.languageCode]?['lore_action_delete_entry'] ?? empty;
+  String get lorebookSelectionTitle =>
+      _localizedValues[locale.languageCode]?['lorebook_selection_title'] ?? empty;
+  String get noLorebooksWarning =>
+      _localizedValues[locale.languageCode]?['no_lorebooks_warning'] ?? empty;
+  String get charLorebooks => _localizedValues[locale.languageCode]?['char_lorebooks'] ?? empty;
+  String get charNoLorebooks =>
+      _localizedValues[locale.languageCode]?['char_no_lorebooks_count'] ?? empty;
 
   String getError(ErrType type, Object exception) {
     switch (type) {
@@ -447,6 +561,8 @@ class AppLocalization {
         return _localizedValues[locale.languageCode]?['err_load_chat'] ?? type.name;
       case ErrType.loadCharacters:
         return _localizedValues[locale.languageCode]?['err_load_characters'] ?? type.name;
+      case ErrType.loadCharacter:
+        return _localizedValues[locale.languageCode]?['err_load_character'] ?? type.name;
       case ErrType.saveCharacter:
         return _localizedValues[locale.languageCode]?['err_save_character'] ?? type.name;
       case ErrType.sendMessage:
@@ -471,6 +587,12 @@ class AppLocalization {
         return _localizedValues[locale.languageCode]?['err_save_settings'] ?? type.name;
       case ErrType.deleteChat:
         return _localizedValues[locale.languageCode]?['err_delete_chat'] ?? type.name;
+      case ErrType.saveLorebook:
+        return _localizedValues[locale.languageCode]?['err_save_lorebook'] ?? type.name;
+      case ErrType.deleteLorebook:
+        return _localizedValues[locale.languageCode]?['err_delete_lorebook'] ?? type.name;
+      case ErrType.loadLoreEntries:
+        return _localizedValues[locale.languageCode]?['err_load_lore_entries'] ?? type.name;
     }
   }
 }
@@ -481,6 +603,7 @@ enum ErrType {
   loadChats,
   loadChat,
   loadCharacters,
+  loadCharacter,
   saveCharacter,
   sendMessage,
   loadUserCards,
@@ -493,6 +616,9 @@ enum ErrType {
   loadSettings,
   saveSettings,
   deleteChat,
+  saveLorebook,
+  deleteLorebook,
+  loadLoreEntries,
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalization> {

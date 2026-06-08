@@ -1,5 +1,6 @@
 import 'package:den_ai/repositories/characters_repository.dart';
 import 'package:den_ai/repositories/chats_repository.dart';
+import 'package:den_ai/repositories/lorebooks_repository.dart';
 import 'package:den_ai/repositories/provider/remote_provider.dart';
 import 'package:den_ai/repositories/provider/interceptor.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
@@ -22,5 +23,6 @@ class DiInitializer {
     di.registerSingleton(CharactersRepository(remoteProvider));
     di.registerSingleton(UserCardsRepository(remoteProvider));
     di.registerSingleton(SettingsRepository(remoteProvider));
+    di.registerSingleton(LorebooksRepository(remoteProvider));
   }
 }

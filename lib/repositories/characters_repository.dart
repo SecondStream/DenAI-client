@@ -33,6 +33,7 @@ class CharactersRepository extends BaseRepository {
     required String scenario,
     required String greeting,
     required String prompt,
+    required List<int> lorebookIds,
     CropData? cropData,
     File? avatarFile,
     File? backgroundFile,
@@ -45,6 +46,7 @@ class CharactersRepository extends BaseRepository {
       'greeting': greeting,
       'prompt': prompt,
       'crop': cropData != null ? jsonEncode(cropData.toJson()) : null,
+      'lorebook_ids': jsonEncode(lorebookIds),
     };
 
     if (id != null && id > 0) {

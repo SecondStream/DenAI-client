@@ -1,36 +1,35 @@
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/routes.dart';
-import 'package:den_ai/blocs/characters/characters_bloc.dart';
+import 'package:den_ai/blocs/lorebook_list/lorebook_list_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:den_ai/models/models.dart';
-import 'package:den_ai/screens/chat_screen.dart';
-import 'package:den_ai/widgets/character_card.dart';
+import 'package:den_ai/widgets/lorebook_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import '../widgets/app_drawer.dart';
 
-class CharactersScreen extends StatelessWidget {
-  const CharactersScreen({super.key});
+class LorebooksScreen extends StatelessWidget {
+  const LorebooksScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalization.of(context);
 
-    return BlocProvider<CharactersBloc>(
-      create: (context) => CharactersBloc(GetIt.instance.get())..add(LoadAllCharactersEvent()),
+    return BlocProvider<LorebookListBloc>(
+      create: (context) => LorebookListBloc(GetIt.instance.get())..add(LoadAllLorebooksEvent()),
       child: Builder(
         builder: (context) {
           return Scaffold(
             appBar: AppBar(
-              title: Text(loc.charactersTitle),
+              title: Text(loc.lorebooksTitle),
               actions: [
                 IconButton(
                   icon: const Icon(Icons.add, size: 28),
                   onPressed: () {
-                    context.push(AppRoutes.characterEdit).then((hasChanges) {
+                    context.push(AppRoutes.lorebookEdit).then((hasChanges) {
                       if (hasChanges == true && context.mounted) {
-                        context.read<CharactersBloc>().add(LoadAllCharactersEvent());
+                        context.read<LorebookListBloc>().add(LoadAllLorebooksEvent());
                       }
                     });
                   },
@@ -39,13 +38,13 @@ class CharactersScreen extends StatelessWidget {
             ),
             drawer: const AppDrawer(),
 
-            body: BlocBuilder<CharactersBloc, CharactersState>(
+            body: BlocBuilder<LorebookListBloc, LorebookListState>(
               builder: (context, state) {
-                if (state is CharactersLoadingState) {
+                if (state is LorebookListLoadingState) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
-                if (state is CharactersErrorState) {
+                if (state is LorebookListErrorState) {
                   return Center(
                     child: Text(
                       AppLocalization.of(context).getError(state.errType, state.error),
@@ -54,11 +53,9 @@ class CharactersScreen extends StatelessWidget {
                   );
                 }
 
-                if (state is CharactersLoadedState) {
-                  if (state.characters.isEmpty) {
-                    return Center(
-                      child: Text(loc.noCharactersMessage, textAlign: TextAlign.center),
-                    );
+                if (state is LorebookListLoadedState) {
+                  if (state.lorebooks.isEmpty) {
+                    return Center(child: Text(loc.noLorebooksMessage, textAlign: TextAlign.center));
                   }
 
                   return GridView.builder(
@@ -67,18 +64,16 @@ class CharactersScreen extends StatelessWidget {
                       maxCrossAxisExtent: 220,
                       mainAxisSpacing: 16,
                       crossAxisSpacing: 16,
-                      childAspectRatio: 0.68,
+                      childAspectRatio: 0.75,
                     ),
-                    itemCount: state.characters.length,
+                    itemCount: state.lorebooks.length,
                     itemBuilder: (context, index) {
-                      final character = state.characters[index];
-                      return CharacterCard(
-                        character: character,
-                        onPressed: (_) => context.push(
-                          AppRoutes.chat,
-                          arguments: ChatScreenArgs(charId: character.id),
-                        ),
-                        onEditPressed: (_) => _onEditCharacterPressed(context, character),
+                      final lorebook = state.lorebooks[index];
+                      return LorebookCard(
+                        lorebook: lorebook,
+                        onPressed: (_) =>
+                            context.push(AppRoutes.loreEntries, arguments: lorebook.id),
+                        onEditPressed: (_) => _onEditPressed(context, lorebook),
                       );
                     },
                   );
@@ -93,12 +88,12 @@ class CharactersScreen extends StatelessWidget {
     );
   }
 
-  void _onEditCharacterPressed(BuildContext context, Char character) async {
-    final charactersBloc = context.read<CharactersBloc>();
+  void _onEditPressed(BuildContext context, Lorebook lorebook) async {
+    final lorebookBloc = context.read<LorebookListBloc>();
 
-    final hasChanges = await context.push(AppRoutes.characterEdit, arguments: character.id);
+    final hasChanges = await context.push(AppRoutes.lorebookEdit, arguments: lorebook);
     if (hasChanges == true) {
-      charactersBloc.add(LoadAllCharactersEvent());
+      lorebookBloc.add(LoadAllLorebooksEvent());
     }
   }
 }
