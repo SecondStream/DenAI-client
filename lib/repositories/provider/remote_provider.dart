@@ -1,8 +1,10 @@
 import 'package:den_ai/env.dart';
 import 'package:dio/dio.dart';
+import 'package:web_socket_channel/io.dart';
 
 class RemoteProvider {
   static const String _baseUrl = Env.apiUrl;
+  static const String _wsUrl = Env.wsUrl;
   final Dio _dio;
 
   RemoteProvider(this._dio);
@@ -38,5 +40,12 @@ class RemoteProvider {
   Future<TResult?> delete<TResult, TData>(String endpoint, {TData? data, Options? options}) async {
     final res = await _dio.delete(_baseUrl + endpoint, data: data);
     return res.data as TResult?;
+  }
+
+  Future<IOWebSocketChannel> wsConnect(String endpoint) async {
+    final wsUrl = Uri.parse(_wsUrl + endpoint);
+    final channel = IOWebSocketChannel.connect(wsUrl, pingInterval: Duration(seconds: 2));
+    await channel.ready;
+    return channel;
   }
 }
