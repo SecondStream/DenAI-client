@@ -1,3 +1,4 @@
+import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/repositories/characters_repository.dart';
 import 'package:den_ai/repositories/chats_repository.dart';
 import 'package:den_ai/repositories/lorebooks_repository.dart';
@@ -18,6 +19,7 @@ class DiInitializer {
 
     final remoteProvider = RemoteProvider(dio);
     di.registerSingleton(remoteProvider);
+    di.registerSingleton(AppRouteObserver());
 
     di.registerSingleton(ChatsRepository(remoteProvider));
     di.registerSingleton(CharactersRepository(remoteProvider));

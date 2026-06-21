@@ -1,11 +1,14 @@
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/screens/chat_lists_screen.dart';
+import 'package:den_ai/widgets/notify_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:get_it/get_it.dart';
 
 class ChatApp extends StatelessWidget {
-  const ChatApp({super.key});
+  final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  ChatApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -44,9 +47,12 @@ class ChatApp extends StatelessWidget {
         GlobalWidgetsLocalizations.delegate,
         GlobalCupertinoLocalizations.delegate,
       ],
+      builder: (context, child) => NotifyWidget(navKey: navigatorKey, child: child),
       home: const ChatsListScreen(),
       initialRoute: AppRoutes.chats,
       onGenerateRoute: _onGenerateRoute,
+      navigatorKey: navigatorKey,
+      navigatorObservers: [GetIt.instance.get<AppRouteObserver>()],
     );
   }
 

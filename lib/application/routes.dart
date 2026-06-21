@@ -55,10 +55,37 @@ class AppRoutes {
   }
 
   static Route<dynamic> _createRoute<T>(String route, RouteSettings settings) {
-    //settings = RouteSettings(name: route, arguments: settings.arguments);
     return MaterialPageRoute<T>(
       builder: (ctx) => _buildByRoute(ctx, route, settings.arguments),
       settings: settings,
     );
+  }
+}
+
+class AppRouteObserver extends NavigatorObserver {
+  String? currentRouteName;
+  Object? currentArguments;
+
+  @override
+  void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPush(route, previousRoute);
+    _extractRoute(route);
+  }
+
+  @override
+  void didPop(Route<dynamic> route, Route<dynamic>? previousRoute) {
+    super.didPop(route, previousRoute);
+    if (previousRoute != null) _extractRoute(previousRoute);
+  }
+
+  @override
+  void didReplace({Route<dynamic>? newRoute, Route<dynamic>? oldRoute}) {
+    super.didReplace(newRoute: newRoute, oldRoute: oldRoute);
+    if (newRoute != null) _extractRoute(newRoute);
+  }
+
+  void _extractRoute(Route<dynamic> route) {
+    currentRouteName = route.settings.name;
+    currentArguments = route.settings.arguments;
   }
 }
