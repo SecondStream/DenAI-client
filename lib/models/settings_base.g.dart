@@ -16,6 +16,7 @@ SettingsBase _$SettingsBaseFromJson(Map<String, dynamic> json) => SettingsBase(
   topP: (json['top_p'] as num).toDouble(),
   repeatPenalty: (json['repeat_penalty'] as num).toDouble(),
   globalSystemPrompt: json['global_system_prompt'] as String,
+  provider: json['provider'] as String,
 );
 
 Map<String, dynamic> _$SettingsBaseToJson(SettingsBase instance) =>
@@ -29,4 +30,5 @@ Map<String, dynamic> _$SettingsBaseToJson(SettingsBase instance) =>
       'top_p': instance.topP,
       'repeat_penalty': instance.repeatPenalty,
       'global_system_prompt': instance.globalSystemPrompt,
+      'provider': instance.provider,
     };

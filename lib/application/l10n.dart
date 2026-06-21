@@ -137,6 +137,7 @@ class AppLocalization {
       'label_main_model': 'Primary Text Model',
       'label_vision_model': 'Vision Model',
       'label_tokenizer': 'Local Tokenizer Dictionary',
+      'label_provider': 'Provider',
       'label_context_limit': 'Context Token Limit',
       'label_context_size': '{num} tokens',
       'label_temperature': 'Temperature',
@@ -306,6 +307,7 @@ class AppLocalization {
       'label_main_model': 'Основная текстовая модель',
       'label_vision_model': 'Vision модель',
       'label_tokenizer': 'Локальный словарь токенизатора',
+      'label_provider': 'Провайдер',
       'label_context_limit': 'Лимит токенов контекста',
       'label_context_size': '{num} tokens',
       'label_temperature': 'Temperature',
@@ -491,6 +493,7 @@ class AppLocalization {
   String get labelVisionModel =>
       _localizedValues[locale.languageCode]?['label_vision_model'] ?? empty;
   String get labelTokenizer => _localizedValues[locale.languageCode]?['label_tokenizer'] ?? empty;
+  String get labelProvider => _localizedValues[locale.languageCode]?['label_provider'] ?? empty;
   String get labelContextLimit =>
       _localizedValues[locale.languageCode]?['label_context_limit'] ?? empty;
   String get labelTemperature =>

@@ -97,6 +97,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           _buildSectionTitle(theme, loc.sectionOllamaTokenizer),
                           const SizedBox(height: 16),
 
+                          _buildDropdownTokenizers(
+                            label: loc.labelProvider,
+                            value: state.settings.provider,
+                            items: state.providers,
+                            onChanged: (v) {
+                              if (v != null &&
+                                  v != state.settings.provider &&
+                                  state.providers.contains(v)) {
+                                _isInitialized = false;
+                                context.read<SettingsBloc>().add(UpdateProviderEvent(provider: v));
+                              }
+                            },
+                          ),
+
                           _buildDropdown(
                             label: loc.labelMainModel,
                             value: _selectedModel,
@@ -107,7 +121,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           _buildDropdown(
                             label: loc.labelVisionModel,
                             value: _selectedVisionModel,
-                            items: state.models,
+                            items: state.visionModels,
                             onChanged: (v) => setState(() => _selectedVisionModel = v),
                           ),
 
@@ -231,6 +245,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   topP: _topP,
                                   repeatPenalty: _repeatPenalty,
                                   globalSystemPrompt: _systemPromptController.text.trim(),
+                                  provider: state.settings.provider,
                                 );
                                 context.read<SettingsBloc>().add(
                                   SaveSettingsEvent(updatedSettings),

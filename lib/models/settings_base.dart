@@ -13,6 +13,7 @@ class SettingsBase {
   final double topP;
   final double repeatPenalty;
   final String globalSystemPrompt;
+  final String provider;
 
   SettingsBase({
     required this.modelName,
@@ -24,6 +25,7 @@ class SettingsBase {
     required this.topP,
     required this.repeatPenalty,
     required this.globalSystemPrompt,
+    required this.provider,
   });
 
   factory SettingsBase.fromJson(Map<String, dynamic> json) => _$SettingsBaseFromJson(json);

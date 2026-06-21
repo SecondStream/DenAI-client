@@ -10,6 +10,11 @@ class SettingsRepository extends BaseRepository {
     return AllSettings.fromJson(response);
   }
 
+  Future<AllSettings> getFakeProviderSettings(String provider) async {
+    final response = await remote.get("$endpoint/fake-provider/$provider");
+    return AllSettings.fromJson(response);
+  }
+
   Future<SettingsBase> updateSettings(SettingsBase settings) async {
     final response = await remote.put(endpoint, data: settings.toJson());
     return SettingsBase.fromJson(response);

@@ -11,7 +11,26 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   SettingsBloc(this._repository) : super(SettingsInitialState()) {
     on<LoadAllSettingsEvent>(_onLoadAllSettings);
+    on<UpdateProviderEvent>(_onUpdateProvider);
     on<SaveSettingsEvent>(_onSaveSettings);
+  }
+
+  void _onUpdateProvider(UpdateProviderEvent event, Emitter<SettingsState> emit) async {
+    emit(SettingsLoadingState());
+    try {
+      final allSettings = await _repository.getFakeProviderSettings(event.provider);
+      emit(
+        SettingsLoadedState(
+          models: allSettings.models,
+          visionModels: allSettings.visionModels,
+          tokenizers: allSettings.tokenizers,
+          settings: allSettings.settings,
+          providers: allSettings.providers,
+        ),
+      );
+    } catch (e) {
+      emit(SettingsErrorState(ErrType.loadSettings, e.toString()));
+    }
   }
 
   void _onLoadAllSettings(LoadAllSettingsEvent event, Emitter<SettingsState> emit) async {
@@ -21,8 +40,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       emit(
         SettingsLoadedState(
           models: allSettings.models,
+          visionModels: allSettings.visionModels,
           tokenizers: allSettings.tokenizers,
           settings: allSettings.settings,
+          providers: allSettings.providers,
         ),
       );
     } catch (e) {
@@ -40,8 +61,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       emit(
         SettingsLoadedState(
           models: currentState.models,
+          visionModels: currentState.visionModels,
           tokenizers: currentState.tokenizers,
           settings: updated,
+          providers: currentState.providers,
         ),
       );
     } catch (e) {
