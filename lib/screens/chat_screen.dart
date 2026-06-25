@@ -81,6 +81,8 @@ class _ChatScreenState extends State<ChatScreen> {
         listener: (context, state) {
           if (state is ChatLoadedState) {
             WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+          } else if (state is ChatErrorState && state.lastUserMessage != null) {
+            _textController.text = state.lastUserMessage!;
           }
         },
         builder: (context, state) {
@@ -121,7 +123,8 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget _buildBody(BuildContext context, AppLocalization loc, ThemeData theme, ChatState state) {
-    if (state is ChatLoadingState) {
+    if (state is ChatLoadingState ||
+        (state is ChatErrorState && state.errType == ErrType.sendMessage)) {
       return const Center(child: CircularProgressIndicator());
     }
     if (state is ChatErrorState) {

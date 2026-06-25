@@ -57,6 +57,7 @@ class ChatLoadedState extends ChatState {
 class ChatErrorState extends ChatState {
   final ErrType errType;
   final Object error;
+  final String? lastUserMessage;
 
-  ChatErrorState(this.errType, this.error);
+  ChatErrorState(this.errType, this.error, {this.lastUserMessage});
 }

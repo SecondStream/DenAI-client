@@ -103,11 +103,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           add(ReceivedAiTokenEvent(token));
         }
       }
-
-      final chat = await _repository.getChatById(currentState.chatId);
-      emit((state as ChatLoadedState).copyWith(messages: chat.messages, isAiTyping: false));
     } catch (e) {
       emit(ChatErrorState(ErrType.sendMessage, e));
+    } finally {
+      final chat = await _repository.getChatById(currentState.chatId);
+      emit(currentState.copyWith(messages: chat.messages, isAiTyping: false));
     }
   }
 
@@ -217,15 +217,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       }
     }
 
-    updatedMessages.add(
-      Message(
-        id: -1,
-        role: MessageRole.user,
-        content: localDisplayContent,
-        createdAt: DateTime.now(),
-        imagePath: imagePath,
-      ),
+    final userMessage = Message(
+      id: -1,
+      role: MessageRole.user,
+      content: localDisplayContent,
+      createdAt: DateTime.now(),
+      imagePath: imagePath,
     );
+    updatedMessages.add(userMessage);
 
     updatedMessages.add(
       Message(id: -2, role: MessageRole.assistant, content: "", createdAt: DateTime.now()),
@@ -259,9 +258,17 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       }
 
       final chat = await _repository.getChatById(currentState.chatId);
-      emit((state as ChatLoadedState).copyWith(messages: chat.messages, isAiTyping: false));
+      emit(currentState.copyWith(messages: chat.messages, isAiTyping: false));
     } catch (e) {
-      emit(ChatErrorState(ErrType.sendMessage, e));
+      emit(ChatErrorState(ErrType.sendMessage, e, lastUserMessage: event.text));
+      final chat = await _repository.getChatById(currentState.chatId);
+      emit(
+        currentState.copyWith(
+          messages: chat.messages,
+          isAiTyping: false,
+          selectedImageFile: imageFile,
+        ),
+      );
     }
   }
 
