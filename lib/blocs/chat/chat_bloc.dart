@@ -12,6 +12,7 @@ part 'chat_event.dart';
 part 'chat_state.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
+  static const String defUser = 'User';
   final ChatsRepository _repository;
   final CharactersRepository _charactersRepository;
   final UserCardsRepository _userCardsRepository;
@@ -170,7 +171,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
                 Message(
                   id: -99,
                   role: MessageRole.assistant,
-                  content: char.greeting,
+                  content: _replacePlaceholders(char.greeting, char.name, defaultUserCard?.name ?? defUser),
                   createdAt: DateTime.now(),
                 ),
             ],
@@ -326,7 +327,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
             Message(
               id: -99,
               role: MessageRole.assistant,
-              content: char.greeting,
+              content: _replacePlaceholders(char.greeting, char.name, currentState.userCard?.name ?? defUser),
               createdAt: DateTime.now(),
             ),
         ],
@@ -355,5 +356,18 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
     emit(currentState.copyWith(selectedImageFile: event.fileImage, isResetImage: true));
+  }
+
+  String _replacePlaceholders(String text, String userName, String charName) {
+    final regex = RegExp(r'\{\{(char|user)\}\}', caseSensitive: false);
+
+    return text.replaceAllMapped(regex, (match) {
+      final tag = match.group(1)?.toLowerCase();
+
+      if (tag == 'char') return charName;
+      if (tag == 'user') return userName;
+
+      return match.group(0) ?? '';
+    });
   }
 }
