@@ -13,6 +13,7 @@ class Message {
   @JsonKey(defaultValue: 1)
   final int totalVariants;
   final String? imagePath;
+  final String modelName;
 
   Message({
     required this.id,
@@ -22,6 +23,7 @@ class Message {
     this.currentIndex = 1,
     this.totalVariants = 1,
     this.imagePath,
+    this.modelName = '',
   });
 
   factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(json);
@@ -35,6 +37,7 @@ class Message {
       createdAt: createdAt,
       currentIndex: currentIndex,
       totalVariants: totalVariants,
+      modelName: modelName,
     );
   }
 }

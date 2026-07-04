@@ -14,6 +14,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   currentIndex: (json['current_index'] as num?)?.toInt() ?? 1,
   totalVariants: (json['total_variants'] as num?)?.toInt() ?? 1,
   imagePath: json['image_path'] as String?,
+  modelName: json['model_name'] as String,
 );
 
 Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
@@ -24,6 +25,7 @@ Map<String, dynamic> _$MessageToJson(Message instance) => <String, dynamic>{
   'current_index': instance.currentIndex,
   'total_variants': instance.totalVariants,
   'image_path': instance.imagePath,
+  'model_name': instance.modelName,
 };
 
 const _$MessageRoleEnumMap = {
