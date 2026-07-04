@@ -35,7 +35,7 @@ class _CroppedAvatarState extends State<CroppedAvatar> {
   @override
   void didUpdateWidget(CroppedAvatar oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.imageUrl != widget.imageUrl) {
+    if (oldWidget.imageUrl != widget.imageUrl || widget.cropData != oldWidget.cropData) {
       _initImageProvider();
       _calculateAspect();
     }

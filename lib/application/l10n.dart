@@ -16,6 +16,7 @@ class AppLocalization {
       'err_load_chat': 'Failed to load chat.',
       'err_load_characters': 'Failed to load character list.',
       'err_load_character': 'Failed to load character.',
+      'err_export_character': 'Error exporting character.',
       'err_save_character': 'Error saving character.',
       'err_send_message': 'Error sending message.',
       'err_load_user_cards': 'Failed to load user cards list.',
@@ -179,6 +180,11 @@ class AppLocalization {
       // --- Окна ---
       'crop_avatar_title': 'Setting up an avatar',
       'replace_avatar_hint': 'Change your avatar image',
+
+      'export': 'Export',
+      'import': 'Import',
+      'export_ext': 'Card V2',
+      'import_ext': 'PNG/JSON',
     },
     'ru': {
       // --- Базовые сообщения ---
@@ -186,6 +192,7 @@ class AppLocalization {
       'err_load_chat': 'Не удалось загрузить чат.',
       'err_load_characters': 'Не удалось загрузить список персонажей.',
       'err_load_character': 'Не удалось загрузить персонажа.',
+      'err_export_character': 'При экспорте персонажа возникла ошибка.',
       'err_save_character': 'При сохранении персонажа возникла ошибка.',
       'err_send_message': 'При отправке сообщения возникла ошибка.',
       'err_load_user_cards': 'При загрузке списка профилей возникла ошибка.',
@@ -349,6 +356,11 @@ class AppLocalization {
       // --- Окна ---
       'crop_avatar_title': 'Настройка аватара',
       'replace_avatar_hint': 'Заменить изображение аватара',
+
+      'export': 'Экспорт',
+      'import': 'Импорт',
+      'export_ext': 'Card V2',
+      'import_ext': 'PNG/JSON',
     },
   };
 
@@ -556,6 +568,15 @@ class AppLocalization {
   String get charNoLorebooks =>
       _localizedValues[locale.languageCode]?['char_no_lorebooks_count'] ?? empty;
 
+  String get export =>
+      _localizedValues[locale.languageCode]?['export'] ?? empty;
+  String get import =>
+      _localizedValues[locale.languageCode]?['import'] ?? empty;
+  String get exportExt =>
+      _localizedValues[locale.languageCode]?['export_ext'] ?? empty;
+  String get imortExt =>
+      _localizedValues[locale.languageCode]?['import_ext'] ?? empty;
+
   String getError(ErrType type, Object exception) {
     switch (type) {
       case ErrType.loadChats:
@@ -566,6 +587,8 @@ class AppLocalization {
         return _localizedValues[locale.languageCode]?['err_load_characters'] ?? type.name;
       case ErrType.loadCharacter:
         return _localizedValues[locale.languageCode]?['err_load_character'] ?? type.name;
+      case ErrType.exportCharacter:
+        return _localizedValues[locale.languageCode]?['err_export_character'] ?? type.name;
       case ErrType.saveCharacter:
         return _localizedValues[locale.languageCode]?['err_save_character'] ?? type.name;
       case ErrType.sendMessage:
@@ -608,6 +631,7 @@ enum ErrType {
   loadCharacters,
   loadCharacter,
   saveCharacter,
+  exportCharacter,
   sendMessage,
   loadUserCards,
   saveUserCard,

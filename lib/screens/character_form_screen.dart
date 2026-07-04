@@ -14,13 +14,15 @@ import 'package:den_ai/models/models.dart';
 
 class CharacterFormScreen extends StatefulWidget {
   final int? characterId;
+
   const CharacterFormScreen({super.key, this.characterId});
 
   @override
   State<CharacterFormScreen> createState() => _CharacterFormScreenState();
 }
 
-class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScreen> {
+class _CharacterFormScreenState
+    extends PersonaFormScreenState<CharacterFormScreen> {
   final _formKey = GlobalKey<FormState>();
 
   late final TextEditingController _nameController;
@@ -65,8 +67,20 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     }
   }
 
-  void _initializeControllersOnce(Char? char, List<int> initialBookIds) {
-    if (_isFieldsInitialized) return;
+  Future<void> _pickCard(BuildContext context) async {
+    final card = await FileTool.pickCard();
+    if (card != null && context.mounted) {
+      context.read<CharacterFormBloc>().add(
+        SelectedCardEvent(card, AppConfig.of(context).baseUrl),
+      );
+    }
+  }
+
+  void _initializeControllersOnce(
+    Char? char,
+    List<int> initialBookIds, {
+    File? avatarFile,
+  }) {
     if (char != null) {
       _nameController.text = char.name;
       _appearanceController.text = char.appearance;
@@ -77,6 +91,9 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     }
     _selectedLorebookIds = List<int>.from(initialBookIds);
     _isFieldsInitialized = true;
+    if (avatarFile != null) {
+      selectedAvatarFile = avatarFile;
+    }
   }
 
   @override
@@ -91,17 +108,30 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
             ..add(InitCharacterFormEvent(widget.characterId)),
       child: Scaffold(
         appBar: AppBar(
-          title: Text(isEditing ? loc.characterFormTitleEdit : loc.characterFormTitleCreate),
+          title: Text(
+            isEditing
+                ? loc.characterFormTitleEdit
+                : loc.characterFormTitleCreate,
+          ),
         ),
         body: BlocConsumer<CharacterFormBloc, CharacterFormState>(
           listener: (context, state) {
-            if (state is CharacterFormSuccessState || state is CharacterDeleteSuccessState) {
+            if (state is CharacterFormSuccessState ||
+                state is CharacterDeleteSuccessState) {
               context.pop(true);
             }
           },
           builder: (context, state) {
             if (state is CharacterFormLoadedState) {
-              _initializeControllersOnce(state.character, state.selectedLorebookIds);
+              CharacterFormLoadedCardState? cardState;
+              if (state is CharacterFormLoadedCardState) cardState = state;
+              if (!_isFieldsInitialized || cardState != null) {
+                _initializeControllersOnce(
+                  state.character,
+                  state.selectedLorebookIds,
+                  avatarFile: cardState?.avatar,
+                );
+              }
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
                 child: Form(
@@ -116,10 +146,16 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                             children: [
                               Text(
                                 loc.avatarLabel,
-                                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                                style: theme.textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey,
+                                ),
                               ),
                               const SizedBox(height: 8),
-                              _buildAvatarPicker(context, theme, state.character),
+                              _buildAvatarPicker(
+                                context,
+                                theme,
+                                state.character,
+                              ),
                             ],
                           ),
                           const SizedBox(width: 24),
@@ -129,7 +165,9 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                               children: [
                                 Text(
                                   loc.backgroundLabel,
-                                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: Colors.grey,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 InkWell(
@@ -138,7 +176,8 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                                   child: Container(
                                     height: 120,
                                     decoration: BoxDecoration(
-                                      color: theme.colorScheme.primary.withValues(alpha: 0.1),
+                                      color: theme.colorScheme.primary
+                                          .withValues(alpha: 0.1),
                                       borderRadius: BorderRadius.circular(16),
                                     ),
                                     clipBehavior: Clip.antiAliasWithSaveLayer,
@@ -153,6 +192,14 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                               ],
                             ),
                           ),
+                          const SizedBox(width: 24),
+                          _buildImportButton(context, loc, theme),
+                          const SizedBox(width: 24),
+                          _buildExportButton(
+                            context,
+                            loc,
+                            theme,
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -163,7 +210,8 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                         hint: loc.charNameHint,
                         minLines: 1,
                         maxLines: 1,
-                        validator: (v) => v!.trim().isEmpty ? loc.validationCharName : null,
+                        validator: (v) =>
+                            v!.trim().isEmpty ? loc.validationCharName : null,
                       ),
                       _buildTextField(
                         controller: _greetingController,
@@ -196,7 +244,12 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                         minLines: 3,
                       ),
 
-                      _buildLorebookButton(context, loc, theme, state.allLorebooks),
+                      _buildLorebookButton(
+                        context,
+                        loc,
+                        theme,
+                        state.allLorebooks,
+                      ),
 
                       const SizedBox(height: 30),
 
@@ -208,13 +261,21 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                               child: OutlinedButton.icon(
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.red.shade400,
-                                  side: BorderSide(color: Colors.red.shade400, width: 1.5),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
+                                  side: BorderSide(
+                                    color: Colors.red.shade400,
+                                    width: 1.5,
+                                  ),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 16,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
                                 ),
-                                icon: const Icon(Icons.delete_outline, size: 22),
+                                icon: const Icon(
+                                  Icons.delete_outline,
+                                  size: 22,
+                                ),
                                 label: Text(
                                   loc.delete,
                                   style: TextStyle(fontWeight: FontWeight.bold),
@@ -234,15 +295,22 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: theme.colorScheme.primary,
                                 foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 16,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
                               onPressed: () => _submitForm(context),
                               child: Text(
-                                isEditing ? loc.saveButton : loc.charCreateButton,
-                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                isEditing
+                                    ? loc.saveButton
+                                    : loc.charCreateButton,
+                                style: const TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
                           ),
@@ -257,7 +325,9 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
             if (state is CharacterFormErrorState) {
               return Center(
                 child: Text(
-                  AppLocalization.of(context).getError(state.errType, state.error),
+                  AppLocalization.of(
+                    context,
+                  ).getError(state.errType, state.error),
                   style: const TextStyle(color: Colors.red),
                   textAlign: TextAlign.center,
                 ),
@@ -268,6 +338,98 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
           },
         ),
       ),
+    );
+  }
+
+  Widget _buildImportButton(
+    BuildContext context,
+    AppLocalization loc,
+    ThemeData theme,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          loc.import,
+          style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () => _pickCard(context),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            height: 120,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            child: Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.person_pin_rounded,
+                    size: 32,
+                    color: Colors.grey,
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    loc.imortExt,
+                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExportButton(
+    BuildContext context,
+    AppLocalization loc,
+    ThemeData theme,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          loc.export,
+          style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+        ),
+        const SizedBox(height: 8),
+        InkWell(
+          onTap: () => _exportCard(context, loc),
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            height: 120,
+            decoration: BoxDecoration(
+              color: theme.colorScheme.primary.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            clipBehavior: Clip.antiAliasWithSaveLayer,
+            child: Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(20),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.output, size: 32, color: Colors.grey),
+                  const SizedBox(height: 4),
+                  Text(
+                    loc.exportExt,
+                    style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 
@@ -293,20 +455,30 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
       borderRadius: BorderRadius.circular(12),
       child: Ink(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
-        decoration: BoxDecoration(color: theme.cardColor, borderRadius: BorderRadius.circular(12)),
+        decoration: BoxDecoration(
+          color: theme.cardColor,
+          borderRadius: BorderRadius.circular(12),
+        ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Row(
               children: [
-                Icon(Icons.library_books_outlined, color: theme.colorScheme.primary, size: 20),
+                Icon(
+                  Icons.library_books_outlined,
+                  color: theme.colorScheme.primary,
+                  size: 20,
+                ),
                 const SizedBox(width: 12),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       loc.charLorebooks,
-                      style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -326,13 +498,22 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     );
   }
 
-  Widget _buildAvatarPicker(BuildContext context, ThemeData theme, Char? character) {
+  Widget _buildAvatarPicker(
+    BuildContext context,
+    ThemeData theme,
+    Char? character,
+  ) {
     final char = character;
-    final avatarUrl = selectedAvatarFile?.path ?? char?.getAvatar(AppConfig.of(context).baseUrl);
+    final avatarUrl =
+        selectedAvatarFile?.path ??
+        char?.getAvatar(AppConfig.of(context).baseUrl);
     return InkWell(
       onTap: () => handleAvatarClick(context, character),
       borderRadius: BorderRadius.circular(60),
-      child: PersonaAvatar.form(avatarUrl, currentCropData ?? char?.getCropData()),
+      child: PersonaAvatar.form(
+        avatarUrl,
+        currentCropData ?? char?.getCropData(),
+      ),
     );
   }
 
@@ -346,7 +527,11 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     final baseUrl = AppConfig.of(context).baseUrl;
     final bgUrl = char?.getBackground(baseUrl);
     if (_selectedBackgroundFile != null) {
-      return Image.file(_selectedBackgroundFile!, fit: BoxFit.cover, width: double.infinity);
+      return Image.file(
+        _selectedBackgroundFile!,
+        fit: BoxFit.cover,
+        width: double.infinity,
+      );
     }
     if (bgUrl != null) {
       return Image.network(bgUrl, fit: BoxFit.cover, width: double.infinity);
@@ -357,7 +542,10 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
         children: [
           const Icon(Icons.wallpaper, size: 32, color: Colors.grey),
           const SizedBox(height: 4),
-          Text(loc.selectBackground, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+          Text(
+            loc.selectBackground,
+            style: TextStyle(color: Colors.grey.shade500, fontSize: 12),
+          ),
         ],
       ),
     );
@@ -393,6 +581,29 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
         ),
       ),
     );
+  }
+
+  Future<void> _exportCard(BuildContext context, AppLocalization loc) async {
+    if (!_formKey.currentState!.validate()) return;
+    final name = _nameController.text.trim();
+    final path = await FileTool.getExportPath(loc, name.isNotEmpty ? name : 'char_card');
+    if (path != null && context.mounted) {
+      context.read<CharacterFormBloc>().add(
+        ExportCardEvent(
+          path: path,
+          baseUrl: AppConfig.of(context).baseUrl,
+          id: widget.characterId,
+          name: name,
+          appearance: _appearanceController.text.trim(),
+          personality: _personalityController.text.trim(),
+          scenario: _scenarioController.text.trim(),
+          greeting: _greetingController.text.trim(),
+          prompt: _promptController.text.trim(),
+          avatarFile: selectedAvatarFile,
+          lorebookIds: _selectedLorebookIds,
+        ),
+      );
+    }
   }
 
   void _submitForm(BuildContext context) {

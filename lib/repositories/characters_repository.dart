@@ -9,6 +9,7 @@ import 'package:dio/dio.dart';
 
 class CharactersRepository extends BaseRepository {
   List<Char>? _cache;
+
   CharactersRepository(RemoteProvider remote) : super(remote, '/chars');
 
   Future<List<Char>> getCharacters() {
@@ -20,9 +21,61 @@ class CharactersRepository extends BaseRepository {
     return characters.where((e) => e.id == characterId).firstOrNull;
   }
 
+  Future<Char> loadByCard(File card) async {
+    final formMap = {
+      'card': await MultipartFile.fromFile(
+        card.path,
+        filename: card.path.split(Platform.pathSeparator).last,
+      ),
+    };
+    final formData = FormData.fromMap(formMap);
+    final response = await remote.post('$endpoint/card', data: formData);
+    _clearCache();
+    return Char.fromJson(response);
+  }
+  
+  Future<File?> loadAvatar(String url) {
+    return remote.download(url);
+  }
+
   Future<void> deleteCharacter(int charId) async {
     await remote.delete("$endpoint/$charId");
     _clearCache();
+  }
+
+  Future<String> exportCard({
+      int? id,
+      required String name,
+      required String appearance,
+      required String personality,
+      required String scenario,
+      required String greeting,
+      required String prompt,
+      required List<int> lorebookIds,
+      File? avatarFile,}) async {
+    final Map<String, dynamic> formMap = {
+      'name': name,
+      'appearance': appearance,
+      'personality': personality,
+      'scenario': scenario,
+      'greeting': greeting,
+      'prompt': prompt,
+      'lorebook_ids': jsonEncode(lorebookIds),
+    };
+
+    if (id != null && id > 0) {
+      formMap['id'] = id.toString();
+    }
+
+    if (avatarFile != null) {
+      formMap['avatar_file'] = await MultipartFile.fromFile(
+        avatarFile.path,
+        filename: avatarFile.path.split(Platform.pathSeparator).last,
+      );
+    }
+
+    final formData = FormData.fromMap(formMap);
+    return await remote.post('$endpoint/card-export', data: formData);
   }
 
   Future<Char> saveCharacter({

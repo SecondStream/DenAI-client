@@ -18,10 +18,30 @@ class CharacterFormLoadedState extends CharacterFormState {
     required this.allLorebooks,
     required this.selectedLorebookIds,
   });
+
+  CharacterFormLoadedState copy() {
+    return CharacterFormLoadedState(
+      character: character,
+      allLorebooks: allLorebooks,
+      selectedLorebookIds: selectedLorebookIds,
+    );
+  }
+}
+
+class CharacterFormLoadedCardState extends CharacterFormLoadedState {
+  final File? avatar;
+
+  const CharacterFormLoadedCardState({
+    super.character,
+    required super.allLorebooks,
+    required super.selectedLorebookIds,
+    this.avatar,
+  });
 }
 
 class CharacterFormSuccessState extends CharacterFormState {
   final Char character;
+
   const CharacterFormSuccessState(this.character);
 }
 
