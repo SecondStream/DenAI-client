@@ -358,7 +358,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     emit(currentState.copyWith(selectedImageFile: event.fileImage, isResetImage: true));
   }
 
-  String _replacePlaceholders(String text, String userName, String charName) {
+  String _replacePlaceholders(String text, String charName, String userName) {
     final regex = RegExp(r'\{\{(char|user)\}\}', caseSensitive: false);
 
     return text.replaceAllMapped(regex, (match) {
