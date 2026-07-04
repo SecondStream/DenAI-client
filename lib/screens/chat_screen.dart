@@ -22,12 +22,14 @@ import 'package:gpt_markdown/gpt_markdown.dart';
 class ChatScreenArgs {
   final int? chatId;
   final int? charId;
+
   ChatScreenArgs({this.chatId, this.charId});
 }
 
 class ChatScreen extends StatefulWidget {
   final int? chatId;
   final int? charId;
+
   ChatScreen({super.key, required ChatScreenArgs args})
     : charId = args.charId,
       chatId = args.chatId;
@@ -43,7 +45,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
       _scrollController.jumpTo(
-        _scrollController.position.maxScrollExtent,
+        0.0,
         // duration: const Duration(milliseconds: 100),
         // curve: Curves.easeOut,
       );
@@ -78,23 +80,38 @@ class _ChatScreenState extends State<ChatScreen> {
         return bloc;
       },
       child: BlocConsumer<ChatBloc, ChatState>(
+        listenWhen: (prev, current) {
+          return current is ChatErrorState ||
+              (prev is ChatLoadedState &&
+                  current is ChatLoadedState &&
+                  prev.messages.length > current.messages.length);
+        },
         listener: (context, state) {
           if (state is ChatLoadedState) {
-            WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
+            WidgetsBinding.instance.addPostFrameCallback(
+              (_) => _scrollToBottom(),
+            );
           } else if (state is ChatErrorState && state.lastUserMessage != null) {
             _textController.text = state.lastUserMessage!;
           }
         },
         builder: (context, state) {
-          final isActionsBlocked = state is! ChatLoadedState || state.isAiTyping;
+          final isActionsBlocked =
+              state is! ChatLoadedState || state.isAiTyping;
           return Scaffold(
             appBar: AppBar(
-              title: Text(state is! ChatLoadedState ? loc.chatTitle : state.char.name),
+              title: Text(
+                state is! ChatLoadedState ? loc.chatTitle : state.char.name,
+              ),
               actions: [
                 Tooltip(
                   message: isActionsBlocked ? loc.empty : loc.historyTooltip,
                   child: IconButton(
-                    icon: const Icon(Icons.menu_book, color: Colors.white, size: 24),
+                    icon: const Icon(
+                      Icons.menu_book,
+                      color: Colors.white,
+                      size: 24,
+                    ),
                     onPressed: isActionsBlocked
                         ? null
                         : () {
@@ -105,7 +122,11 @@ class _ChatScreenState extends State<ChatScreen> {
                 Tooltip(
                   message: isActionsBlocked ? loc.empty : loc.newChatTooltip,
                   child: IconButton(
-                    icon: const Icon(Icons.add_comment, color: Colors.white, size: 26),
+                    icon: const Icon(
+                      Icons.add_comment,
+                      color: Colors.white,
+                      size: 26,
+                    ),
                     onPressed: isActionsBlocked
                         ? null
                         : () {
@@ -122,7 +143,12 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildBody(BuildContext context, AppLocalization loc, ThemeData theme, ChatState state) {
+  Widget _buildBody(
+    BuildContext context,
+    AppLocalization loc,
+    ThemeData theme,
+    ChatState state,
+  ) {
     if (state is ChatLoadingState ||
         (state is ChatErrorState && state.errType == ErrType.sendMessage)) {
       return const Center(child: CircularProgressIndicator());
@@ -139,6 +165,7 @@ class _ChatScreenState extends State<ChatScreen> {
     if (state is ChatLoadedState) {
       final bgUrl = state.background;
       final baseUrl = AppConfig.of(context).baseUrl;
+      final messages = state.messages.reversed.toList();
       return Container(
         decoration: BoxDecoration(
           color: theme.scaffoldBackgroundColor,
@@ -164,11 +191,12 @@ class _ChatScreenState extends State<ChatScreen> {
               children: [
                 Expanded(
                   child: ListView.builder(
+                    reverse: true,
                     controller: _scrollController,
                     padding: const EdgeInsets.all(16),
-                    itemCount: state.messages.length,
+                    itemCount: messages.length,
                     itemBuilder: (context, index) {
-                      final message = state.messages[index];
+                      final message = messages[index];
                       return _buildMessageBubble(
                         context,
                         loc,
@@ -212,7 +240,10 @@ class _ChatScreenState extends State<ChatScreen> {
                         ],
                       ),
                       clipBehavior: Clip.antiAlias,
-                      child: Image.file(state.selectedImageFile!, fit: BoxFit.contain),
+                      child: Image.file(
+                        state.selectedImageFile!,
+                        fit: BoxFit.contain,
+                      ),
                     ),
 
                     Positioned(
@@ -228,7 +259,11 @@ class _ChatScreenState extends State<ChatScreen> {
                             color: Colors.black87,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.close, size: 12, color: Colors.white),
+                          child: const Icon(
+                            Icons.close,
+                            size: 12,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                     ),
@@ -257,21 +292,30 @@ class _ChatScreenState extends State<ChatScreen> {
       messageWidget = UserMessage(
         message: message,
         card: user,
-        onEditMessage: isTyping ? null : (_) => _showEditMessageDialog(context, loc, message),
-        onDeleteMessage: isTyping ? null : (messageId) => _onDeleteMessage(context, loc, messageId),
+        onEditMessage: isTyping
+            ? null
+            : (_) => _showEditMessageDialog(context, loc, message),
+        onDeleteMessage: isTyping
+            ? null
+            : (messageId) => _onDeleteMessage(context, loc, messageId),
       );
     } else {
       messageWidget = CharacterMessage(
         char: char,
         message: message,
         isThinking: isTyping,
-        onEditMessage: isTyping ? null : (_) => _showEditMessageDialog(context, loc, message),
+        onEditMessage: isTyping
+            ? null
+            : (_) => _showEditMessageDialog(context, loc, message),
 
         onSwitchMessage: isTyping
             ? null
             : (messageId, direction) {
                 context.read<ChatBloc>().add(
-                  SwitchMessageBranchEvent(messageId: messageId, direction: direction),
+                  SwitchMessageBranchEvent(
+                    messageId: messageId,
+                    direction: direction,
+                  ),
                 );
               },
         onRegenerateMessage: isTyping || !isLastMessage
@@ -282,7 +326,10 @@ class _ChatScreenState extends State<ChatScreen> {
       );
     }
 
-    return Padding(padding: const EdgeInsets.symmetric(vertical: 4), child: messageWidget);
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: messageWidget,
+    );
   }
 
   void _showSummaryEditDialog(
@@ -304,7 +351,11 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _onDeleteMessage(BuildContext context, AppLocalization loc, int messageId) async {
+  void _onDeleteMessage(
+    BuildContext context,
+    AppLocalization loc,
+    int messageId,
+  ) async {
     final res = await ConfirmationDialog.open(
       context,
       loc.removeMessageTitle,
@@ -315,7 +366,11 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _showEditMessageDialog(BuildContext context, AppLocalization loc, Message message) async {
+  void _showEditMessageDialog(
+    BuildContext context,
+    AppLocalization loc,
+    Message message,
+  ) async {
     final chatBloc = context.read<ChatBloc>();
 
     String editableContent = message.content;
@@ -342,7 +397,9 @@ class _ChatScreenState extends State<ChatScreen> {
     );
 
     if (newText != null && newText.isNotEmpty && newText != editableContent) {
-      chatBloc.add(EditMessageEvent(messageId: message.id, newContent: newText));
+      chatBloc.add(
+        EditMessageEvent(messageId: message.id, newContent: newText),
+      );
     }
   }
 
@@ -377,7 +434,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 ? loc.changeRoleButton
                 : loc.selectRoleButton,
             child: InkWell(
-              onTap: isBlocked ? null : () => _showChangeCardDialog(context, loc, availableCards),
+              onTap: isBlocked
+                  ? null
+                  : () => _showChangeCardDialog(context, loc, availableCards),
               borderRadius: BorderRadius.circular(22),
               child: PersonaAvatar(userCard, size: 50),
             ),
@@ -409,7 +468,9 @@ class _ChatScreenState extends State<ChatScreen> {
                   style: const TextStyle(color: Colors.white),
                   enabled: !isBlocked,
                   decoration: InputDecoration(
-                    hintText: isBlocked ? loc.characterTyping : loc.writeSomething,
+                    hintText: isBlocked
+                        ? loc.characterTyping
+                        : loc.writeSomething,
                     hintStyle: const TextStyle(color: Colors.grey),
                     fillColor: theme.cardColor,
                     filled: true,
@@ -417,9 +478,13 @@ class _ChatScreenState extends State<ChatScreen> {
                       borderRadius: BorderRadius.all(Radius.circular(20)),
                       borderSide: BorderSide.none,
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
                   ),
-                  onSubmitted: (text) => isBlocked ? null : _sendMessage(context),
+                  onSubmitted: (text) =>
+                      isBlocked ? null : _sendMessage(context),
                 ),
               ),
             ),
@@ -427,7 +492,10 @@ class _ChatScreenState extends State<ChatScreen> {
           const SizedBox(width: 8),
 
           IconButton(
-            icon: Icon(Icons.send, color: isBlocked ? Colors.grey : theme.colorScheme.primary),
+            icon: Icon(
+              Icons.send,
+              color: isBlocked ? Colors.grey : theme.colorScheme.primary,
+            ),
             onPressed: isBlocked ? null : () => _sendMessage(context),
           ),
         ],
@@ -492,9 +560,15 @@ class _ChatScreenState extends State<ChatScreen> {
                           : theme.cardColor,
                       child: ListTile(
                         leading: PersonaAvatar(card, size: 40),
-                        title: Text(card.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        title: Text(
+                          card.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         trailing: isCurrent
-                            ? const Icon(Icons.check_circle, color: Colors.green)
+                            ? const Icon(
+                                Icons.check_circle,
+                                color: Colors.green,
+                              )
                             : null,
                         onTap: () {
                           dialogContext.pop();
@@ -512,7 +586,10 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  void _showNewChatConfirmationDialog(BuildContext context, AppLocalization loc) async {
+  void _showNewChatConfirmationDialog(
+    BuildContext context,
+    AppLocalization loc,
+  ) async {
     final chatBloc = context.read<ChatBloc>();
     final res = await NewChatConfirmationDialog.open(context);
     if (res != null) {
@@ -537,10 +614,15 @@ class CustomItalicComponent extends ItalicMd {
   CustomItalicComponent({this.italicColor = Colors.grey});
 
   @override
-  RegExp get exp => RegExp(r"(?:(?<!\*)\*(?<!\s)(.+?)(?:(?<!\s)\*(?!\*)|$))", dotAll: true);
+  RegExp get exp =>
+      RegExp(r"(?:(?<!\*)\*(?<!\s)(.+?)(?:(?<!\s)\*(?!\*)|$))", dotAll: true);
 
   @override
-  InlineSpan span(BuildContext context, String text, final GptMarkdownConfig config) {
+  InlineSpan span(
+    BuildContext context,
+    String text,
+    final GptMarkdownConfig config,
+  ) {
     final match = exp.firstMatch(text);
     final data = match?[1] ?? text.replaceAll('*', '');
 
