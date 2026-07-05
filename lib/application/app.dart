@@ -49,7 +49,7 @@ class ChatApp extends StatelessWidget {
       ],
       builder: (context, child) => NotifyWidget(navKey: navigatorKey, child: child),
       home: const ChatsListScreen(),
-      initialRoute: AppRoutes.chats,
+      initialRoute: AppRoutes.home,
       onGenerateRoute: _onGenerateRoute,
       navigatorKey: navigatorKey,
       navigatorObservers: [GetIt.instance.get<AppRouteObserver>()],

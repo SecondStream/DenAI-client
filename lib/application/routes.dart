@@ -13,7 +13,6 @@ import 'package:flutter/material.dart';
 
 class AppRoutes {
   static const String home = '/';
-  static const String chats = '/chats';
   static const String chat = '/chat';
   static const String characters = '/characters';
   static const String userCards = '/user_cards';
@@ -30,7 +29,7 @@ class AppRoutes {
 
   static Widget _buildByRoute(BuildContext context, String route, Object? args) {
     switch (route) {
-      case chats || home:
+      case home:
         return const ChatsListScreen();
       case characters:
         return const CharactersScreen();

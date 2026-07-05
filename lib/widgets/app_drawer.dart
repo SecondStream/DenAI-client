@@ -40,12 +40,12 @@ class AppDrawer extends StatelessWidget {
             ListTile(
               leading: const Icon(Icons.chat_bubble, color: Colors.white70),
               title: Text(loc.myChats, style: TextStyle(color: Colors.white)),
-              selected: currentRoute == AppRoutes.chats || currentRoute == AppRoutes.home,
+              selected: currentRoute == AppRoutes.home,
               selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.15),
               titleAlignment: ListTileTitleAlignment.center,
               onTap: () {
                 context.pop();
-                context.replace(AppRoutes.chats);
+                context.replace(AppRoutes.home);
               },
             ),
             ListTile(
