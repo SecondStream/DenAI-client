@@ -31,7 +31,7 @@ class CharacterMessage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        PersonaAvatar(char, size: 50),
+        PersonaAvatar(char, size: 55),
         const SizedBox(width: 8),
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -67,7 +67,7 @@ class UserMessage extends StatelessWidget {
           ],
         ),
         const SizedBox(width: 8),
-        PersonaAvatar(card, size: 50),
+        PersonaAvatar(card, size: 55),
       ],
     );
   }
