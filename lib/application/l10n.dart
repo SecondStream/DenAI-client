@@ -72,7 +72,7 @@ class AppLocalization {
       'history_title': 'Results of history',
       'attach_image': 'Attach an image',
       //  --- Экран списка чатов ---
-      'chats_list_title': 'My AI Companions',
+      'chats_list_title': 'List of chats',
       'add_chat_button': '+',
       'no_chats':
           'You don\'t have any active chats yet.\nPress \'+\' at the top to select a character!',
@@ -82,24 +82,24 @@ class AppLocalization {
       'delete_chat_dialog_message':
           'Are you sure you want to permanently delete the chat?\nAll chat history will be permanently deleted.',
       // --- Экран персонажей ---
-      'characters_title': 'Choose Companion',
+      'characters_title': 'Choose Character',
       'add_character_button': '+',
       'no_characters_message': 'The tavern is empty.\nClick \'+\' above to create a character.',
       'edit_prompts': 'Edit character prompts',
       'chat': 'Chat',
       // --- Экран создания персонажа ---
       'character_form_title_create': 'Create Character',
-      'character_form_title_edit': 'Edit AI',
+      'character_form_title_edit': 'Edit Character',
       'char_name_label': 'Character Name',
       'char_name_hint': 'For example: Felicity',
       'greeting_label': 'Starting Greeting',
-      'greeting_hint': 'A line the bot will start the chat with',
-      'appearance_label': 'Appearance',
-      'appearance_hint': 'Describe face, clothing, race',
+      'greeting_hint': 'A line the character will start the chat with',
+      'appearance_label': 'Description',
+      'appearance_hint': 'General description of the character',
       'personality_label': 'Personality',
       'personality_hint': 'Character traits, speech style, fears',
       'scenario_label': 'Scenario',
-      'scenario_hint': 'What situation or room you are in',
+      'scenario_hint': 'Global plot: what is happening and what the characters are striving for',
       'prompt_label': 'System Prompt / Instructions',
       'prompt_hint': 'Rules for LLM. For example: Always reply in English',
       'delete_button': 'Delete',
@@ -114,7 +114,7 @@ class AppLocalization {
       'user_cards_title': 'My Roles (Profiles)',
       'add_user_card_button': '+',
       'no_user_cards_message':
-          'Your wardrobe is empty...\nPress \'+\' at the top to create your profile!',
+          'You don\'t have any roles created yet...\nPress \'+\' at the top to create your profile!',
       'default_status': 'Default',
       'additional_status': 'Additional',
 
@@ -122,11 +122,11 @@ class AppLocalization {
       'user_card_form_title_create': 'Create Player Profile',
       'user_card_form_title_edit': 'Edit Role',
       'card_name_label': 'Your Name/Nickname in this Role',
-      'card_name_hint': 'For example: Ivan, Mage Arthur',
+      'card_name_hint': 'For example: John, Mage Arthur',
       'description_label': 'Character Description (Appearance, Lore, Race)',
-      'description_hint': 'Describe yourself to the AI: Summoned familiar, wears a ring, human',
+      'description_hint': 'Describe yourself: Summoned familiar, wears a ring, human',
       'default_switch_title': 'Use as Default',
-      'default_switch_subtitle': 'This role will be automatically selected for all new chats',
+      'default_switch_subtitle': 'This role will be automatically selected for new chats',
       'card_create_button': 'Create Profile',
 
       // --- Экран настроек ---
@@ -248,7 +248,7 @@ class AppLocalization {
       'history_title': 'Итоги истории',
       'attach_image': 'Прикрепить изображение',
       //  --- Экран списка чатов ---
-      'chats_list_title': 'Мои ИИ-Компаньоны',
+      'chats_list_title': 'Список чатов',
       'add_chat_button': '+',
       'no_chats': 'У вас еще нет активных чатов.\nНажмите \'+\' сверху, чтобы выбрать персонажа.',
       'no_last_message': 'Нет сообщений',
@@ -257,7 +257,7 @@ class AppLocalization {
       'delete_chat_dialog_message':
           'Вы уверены, что хотите навсегда удалить чат?\nВся история переписки будут безвозвратно стёрты.',
       // --- Экран персонажей ---
-      'characters_title': 'Выбор Компаньона',
+      'characters_title': 'Выбор персонажа',
       'add_character_button': '+',
       'no_characters_message':
           'В таверне пока пусто.\nНажмите \'+\' сверху, чтобы создать персонажа.',
@@ -265,17 +265,17 @@ class AppLocalization {
       'chat': 'Общаться',
       // --- Экран создания персонажа ---
       'character_form_title_create': 'Создать Персонажа',
-      'character_form_title_edit': 'Редактировать ИИ',
+      'character_form_title_edit': 'Редактировать персонажа',
       'char_name_label': 'Имя персонажа',
-      'char_name_hint': 'Например: Felicity',
+      'char_name_hint': 'Например: Фелисити',
       'greeting_label': 'Стартовое приветствие (Greeting)',
-      'greeting_hint': 'Реплика, с которой бот сам начнет чат',
-      'appearance_label': 'Внешность (Appearance)',
-      'appearance_hint': 'Опишите лицо, одежду, расу',
+      'greeting_hint': 'Реплика, с которой персонаж сам начнет чат',
+      'appearance_label': 'Описание (Description)',
+      'appearance_hint': 'Общее описание персонажа',
       'personality_label': 'Характер (Personality)',
       'personality_hint': 'Черты характера, манера речи, страхи',
       'scenario_label': 'Сценарий (Scenario)',
-      'scenario_hint': 'В какой ситуации или комнате вы находитесь',
+      'scenario_hint': 'Глобальный сюжет: что происходит и к чему стремятся персонажи',
       'prompt_label': 'Системный Промпт / Инструкция',
       'prompt_hint': 'Правила для LLM. Например: Always reply in English',
       'delete_button': 'Удалить',
@@ -290,19 +290,19 @@ class AppLocalization {
       'user_cards_title': 'Мои Роли (Профили)',
       'add_user_card_button': '+',
       'no_user_cards_message':
-          'В вашей гардеробной ролей пока пусто...\nНажмите \'+\' сверху, чтобы создать свой профиль.',
+          'У вас пока нет созданных ролей...\nНажмите \'+\' сверху, чтобы создать свой профиль.',
       'default_status': 'По умолчанию',
       'additional_status': 'Дополнительная',
 
       // --- Форма профиля игрока ---
       'user_card_form_title_create': 'Создать Профиль Игрока',
       'user_card_form_title_edit': 'Редактировать Роль',
-      'card_name_label': 'Твое Имя/Ник в этой роли',
+      'card_name_label': 'Ваше Имя/Ник в этой роли',
       'card_name_hint': 'Например: Иван, Маг Артур',
       'description_label': 'Описание твоего персонажа (Внешность, лор, раса)',
-      'description_hint': 'Опишите себя для ИИ: Призванный фамильяр, носит кольцо, человек',
+      'description_hint': 'Опишите себя: Призванный фамильяр, носит кольцо, человек',
       'default_switch_title': 'Использовать по умолчанию',
-      'default_switch_subtitle': 'Эта роль будет автоматически выбираться для всех новых чатов',
+      'default_switch_subtitle': 'Эта роль будет автоматически выбираться для новых чатов',
       'card_create_button': 'Создать профиль',
 
       // --- Экран настроек ---

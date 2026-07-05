@@ -16,6 +16,7 @@ void main() async {
       size: Size(1280, 900),
       center: true,
       minimumSize: Size(800, 700),
+      title: "DenAI",
     );
     windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.show();
