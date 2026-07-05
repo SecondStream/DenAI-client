@@ -9,6 +9,9 @@ import 'package:dio/dio.dart';
 import '../models/models.dart';
 
 class ChatsRepository extends BaseRepository {
+  final _messageController = StreamController<StreamMessage>.broadcast();
+  Stream<StreamMessage> get allMessagesStream => _messageController.stream;
+
   ChatsRepository(RemoteProvider remote) : super(remote, '/chats');
 
   Future<List<Chat>> getChats() async {
@@ -49,18 +52,27 @@ class ChatsRepository extends BaseRepository {
     return Chat.fromJson(response);
   }
 
-  Future<Stream<String>?> regenerateMessage(int chatId) async {
-    final ResponseBody? r = await remote.post<ResponseBody, Map<String, dynamic>>(
-      '$endpoint/$chatId/regenerate',
-      options: Options(responseType: ResponseType.stream),
-    );
+  Future<void> regenerateMessage(int chatId) async {
+    try {
+      final ResponseBody? r = await remote.post<ResponseBody, Map<String, dynamic>>(
+        '$endpoint/$chatId/regenerate',
+        options: Options(responseType: ResponseType.stream),
+      );
 
-    if (r != null) {
-      final stream = r.stream.transform(unit8BufferToString).cast<String>();
+      if (r != null) {
+        final stream = r.stream
+            .transform(unit8BufferToString)
+            .transform(const LineSplitter())
+            .where((line) => line.trim().isNotEmpty) // maybe ping
+            .map((jsonStr) => StreamMessage.fromJson(jsonDecode(jsonStr)));
 
-      return stream;
+        await for (final message in stream) {
+          _messageController.add(message);
+        }
+      }
+    } catch (e) {
+      _messageController.addError(StreamMessageError(chatId: chatId));
     }
-    return null;
   }
 
   Future<void> updateChatUserCard(int chatId, int userCardId) async {
@@ -86,17 +98,30 @@ class ChatsRepository extends BaseRepository {
     return response['image_path'];
   }
 
-  Future<Stream<String>?> sendMessage(int chatId, String text, String? imagePath) async {
-    final ResponseBody? r = await remote.post<ResponseBody, dynamic>(
-      '$endpoint/$chatId/send',
-      data: {"content": text, "image_path": imagePath},
-      options: Options(responseType: ResponseType.stream),
-    );
+  Future<void> sendMessage(int chatId, String text, String? imagePath, File? imageFile) async {
+    try {
+      final ResponseBody? r = await remote.post<ResponseBody, dynamic>(
+        '$endpoint/$chatId/send',
+        data: {"content": text, "image_path": imagePath},
+        options: Options(responseType: ResponseType.stream),
+      );
 
-    if (r != null) {
-      return r.stream.transform(unit8BufferToString).cast<String>();
+      if (r != null) {
+        final stream = r.stream
+            .transform(unit8BufferToString)
+            .transform(const LineSplitter())
+            .where((line) => line.trim().isNotEmpty) // maybe ping
+            .map((jsonStr) => StreamMessage.fromJson(jsonDecode(jsonStr)));
+
+        await for (final message in stream) {
+          _messageController.add(message);
+        }
+      }
+    } catch (e) {
+      _messageController.addError(
+        StreamMessageError(chatId: chatId, lastUserMessage: text, imageFile: imageFile),
+      );
     }
-    return null;
   }
 
   Future<void> deleteChat(int chatId) async {
@@ -114,4 +139,8 @@ class ChatsRepository extends BaseRepository {
           sink.add(utf8.decode(data, allowMalformed: true));
         },
       );
+
+  void dispose() {
+    _messageController.close();
+  }
 }

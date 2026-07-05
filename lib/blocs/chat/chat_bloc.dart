@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:den_ai/application/config.dart';
@@ -17,12 +18,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final CharactersRepository _charactersRepository;
   final UserCardsRepository _userCardsRepository;
   final AppConfig config;
+  StreamSubscription<StreamMessage>? _messageSubscription;
 
   ChatBloc(this._repository, this._charactersRepository, this._userCardsRepository, this.config)
     : super(ChatInitialState()) {
     on<LoadChatHistoryEvent>(_onLoadChatHistory);
     on<SendUserMessageEvent>(_onSendUserMessage);
     on<ReceivedAiTokenEvent>(_onReceivedAiToken);
+    on<ReceivedAiTokenErrorEvent>(_onReceivedAiTokenError);
     on<CheckOrCreateVirtualChatEvent>(_onCheckOrCreateVirtualChat);
     on<RequestUserCardsForDialogEvent>(_onRequestUserCardsForDialog);
     on<ChangeUserCardEvent>(_onChangeUserCard);
@@ -33,6 +36,21 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<DeleteMessageEvent>(_onDeleteMessage);
     on<UpdateChatSummaryEvent>(_onUpdateChatSummary);
     on<SelectImageEvent>(_onSelectImage);
+
+    _messageSubscription = _repository.allMessagesStream.listen(
+      (message) => add(ReceivedAiTokenEvent(message)),
+      onError: (e, _) {
+        if (e is StreamMessageError) add(ReceivedAiTokenErrorEvent(e));
+      },
+      cancelOnError: false,
+    );
+  }
+
+  @override
+  Future<void> close() {
+    _messageSubscription?.cancel();
+    _messageSubscription = null;
+    return super.close();
   }
 
   void _onLoadChatHistory(LoadChatHistoryEvent event, Emitter<ChatState> emit) async {
@@ -96,20 +114,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     emit(currentState.copyWith(messages: updatedMessages, isAiTyping: true));
 
-    try {
-      final tokenStream = await _repository.regenerateMessage(currentState.chatId);
-
-      if (tokenStream != null) {
-        await for (final token in tokenStream) {
-          add(ReceivedAiTokenEvent(token));
-        }
-      }
-    } catch (e) {
-      emit(ChatErrorState(ErrType.sendMessage, e));
-    } finally {
-      final chat = await _repository.getChatById(currentState.chatId);
-      emit(currentState.copyWith(messages: chat.messages, isAiTyping: false));
-    }
+    unawaited(_repository.regenerateMessage(currentState.chatId));
   }
 
   void _onSwitchMessageBranch(SwitchMessageBranchEvent event, Emitter<ChatState> emit) async {
@@ -171,7 +176,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
                 Message(
                   id: -99,
                   role: MessageRole.assistant,
-                  content: _replacePlaceholders(char.greeting, char.name, defaultUserCard?.name ?? defUser),
+                  content: _replacePlaceholders(
+                    char.greeting,
+                    char.name,
+                    defaultUserCard?.name ?? defUser,
+                  ),
                   createdAt: DateTime.now(),
                 ),
             ],
@@ -250,18 +259,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         emit(currentState);
       }
 
-      final tokenStream = await _repository.sendMessage(currentState.chatId, event.text, imagePath);
-
-      if (tokenStream != null) {
-        await for (final token in tokenStream) {
-          add(ReceivedAiTokenEvent(token));
-        }
-      }
-
-      final chat = await _repository.getChatById(currentState.chatId);
-      emit(currentState.copyWith(messages: chat.messages, isAiTyping: false));
+      unawaited(_repository.sendMessage(currentState.chatId, event.text, imagePath, imageFile));
     } catch (e) {
-      emit(ChatErrorState(ErrType.sendMessage, e, lastUserMessage: event.text));
       final chat = await _repository.getChatById(currentState.chatId);
       emit(
         currentState.copyWith(
@@ -273,16 +272,54 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  void _onReceivedAiToken(ReceivedAiTokenEvent event, Emitter<ChatState> emit) {
+  void _onReceivedAiToken(ReceivedAiTokenEvent event, Emitter<ChatState> emit) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
+    final message = event.message;
+    if (currentState.chatId != message.chatId) return;
 
-    final updatedMessages = List<Message>.from(currentState.messages);
-    final lastIndex = updatedMessages.length - 1;
-    final lastMessage = updatedMessages[lastIndex];
+    if (message.status == MessageStatus.completed) {
+      final chat = await _repository.getChatById(currentState.chatId);
+      emit(currentState.copyWith(messages: chat.messages, isAiTyping: false));
+    } else {
+      final updatedMessages = List<Message>.from(currentState.messages);
+      final lastIndex = updatedMessages.length - 1;
+      final lastMessage = updatedMessages[lastIndex];
+      if (lastMessage.id < 0) {
+        updatedMessages[lastIndex] = lastMessage.copyWith(
+          content: message.token,
+          modelName: message.model,
+        );
+      } else {
+        updatedMessages.add(
+          Message(
+            id: -2,
+            role: MessageRole.assistant,
+            content: message.token,
+            createdAt: DateTime.now(),
+            modelName: message.model,
+          ),
+        );
+      }
+      emit(currentState.copyWith(messages: updatedMessages, isAiTyping: true));
+    }
+  }
 
-    updatedMessages[lastIndex] = lastMessage.copyWith(content: lastMessage.content + event.token);
-    emit(currentState.copyWith(messages: updatedMessages));
+  void _onReceivedAiTokenError(ReceivedAiTokenErrorEvent event, Emitter<ChatState> emit) async {
+    if (state is! ChatLoadedState) return;
+    final currentState = state as ChatLoadedState;
+    final error = event.error;
+    if (currentState.chatId != error.chatId) return;
+
+    emit(ChatErrorState(ErrType.sendMessage, '', lastUserMessage: error.lastUserMessage));
+    final chat = await _repository.getChatById(currentState.chatId);
+    emit(
+      currentState.copyWith(
+        messages: chat.messages,
+        isAiTyping: false,
+        selectedImageFile: error.imageFile,
+      ),
+    );
   }
 
   void _onChangeUserCard(ChangeUserCardEvent event, Emitter<ChatState> emit) async {
@@ -327,7 +364,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
             Message(
               id: -99,
               role: MessageRole.assistant,
-              content: _replacePlaceholders(char.greeting, char.name, currentState.userCard?.name ?? defUser),
+              content: _replacePlaceholders(
+                char.greeting,
+                char.name,
+                currentState.userCard?.name ?? defUser,
+              ),
               createdAt: DateTime.now(),
             ),
         ],

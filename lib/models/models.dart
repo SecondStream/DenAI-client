@@ -10,3 +10,4 @@ export 'persona.dart';
 export 'lore_entry.dart';
 export 'lorebook.dart';
 export 'ws_message.dart';
+export 'stream_message.dart';

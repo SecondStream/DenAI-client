@@ -19,8 +19,13 @@ class SendUserMessageEvent extends ChatEvent {
 }
 
 class ReceivedAiTokenEvent extends ChatEvent {
-  final String token;
-  ReceivedAiTokenEvent(this.token);
+  final StreamMessage message;
+  ReceivedAiTokenEvent(this.message);
+}
+
+class ReceivedAiTokenErrorEvent extends ChatEvent {
+  final StreamMessageError error;
+  ReceivedAiTokenErrorEvent(this.error);
 }
 
 class RequestUserCardsForDialogEvent extends ChatEvent {

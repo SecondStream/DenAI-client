@@ -29,7 +29,7 @@ class Message {
   factory Message.fromJson(Map<String, dynamic> json) => _$MessageFromJson(json);
   Map<String, dynamic> toJson() => _$MessageToJson(this);
 
-  Message copyWith({String? content}) {
+  Message copyWith({String? content, String? modelName}) {
     return Message(
       id: id,
       role: role,
@@ -37,7 +37,7 @@ class Message {
       createdAt: createdAt,
       currentIndex: currentIndex,
       totalVariants: totalVariants,
-      modelName: modelName,
+      modelName: modelName ?? this.modelName,
     );
   }
 }
