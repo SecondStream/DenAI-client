@@ -1,6 +1,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/blocs/chat/chat_bloc.dart';
 import 'package:den_ai/consts/consts.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
@@ -105,6 +106,30 @@ class _ChatScreenState extends State<ChatScreen> {
               ),
               actions: [
                 Tooltip(
+                  message: isActionsBlocked ? loc.empty : loc.editPrompts,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.edit,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                    onPressed: isActionsBlocked
+                        ? null
+                        : () async {
+                            final hasChanges = await Navigator.of(context)
+                                .pushNamed(
+                                  AppRoutes.characterEdit,
+                                  arguments: state.char.id,
+                                );
+                            if (hasChanges == true && context.mounted) {
+                              context.read<ChatBloc>().add(
+                                UpdateCharacterEvent(),
+                              );
+                            }
+                          },
+                  ),
+                ),
+                Tooltip(
                   message: isActionsBlocked ? loc.empty : loc.historyTooltip,
                   child: IconButton(
                     icon: const Icon(
@@ -123,7 +148,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   message: isActionsBlocked ? loc.empty : loc.newChatTooltip,
                   child: IconButton(
                     icon: const Icon(
-                      Icons.add_comment,
+                      Icons.add_box_outlined,
                       color: Colors.white,
                       size: 26,
                     ),

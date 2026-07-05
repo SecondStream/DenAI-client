@@ -31,6 +31,7 @@ class ChatLoadedState extends ChatState {
 
   ChatLoadedState copyWith({
     int? chatId,
+    Char? char,
     List<Message>? messages,
     String? background,
     UserCard? userCard,
@@ -42,7 +43,7 @@ class ChatLoadedState extends ChatState {
   }) {
     return ChatLoadedState(
       chatId: chatId ?? this.chatId,
-      char: char,
+      char: char ?? this.char,
       messages: messages ?? this.messages,
       background: background ?? this.background,
       summary: summary ?? this.summary,

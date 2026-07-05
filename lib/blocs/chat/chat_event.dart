@@ -7,6 +7,10 @@ class LoadChatHistoryEvent extends ChatEvent {
   LoadChatHistoryEvent(this.chatId);
 }
 
+class UpdateCharacterEvent extends ChatEvent {
+  UpdateCharacterEvent();
+}
+
 class CheckOrCreateVirtualChatEvent extends ChatEvent {
   final int charId;
   CheckOrCreateVirtualChatEvent(this.charId);

@@ -9,7 +9,9 @@ import 'package:den_ai/repositories/characters_repository.dart';
 import 'package:den_ai/repositories/chats_repository.dart';
 import 'package:den_ai/repositories/user_cards_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 part 'chat_event.dart';
+
 part 'chat_state.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
@@ -20,8 +22,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final AppConfig config;
   StreamSubscription<StreamMessage>? _messageSubscription;
 
-  ChatBloc(this._repository, this._charactersRepository, this._userCardsRepository, this.config)
-    : super(ChatInitialState()) {
+  ChatBloc(
+    this._repository,
+    this._charactersRepository,
+    this._userCardsRepository,
+    this.config,
+  ) : super(ChatInitialState()) {
     on<LoadChatHistoryEvent>(_onLoadChatHistory);
     on<SendUserMessageEvent>(_onSendUserMessage);
     on<ReceivedAiTokenEvent>(_onReceivedAiToken);
@@ -36,6 +42,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<DeleteMessageEvent>(_onDeleteMessage);
     on<UpdateChatSummaryEvent>(_onUpdateChatSummary);
     on<SelectImageEvent>(_onSelectImage);
+    on<UpdateCharacterEvent>(_onUpdateCharacter);
 
     _messageSubscription = _repository.allMessagesStream.listen(
       (message) => add(ReceivedAiTokenEvent(message)),
@@ -53,7 +60,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     return super.close();
   }
 
-  void _onLoadChatHistory(LoadChatHistoryEvent event, Emitter<ChatState> emit) async {
+  void _onLoadChatHistory(
+    LoadChatHistoryEvent event,
+    Emitter<ChatState> emit,
+  ) async {
     emit(ChatLoadingState());
     try {
       final chat = await _repository.getChatById(event.chatId);
@@ -77,14 +87,20 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     final currentState = state as ChatLoadedState;
 
     try {
-      final updatedChat = await _repository.editMessage(event.messageId, event.newContent);
+      final updatedChat = await _repository.editMessage(
+        event.messageId,
+        event.newContent,
+      );
       emit(currentState.copyWith(messages: updatedChat.messages));
     } catch (e) {
       emit(ChatErrorState(ErrType.editMessage, e));
     }
   }
 
-  void _onDeleteMessage(DeleteMessageEvent event, Emitter<ChatState> emit) async {
+  void _onDeleteMessage(
+    DeleteMessageEvent event,
+    Emitter<ChatState> emit,
+  ) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
 
@@ -97,7 +113,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  void _onRegenerateMessage(RegenerateLastAiMessageEvent event, Emitter<ChatState> emit) async {
+  void _onRegenerateMessage(
+    RegenerateLastAiMessageEvent event,
+    Emitter<ChatState> emit,
+  ) async {
     if (state is! ChatLoadedState) return;
     var currentState = state as ChatLoadedState;
 
@@ -109,7 +128,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       updatedMessages.removeLast();
     }
     updatedMessages.add(
-      Message(id: -2, role: MessageRole.assistant, content: "", createdAt: DateTime.now()),
+      Message(
+        id: -2,
+        role: MessageRole.assistant,
+        content: "",
+        createdAt: DateTime.now(),
+      ),
     );
 
     emit(currentState.copyWith(messages: updatedMessages, isAiTyping: true));
@@ -117,7 +141,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     unawaited(_repository.regenerateMessage(currentState.chatId));
   }
 
-  void _onSwitchMessageBranch(SwitchMessageBranchEvent event, Emitter<ChatState> emit) async {
+  void _onSwitchMessageBranch(
+    SwitchMessageBranchEvent event,
+    Emitter<ChatState> emit,
+  ) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
     try {
@@ -139,7 +166,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     emit(ChatLoadingState());
 
     try {
-      final Chat? existingChat = await _repository.getActiveChatByCharId(event.charId);
+      final Chat? existingChat = await _repository.getActiveChatByCharId(
+        event.charId,
+      );
 
       if (existingChat != null) {
         emit(
@@ -202,7 +231,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     emit(currentState.copyWith(availableCards: cards));
   }
 
-  void _onSendUserMessage(SendUserMessageEvent event, Emitter<ChatState> emit) async {
+  void _onSendUserMessage(
+    SendUserMessageEvent event,
+    Emitter<ChatState> emit,
+  ) async {
     if (state is! ChatLoadedState) return;
     var currentState = state as ChatLoadedState;
     final imageFile = currentState.selectedImageFile;
@@ -220,7 +252,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         );
 
         if (localDisplayContent.contains(MessageTags.img)) {
-          localDisplayContent = localDisplayContent.replaceFirst(MessageTags.img, markdownTag);
+          localDisplayContent = localDisplayContent.replaceFirst(
+            MessageTags.img,
+            markdownTag,
+          );
         } else {
           localDisplayContent = "$localDisplayContent\n$markdownTag";
         }
@@ -237,7 +272,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     updatedMessages.add(userMessage);
 
     updatedMessages.add(
-      Message(id: -2, role: MessageRole.assistant, content: "", createdAt: DateTime.now()),
+      Message(
+        id: -2,
+        role: MessageRole.assistant,
+        content: "",
+        createdAt: DateTime.now(),
+      ),
     );
 
     currentState = currentState.copyWith(
@@ -259,7 +299,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         emit(currentState);
       }
 
-      unawaited(_repository.sendMessage(currentState.chatId, event.text, imagePath, imageFile));
+      unawaited(
+        _repository.sendMessage(
+          currentState.chatId,
+          event.text,
+          imagePath,
+          imageFile,
+        ),
+      );
     } catch (e) {
       final chat = await _repository.getChatById(currentState.chatId);
       emit(
@@ -272,7 +319,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  void _onReceivedAiToken(ReceivedAiTokenEvent event, Emitter<ChatState> emit) async {
+  void _onReceivedAiToken(
+    ReceivedAiTokenEvent event,
+    Emitter<ChatState> emit,
+  ) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
     final message = event.message;
@@ -305,13 +355,22 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  void _onReceivedAiTokenError(ReceivedAiTokenErrorEvent event, Emitter<ChatState> emit) async {
+  void _onReceivedAiTokenError(
+    ReceivedAiTokenErrorEvent event,
+    Emitter<ChatState> emit,
+  ) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
     final error = event.error;
     if (currentState.chatId != error.chatId) return;
 
-    emit(ChatErrorState(ErrType.sendMessage, '', lastUserMessage: error.lastUserMessage));
+    emit(
+      ChatErrorState(
+        ErrType.sendMessage,
+        '',
+        lastUserMessage: error.lastUserMessage,
+      ),
+    );
     final chat = await _repository.getChatById(currentState.chatId);
     emit(
       currentState.copyWith(
@@ -322,21 +381,29 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     );
   }
 
-  void _onChangeUserCard(ChangeUserCardEvent event, Emitter<ChatState> emit) async {
+  void _onChangeUserCard(
+    ChangeUserCardEvent event,
+    Emitter<ChatState> emit,
+  ) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
     try {
       if (currentState.chatId > 0) {
         await _repository.updateChatUserCard(currentState.chatId, event.cardId);
       }
-      final card = currentState.availableCards?.firstWhere((e) => e.id == event.cardId);
+      final card = currentState.availableCards?.firstWhere(
+        (e) => e.id == event.cardId,
+      );
       if (card != null) emit(currentState.copyWith(userCard: card));
     } catch (e) {
       emit(ChatErrorState(ErrType.updateCard, e));
     }
   }
 
-  void _onStartNewChatSession(StartNewChatSessionEvent event, Emitter<ChatState> emit) async {
+  void _onStartNewChatSession(
+    StartNewChatSessionEvent event,
+    Emitter<ChatState> emit,
+  ) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
 
@@ -347,7 +414,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         // ignore: empty_catches
       } catch (e) {}
     }
-    final char = await _charactersRepository.getCharacterById(currentState.char.id);
+    final char = await _charactersRepository.getCharacterById(
+      currentState.char.id,
+    );
     if (char == null) {
       emit(ChatErrorState(ErrType.loadChat, 'Character not found'));
       return;
@@ -376,7 +445,21 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     );
   }
 
-  void _onUpdateChatSummary(UpdateChatSummaryEvent event, Emitter<ChatState> emit) async {
+  Future<void> _onUpdateCharacter(UpdateCharacterEvent event, Emitter<ChatState> emit) async {
+    if (state is! ChatLoadedState) return;
+    final currentState = state as ChatLoadedState;
+
+    final char = await _charactersRepository.getCharacterById(
+      currentState.char.id,
+    );
+
+    emit(currentState.copyWith(char: char));
+  }
+
+  void _onUpdateChatSummary(
+    UpdateChatSummaryEvent event,
+    Emitter<ChatState> emit,
+  ) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
 
@@ -396,7 +479,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   void _onSelectImage(SelectImageEvent event, Emitter<ChatState> emit) {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
-    emit(currentState.copyWith(selectedImageFile: event.fileImage, isResetImage: true));
+    emit(
+      currentState.copyWith(
+        selectedImageFile: event.fileImage,
+        isResetImage: true,
+      ),
+    );
   }
 
   String _replacePlaceholders(String text, String charName, String userName) {
