@@ -134,7 +134,8 @@ class AppLocalization {
       'section_ollama_tokenizer': 'Selecting a model and tokenizer',
       'section_context_window': 'Context window size',
       'section_sampling_params': 'Sampling Parameters',
-      'section_system_prompt': 'Global System Instructions',
+      'section_system_prompt': 'Global Instructions',
+      'section_system_template': 'System Template',
       'label_main_model': 'Primary Text Model',
       'label_vision_model': 'Vision Model',
       'label_tokenizer': 'Local Tokenizer Dictionary',
@@ -145,7 +146,8 @@ class AppLocalization {
       'label_min_p': 'Min P',
       'label_top_p': 'Top P',
       'label_repeat_penalty': 'Repetition Penalty',
-      'hint_system_prompt': 'Enter instructions that will be mixed into all chats...',
+      'hint_system_prompt': 'Enter instructions that will be mixed into all chats.',
+      'hint_system_template': 'A template for AI indicating its role and instructions.',
       'button_save_settings': 'Save Settings',
       'message_settings_saved': 'Settings saved successfully!',
       // --- Экраны книг ---
@@ -310,7 +312,8 @@ class AppLocalization {
       'section_ollama_tokenizer': 'Выбор модели и токенизатора',
       'section_context_window': 'Размер контекстного окна',
       'section_sampling_params': 'Параметры сэмплинга',
-      'section_system_prompt': 'Глобальные системные инструкции',
+      'section_system_prompt': 'Глобальные инструкции',
+      'section_system_template': 'Системный шаблон',
       'label_main_model': 'Основная текстовая модель',
       'label_vision_model': 'Vision модель',
       'label_tokenizer': 'Локальный словарь токенизатора',
@@ -321,7 +324,8 @@ class AppLocalization {
       'label_min_p': 'Min P',
       'label_top_p': 'Top P',
       'label_repeat_penalty': 'Repetition Penalty',
-      'hint_system_prompt': 'Введите инструкции, которые будут подмешиваться ко всем чатам...',
+      'hint_system_prompt': 'Введите инструкции, которые будут подмешиваться ко всем чатам.',
+      'hint_system_template': 'Шаблон для ИИ с указанием его роли и инструкций.',
       'button_save_settings': 'Сохранить настройки',
       'message_settings_saved': 'Настройки успешно сохранены!',
 
@@ -501,6 +505,8 @@ class AppLocalization {
       _localizedValues[locale.languageCode]?['section_sampling_params'] ?? empty;
   String get sectionSystemPrompt =>
       _localizedValues[locale.languageCode]?['section_system_prompt'] ?? empty;
+  String get sectionSystemTemplate =>
+      _localizedValues[locale.languageCode]?['section_system_template'] ?? empty;
   String get labelMainModel => _localizedValues[locale.languageCode]?['label_main_model'] ?? empty;
   String get labelVisionModel =>
       _localizedValues[locale.languageCode]?['label_vision_model'] ?? empty;
@@ -516,6 +522,8 @@ class AppLocalization {
       _localizedValues[locale.languageCode]?['label_repeat_penalty'] ?? empty;
   String get hintSystemPrompt =>
       _localizedValues[locale.languageCode]?['hint_system_prompt'] ?? empty;
+  String get hintSystemTemplate =>
+      _localizedValues[locale.languageCode]?['hint_system_template'] ?? empty;
   String get buttonSettingsSaved =>
       _localizedValues[locale.languageCode]?['button_save_settings'] ?? empty;
   String get messageSettingsSaved =>

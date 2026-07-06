@@ -26,17 +26,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
   double _repeatPenalty = 1.1;
 
   late final TextEditingController _systemPromptController;
+  late final TextEditingController _templateController;
   bool _isInitialized = false;
 
   @override
   void initState() {
     super.initState();
     _systemPromptController = TextEditingController();
+    _templateController = TextEditingController();
   }
 
   @override
   void dispose() {
     _systemPromptController.dispose();
+    _templateController.dispose();
     super.dispose();
   }
 
@@ -51,6 +54,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _topP = settings.topP;
     _repeatPenalty = settings.repeatPenalty;
     _systemPromptController.text = settings.globalSystemPrompt;
+    _templateController.text = settings.template;
     _isInitialized = true;
   }
 
@@ -143,6 +147,33 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             divisions: 126,
                             displayValue: loc.contextSize(_maxContext.toInt()),
                             onChanged: (v) => setState(() => _maxContext = v),
+                          ),
+
+                          const SizedBox(height: 16),
+                          _buildSectionTitle(theme, loc.sectionSystemTemplate),
+                          const SizedBox(height: 12),
+                          Expanded(
+                            child: TextField(
+                              controller: _templateController,
+                              maxLines: null,
+                              expands: true,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                height: 1.4,
+                                color: Colors.white,
+                              ),
+                              textAlignVertical: TextAlignVertical.top,
+                              decoration: InputDecoration(
+                                hintText: loc.hintSystemTemplate,
+                                fillColor: theme.cardColor,
+                                filled: true,
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                  borderSide: BorderSide.none,
+                                ),
+                                contentPadding: const EdgeInsets.all(16),
+                              ),
+                            ),
                           ),
                         ],
                       ),
@@ -245,6 +276,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   topP: _topP,
                                   repeatPenalty: _repeatPenalty,
                                   globalSystemPrompt: _systemPromptController.text.trim(),
+                                  template: _templateController.text.trim(),
                                   provider: state.settings.provider,
                                 );
                                 context.read<SettingsBloc>().add(

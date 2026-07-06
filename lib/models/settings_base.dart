@@ -13,6 +13,7 @@ class SettingsBase {
   final double topP;
   final double repeatPenalty;
   final String globalSystemPrompt;
+  final String template;
   final String provider;
 
   SettingsBase({
@@ -25,6 +26,7 @@ class SettingsBase {
     required this.topP,
     required this.repeatPenalty,
     required this.globalSystemPrompt,
+    required this.template,
     required this.provider,
   });
 
