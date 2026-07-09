@@ -67,9 +67,9 @@ class RemoteProvider {
     final wsUrl = Uri.parse(_wsUrl + endpoint);
     final channel = IOWebSocketChannel.connect(
       wsUrl,
-      pingInterval: Duration(seconds: 2),
+      pingInterval: Duration(seconds: 20),
     );
-    await channel.ready;
+    //await channel.ready;
     return channel;
   }
 
