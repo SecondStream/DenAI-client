@@ -29,8 +29,10 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
   ) async {
     emit(CharacterFormLoadingState());
     try {
-      final allLorebooks = await _loreRepository.getAllLorebooks();
-
+      List<Lorebook> allLorebooks = [];
+      try {
+        allLorebooks = await _loreRepository.getAllLorebooks();
+      } catch (_) {}
       Char? char;
       List<int> selectedIds = [];
       if (event.characterId != null) {

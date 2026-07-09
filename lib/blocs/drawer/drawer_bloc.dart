@@ -3,6 +3,7 @@ import 'package:den_ai/repositories/user_cards_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'drawer_event.dart';
+
 part 'drawer_state.dart';
 
 class DrawerBloc extends Bloc<DrawerEvent, DrawerState> {
@@ -13,7 +14,11 @@ class DrawerBloc extends Bloc<DrawerEvent, DrawerState> {
   }
 
   void _onShown(DrawerShownEvent event, Emitter<DrawerState> emit) async {
-    final card = await _repository.getDefaultUserCard();
-    emit(DrawerLoadSuccessState(card));
+    UserCard? card;
+    try {
+      card = await _repository.getDefaultUserCard();
+    } finally {
+      emit(DrawerLoadSuccessState(card));
+    }
   }
 }
