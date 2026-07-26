@@ -108,11 +108,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 Tooltip(
                   message: isActionsBlocked ? loc.empty : loc.editPrompts,
                   child: IconButton(
-                    icon: const Icon(
-                      Icons.edit,
-                      color: Colors.white,
-                      size: 24,
-                    ),
+                    icon: const Icon(Icons.edit, color: Colors.white, size: 24),
                     onPressed: isActionsBlocked
                         ? null
                         : () async {
@@ -215,23 +211,25 @@ class _ChatScreenState extends State<ChatScreen> {
             Column(
               children: [
                 Expanded(
-                  child: ListView.builder(
-                    reverse: true,
-                    controller: _scrollController,
-                    padding: const EdgeInsets.all(16),
-                    itemCount: messages.length,
-                    itemBuilder: (context, index) {
-                      final message = messages[index];
-                      return _buildMessageBubble(
-                        context,
-                        loc,
-                        message,
-                        state.char,
-                        state.userCard,
-                        state.isAiTyping,
-                        state.messages.last.id == message.id,
-                      );
-                    },
+                  child: SelectionArea(
+                    child: ListView.builder(
+                      reverse: true,
+                      controller: _scrollController,
+                      padding: const EdgeInsets.all(16),
+                      itemCount: messages.length,
+                      itemBuilder: (context, index) {
+                        final message = messages[index];
+                        return _buildMessageBubble(
+                          context,
+                          loc,
+                          message,
+                          state.char,
+                          state.userCard,
+                          state.isAiTyping,
+                          state.messages.last.id == message.id,
+                        );
+                      },
+                    ),
                   ),
                 ),
                 _buildInputZone(

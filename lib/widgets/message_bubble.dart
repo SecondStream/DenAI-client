@@ -6,7 +6,12 @@ class MessageBubble extends StatelessWidget {
   final MessagePosition position;
   final String message;
 
-  const MessageBubble({super.key, required this.position, required this.message});
+  const MessageBubble({
+    super.key,
+    required this.position,
+    required this.message,
+  });
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -24,25 +29,27 @@ class MessageBubble extends StatelessWidget {
           bottomRight: Radius.circular(isRight ? 0 : 12),
         ),
       ),
-      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.65),
-      child: SelectionArea(
-        child: GptMarkdown(
-          message,
-          style: TextStyle(
-            color: isRight ? Colors.white70 : Colors.white,
-            fontSize: 15,
-            height: 1.4,
-          ),
-          inlineComponents: [
-            ATagMd(),
-            ImageMd(),
-            StrikeMd(),
-            BoldMd(),
-            CustomItalicComponent(italicColor: isRight ? Colors.white38 : Colors.white54),
-            UnderLineMd(),
-            SourceTag(),
-          ],
+      constraints: BoxConstraints(
+        maxWidth: MediaQuery.of(context).size.width * 0.65,
+      ),
+      child: GptMarkdown(
+        message,
+        style: TextStyle(
+          color: isRight ? Colors.white70 : Colors.white,
+          fontSize: 15,
+          height: 1.4,
         ),
+        inlineComponents: [
+          ATagMd(),
+          ImageMd(),
+          StrikeMd(),
+          BoldMd(),
+          CustomItalicComponent(
+            italicColor: isRight ? Colors.white38 : Colors.white54,
+          ),
+          UnderLineMd(),
+          SourceTag(),
+        ],
       ),
     );
   }
@@ -56,10 +63,15 @@ class CustomItalicComponent extends ItalicMd {
   CustomItalicComponent({this.italicColor = Colors.grey});
 
   @override
-  RegExp get exp => RegExp(r"(?:(?<!\*)\*(?<!\s)(.+?)(?:(?<!\s)\*(?!\*)|$))", dotAll: true);
+  RegExp get exp =>
+      RegExp(r"(?:(?<!\*)\*(?<!\s)(.+?)(?:(?<!\s)\*(?!\*)|$))", dotAll: true);
 
   @override
-  InlineSpan span(BuildContext context, String text, final GptMarkdownConfig config) {
+  InlineSpan span(
+    BuildContext context,
+    String text,
+    final GptMarkdownConfig config,
+  ) {
     final match = exp.firstMatch(text);
     final data = match?[1] ?? text.replaceAll('*', '');
 
