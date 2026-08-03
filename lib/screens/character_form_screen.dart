@@ -32,6 +32,7 @@ class _CharacterFormScreenState
   late final TextEditingController _greetingController;
   late final TextEditingController _promptController;
   late List<int> _selectedLorebookIds;
+  late int? _characterId;
 
   File? _selectedBackgroundFile;
   bool _isFieldsInitialized = false;
@@ -39,6 +40,7 @@ class _CharacterFormScreenState
   @override
   void initState() {
     super.initState();
+    _characterId = widget.characterId;
     _nameController = TextEditingController();
     _appearanceController = TextEditingController();
     _personalityController = TextEditingController();
@@ -82,6 +84,7 @@ class _CharacterFormScreenState
     File? avatarFile,
   }) {
     if (char != null) {
+      _characterId = char.id;
       _nameController.text = char.name;
       _appearanceController.text = char.appearance;
       _personalityController.text = char.personality;
@@ -100,12 +103,12 @@ class _CharacterFormScreenState
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
-    final isEditing = widget.characterId != null;
+    var isEditing = _characterId != null;
 
     return BlocProvider<CharacterFormBloc>(
       create: (context) =>
           CharacterFormBloc(GetIt.instance.get(), GetIt.instance.get())
-            ..add(InitCharacterFormEvent(widget.characterId)),
+            ..add(InitCharacterFormEvent(_characterId)),
       child: Scaffold(
         appBar: AppBar(
           title: Text(
@@ -131,6 +134,7 @@ class _CharacterFormScreenState
                   state.selectedLorebookIds,
                   avatarFile: cardState?.avatar,
                 );
+                isEditing = _characterId != null;
               }
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
@@ -282,7 +286,7 @@ class _CharacterFormScreenState
                                 ),
                                 onPressed: () {
                                   context.read<CharacterFormBloc>().add(
-                                    DeleteCharacterEvent(widget.characterId!),
+                                    DeleteCharacterEvent(_characterId!),
                                   );
                                 },
                               ),
@@ -592,7 +596,7 @@ class _CharacterFormScreenState
         ExportCardEvent(
           path: path,
           baseUrl: AppConfig.of(context).baseUrl,
-          id: widget.characterId,
+          id: _characterId,
           name: name,
           appearance: _appearanceController.text.trim(),
           personality: _personalityController.text.trim(),
@@ -610,7 +614,7 @@ class _CharacterFormScreenState
     if (!_formKey.currentState!.validate()) return;
     context.read<CharacterFormBloc>().add(
       SubmitCharacterFormEvent(
-        id: widget.characterId,
+        id: _characterId,
         name: _nameController.text.trim(),
         appearance: _appearanceController.text.trim(),
         personality: _personalityController.text.trim(),

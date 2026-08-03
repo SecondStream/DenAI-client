@@ -64,11 +64,17 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
       var avatar = avatarPath != null
           ? await _repository.loadAvatar(avatarPath)
           : null;
+      List<Lorebook> allLorebooks = currentState.allLorebooks;
+      if (char.lorebooks.isNotEmpty) {
+        try {
+          allLorebooks = await _loreRepository.getAllLorebooks();
+        } catch (_) {}
+      }
       emit(
         CharacterFormLoadedCardState(
           character: char,
-          allLorebooks: currentState.allLorebooks,
-          selectedLorebookIds: currentState.selectedLorebookIds,
+          allLorebooks: allLorebooks,
+          selectedLorebookIds: char.lorebooks.isNotEmpty ? char.lorebooks.map((e) => e.id).toList() : [],
           avatar: avatar,
         ),
       );

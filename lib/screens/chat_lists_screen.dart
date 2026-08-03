@@ -20,7 +20,8 @@ class ChatsListScreen extends StatelessWidget {
 
     return BlocProvider<ChatsListBloc>(
       create: (context) =>
-          ChatsListBloc(GetIt.instance.get())..add(LoadAllChatsEvent()),
+      ChatsListBloc(GetIt.instance.get())
+        ..add(LoadAllChatsEvent()),
       child: Builder(
         builder: (context) {
           return BlocListener<NotifyBloc, NotifyState>(
@@ -73,19 +74,14 @@ class ChatsListScreen extends StatelessWidget {
 
                         return ChatItem(
                           chat: chat,
-                          onPressed: (_) {
-                            context
+                          onPressed: (_) async {
+                            final bloc = context.read<ChatsListBloc>();
+                            await context
                                 .push(
-                                  AppRoutes.chat,
-                                  arguments: ChatScreenArgs(chatId: chat.id),
-                                )
-                                .then((_) {
-                                  if (context.mounted) {
-                                    context.read<ChatsListBloc>().add(
-                                      LoadAllChatsEvent(),
-                                    );
-                                  }
-                                });
+                              AppRoutes.chat,
+                              arguments: ChatScreenArgs(chatId: chat.id),
+                            );
+                            bloc.add(LoadAllChatsEvent());
                           },
                           onRemovePressed: (_) =>
                               _onDeleteChat(context, loc, chat.id),
@@ -103,11 +99,9 @@ class ChatsListScreen extends StatelessWidget {
     );
   }
 
-  void _onDeleteChat(
-    BuildContext context,
-    AppLocalization loc,
-    int chatId,
-  ) async {
+  void _onDeleteChat(BuildContext context,
+      AppLocalization loc,
+      int chatId,) async {
     final chatsListBloc = context.read<ChatsListBloc>();
     final res = await ConfirmationDialog.open(
       context,
