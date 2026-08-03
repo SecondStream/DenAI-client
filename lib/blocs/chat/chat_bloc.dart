@@ -490,13 +490,45 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   String _replacePlaceholders(String text, String charName, String userName) {
     final regex = RegExp(r'\{\{(char|user)\}\}', caseSensitive: false);
 
-    return text.replaceAllMapped(regex, (match) {
+    final res = text.replaceAllMapped(regex, (match) {
       final tag = match.group(1)?.toLowerCase();
 
       if (tag == 'char') return charName;
       if (tag == 'user') return userName;
 
       return match.group(0) ?? '';
+    });
+    return _removeComments(res);
+  }
+
+  String _removeComments(String text) {
+    if(text.isEmpty) return text;
+    return _removeLineComments(_removeBlockComments(text));
+  }
+
+  String _removeBlockComments(String text) {
+    final pattern = RegExp(r'/\*[\s\S]*?\*/', multiLine: true);
+
+    // Просто заменяем все совпадения на пустую строку
+    return text.replaceAll(pattern, '');
+  }
+
+  String _removeLineComments(String text) {
+    // RegExp:
+    // Группа 1 (strings) - ловит строки в одинарных или двойных кавычках
+    // Группа 2 (comment) - ловит пробел + // + всё до конца строки (исключая \n)
+    final pattern = RegExp(
+        r'(' r"'(?:\\.|[^'\\])*'" r'|"(?:\\.|[^"\\])*")|(\s//[^\n]*)'
+    );
+
+    return text.replaceAllMapped(pattern, (match) {
+      // Если совпала группа 1 (строка в кавычках), возвращаем её без изменений
+      if (match.group(1) != null) {
+        return match.group(1)!;
+      }
+      // Если совпал комментарий (группа 2), удаляем его (возвращаем пустую строку)
+      // Символ \n при этом сохраняется в исходном тексте
+      return '';
     });
   }
 }
