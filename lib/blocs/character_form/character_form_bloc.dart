@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:den_ai/repositories/lorebooks_repository.dart';
+import 'package:den_ai/tools/file_tool.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
@@ -14,8 +15,7 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
   final CharactersRepository _repository;
   final LorebooksRepository _loreRepository;
 
-  CharacterFormBloc(this._repository, this._loreRepository)
-    : super(CharacterFormInitialState()) {
+  CharacterFormBloc(this._repository, this._loreRepository) : super(CharacterFormInitialState()) {
     on<SubmitCharacterFormEvent>(_onSubmitForm);
     on<DeleteCharacterEvent>(_onDeleteCharacter);
     on<InitCharacterFormEvent>(_onInitCharacterForm);
@@ -51,46 +51,49 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
     }
   }
 
-  Future<void> _onSelectedCard(
-    SelectedCardEvent event,
-    Emitter<CharacterFormState> emit,
-  ) async {
+  Future<void> _onSelectedCard(SelectedCardEvent event, Emitter<CharacterFormState> emit) async {
     final currentState = state;
     if (currentState is! CharacterFormLoadedState) return;
     emit(CharacterFormLoadingState());
     try {
-      final char = await _repository.loadByCard(event.card);
-      final avatarPath = char.getAvatar(event.baseUrl);
-      var avatar = avatarPath != null
-          ? await _repository.loadAvatar(avatarPath)
-          : null;
-      List<Lorebook> allLorebooks = currentState.allLorebooks;
-      if (char.lorebooks.isNotEmpty) {
-        try {
-          allLorebooks = await _loreRepository.getAllLorebooks();
-        } catch (_) {}
-      }
-      emit(
-        CharacterFormLoadedCardState(
-          character: char,
-          allLorebooks: allLorebooks,
-          selectedLorebookIds: char.lorebooks.isNotEmpty ? char.lorebooks.map((e) => e.id).toList() : [],
-          avatar: avatar,
-        ),
-      );
-      //TODO: Временная затычка, надо убрать и сделать по человечески.
-      await Future.delayed(Duration(milliseconds: 100));
-      emit((state as CharacterFormLoadedState).copy());
+      throw Exception(); // TODO
+      // final char = await _repository.loadByCard(event.card);
+      // final avatarPath = char.getAvatar(event.baseUrl);
+      // var avatar = avatarPath != null ? await _repository.loadAvatar(avatarPath) : null;
+      // List<Lorebook> allLorebooks = currentState.allLorebooks;
+      // if (char.lorebooks.isNotEmpty) {
+      //   try {
+      //     allLorebooks = await _loreRepository.getAllLorebooks();
+      //   } catch (_) {}
+      // }
+      // emit(
+      //   CharacterFormLoadedCardState(
+      //     character: char,
+      //     allLorebooks: allLorebooks,
+      //     selectedLorebookIds: char.lorebooks.isNotEmpty
+      //         ? char.lorebooks.map((e) => e.id).toList()
+      //         : [],
+      //     avatar: avatar,
+      //   ),
+      // );
+      // //TODO: tmp
+      // await Future.delayed(Duration(milliseconds: 100));
+      // emit((state as CharacterFormLoadedState).copy());
     } catch (e) {
       emit(CharacterFormErrorState(ErrType.loadCharacter, e));
     }
   }
 
-  void _onSubmitForm(
-    SubmitCharacterFormEvent event,
-    Emitter<CharacterFormState> emit,
-  ) async {
+  void _onSubmitForm(SubmitCharacterFormEvent event, Emitter<CharacterFormState> emit) async {
     emit(CharacterFormLoadingState());
+    String? avatarPath;
+    String? backgroundPath;
+    if (event.avatarFile != null) {
+      avatarPath = await FileTool.saveAvatar(event.avatarFile!);
+    }
+    if (event.backgroundFile != null) {
+      backgroundPath = await FileTool.saveBackground(event.backgroundFile!);
+    }
     try {
       final savedChar = await _repository.saveCharacter(
         id: event.id,
@@ -100,9 +103,9 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
         scenario: event.scenario,
         greeting: event.greeting,
         prompt: event.prompt,
-        avatarFile: event.avatarFile,
+        avatarPath: avatarPath,
         cropData: event.cropData,
-        backgroundFile: event.backgroundFile,
+        backgroundPath: backgroundPath,
         lorebookIds: event.lorebookIds,
       );
       emit(CharacterFormSuccessState(savedChar));
@@ -111,10 +114,7 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
     }
   }
 
-  void _onDeleteCharacter(
-    DeleteCharacterEvent event,
-    Emitter<CharacterFormState> emit,
-  ) async {
+  void _onDeleteCharacter(DeleteCharacterEvent event, Emitter<CharacterFormState> emit) async {
     emit(CharacterFormLoadingState());
     try {
       await _repository.deleteCharacter(event.id);
@@ -124,10 +124,7 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
     }
   }
 
-  Future<void> _onExportCard(
-    ExportCardEvent event,
-    Emitter<CharacterFormState> emit,
-  ) async {
+  Future<void> _onExportCard(ExportCardEvent event, Emitter<CharacterFormState> emit) async {
     final currentState = state;
     if (currentState is! CharacterFormLoadedState) return;
     emit(CharacterFormLoadingState());
@@ -144,9 +141,12 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
         avatarFile: event.avatarFile,
       );
 
-      final file = await _repository.loadAvatar('${event.baseUrl}/$remotePath');
-      if (file != null) {
-        await file.copy(event.path);
+      if (remotePath != null) {
+        // TODO: tmp
+        final file = await _repository.loadAvatar('${event.baseUrl}/$remotePath');
+        if (file != null) {
+          await file.copy(event.path);
+        }
       }
       emit(currentState.copy());
     } catch (e) {

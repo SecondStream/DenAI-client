@@ -1,8 +1,5 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:drift/drift.dart';
 
-part 'settings_base.g.dart';
-
-@JsonSerializable(fieldRename: FieldRename.snake)
 class SettingsBase {
   final String modelName;
   final String visionModelName;
@@ -29,7 +26,26 @@ class SettingsBase {
     required this.template,
     required this.provider,
   });
+}
 
-  factory SettingsBase.fromJson(Map<String, dynamic> json) => _$SettingsBaseFromJson(json);
-  Map<String, dynamic> toJson() => _$SettingsBaseToJson(this);
+@DataClassName('SettingsData')
+class SettingsTable extends Table {
+  IntColumn get id => integer().autoIncrement()();
+
+  TextColumn get modelName => text()();
+  TextColumn get visionModelName => text()();
+  TextColumn get tokenizerPath => text()();
+  IntColumn get maxContextTokens => integer()();
+
+  RealColumn get temperature => real()();
+  RealColumn get minP => real()();
+  RealColumn get topP => real()();
+  RealColumn get repeatPenalty => real()();
+
+  TextColumn get globalSystemPrompt => text()();
+  TextColumn get template => text()();
+  TextColumn get provider => text()();
+
+  @override
+  Set<Column> get primaryKey => {id};
 }

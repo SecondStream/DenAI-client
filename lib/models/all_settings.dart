@@ -1,9 +1,5 @@
 import 'package:den_ai/models/models.dart';
-import 'package:json_annotation/json_annotation.dart';
 
-part 'all_settings.g.dart';
-
-@JsonSerializable(fieldRename: FieldRename.snake)
 class AllSettings {
   final List<ModelInfo> models;
   final List<ModelInfo> visionModels;
@@ -18,7 +14,4 @@ class AllSettings {
     required this.settings,
     required this.providers,
   });
-
-  factory AllSettings.fromJson(Map<String, dynamic> json) => _$AllSettingsFromJson(json);
-  Map<String, dynamic> toJson() => _$AllSettingsToJson(this);
 }

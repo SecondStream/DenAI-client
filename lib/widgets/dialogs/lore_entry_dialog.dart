@@ -1,5 +1,6 @@
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/screens/lorebook_entries_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:den_ai/models/models.dart';
 

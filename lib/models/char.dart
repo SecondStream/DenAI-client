@@ -1,42 +1,86 @@
-import 'package:den_ai/models/lorebook.dart';
+import 'dart:convert';
+import 'package:den_ai/models/crop_data.dart';
 import 'package:den_ai/models/persona.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:den_ai/repositories/database.dart' show CharData;
+import 'package:drift/drift.dart';
+import 'lorebook.dart';
+import 'package:path/path.dart' as p;
 
-part 'char.g.dart';
-
-@JsonSerializable(fieldRename: FieldRename.snake)
 class Char extends Persona {
+  final int id;
+  final String name;
+  final String? avatar;
+  final String? crop;
   final String? background;
-  @JsonKey(defaultValue: "")
   final String appearance;
-  @JsonKey(defaultValue: "")
   final String personality;
-  @JsonKey(defaultValue: "")
   final String scenario;
-  @JsonKey(defaultValue: "")
   final String greeting;
-  @JsonKey(defaultValue: "")
   final String prompt;
-  @JsonKey(defaultValue: [])
   final List<Lorebook> lorebooks;
 
-  factory Char.fromJson(Map<String, dynamic> json) => _$CharFromJson(json);
-
   Char({
-    required super.id,
-    required super.name,
-    required super.avatar,
-    super.crop,
+    required this.id,
+    required this.name,
+    this.avatar,
+    this.crop,
     this.background,
-    required this.appearance,
-    required this.personality,
-    required this.scenario,
-    required this.greeting,
-    required this.prompt,
+    this.appearance = "",
+    this.personality = "",
+    this.scenario = "",
+    this.greeting = "",
+    this.prompt = "",
     required this.lorebooks,
   });
-  Map<String, dynamic> toJson() => _$CharToJson(this);
+
+  factory Char.fromDb(CharData data, {required List<Lorebook> lorebooks}) {
+    return Char(
+      id: data.id,
+      name: data.name,
+      avatar: data.avatar,
+      crop: data.crop,
+      background: data.background,
+      appearance: data.appearance,
+      personality: data.personality,
+      scenario: data.scenario,
+      greeting: data.greeting,
+      prompt: data.prompt,
+      lorebooks: lorebooks,
+    );
+  }
+
+  @override
+  String? getAvatar(String baseUrl) =>
+      avatar != null && avatar!.isNotEmpty && !avatar!.contains('default')
+      ? p.join(baseUrl, avatar)
+      : null;
 
   String? getBackground(String baseUrl) =>
-      background != null && background!.isNotEmpty ? '$baseUrl/$background' : null;
+      background != null && background!.isNotEmpty ? p.join(baseUrl, background) : null;
+
+  @override
+  CropData? getCropData() {
+    if (crop == null || crop!.isEmpty) return null;
+    final validJson = crop!.replaceAll("'", '"');
+    final Map<String, dynamic> map = jsonDecode(validJson);
+    return CropData.fromJson(map);
+  }
+}
+
+@DataClassName('CharData')
+class Chars extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get name => text().withLength(min: 1, max: 255)();
+  TextColumn get avatar => text().nullable()();
+  TextColumn get crop => text().nullable()();
+  TextColumn get background => text().nullable()();
+
+  TextColumn get appearance => text().withDefault(const Constant(''))();
+  TextColumn get personality => text().withDefault(const Constant(''))();
+  TextColumn get scenario => text().withDefault(const Constant(''))();
+  TextColumn get greeting => text().withDefault(const Constant(''))();
+  TextColumn get prompt => text().withDefault(const Constant(''))();
+
+  @override
+  Set<Column> get primaryKey => {id};
 }

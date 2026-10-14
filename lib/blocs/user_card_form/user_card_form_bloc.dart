@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:den_ai/tools/file_tool.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
@@ -17,13 +18,17 @@ class UserCardFormBloc extends Bloc<UserCardFormEvent, UserCardFormState> {
 
   void _onSubmitForm(SubmitUserCardFormEvent event, Emitter<UserCardFormState> emit) async {
     emit(UserCardFormLoadingState());
+    String? avatarPath;
+    if (event.avatarFile != null) {
+      avatarPath = await FileTool.saveAvatar(event.avatarFile!);
+    }
     try {
       final savedCard = await _repository.saveUserCard(
         id: event.id,
         name: event.name,
         description: event.description,
         isDefault: event.isDefault,
-        avatarFile: event.avatarFile,
+        avatarPath: avatarPath,
         cropData: event.cropData,
       );
       emit(UserCardFormSuccessState(savedCard));

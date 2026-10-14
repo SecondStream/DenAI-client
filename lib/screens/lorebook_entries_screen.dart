@@ -117,7 +117,28 @@ class LorebookEntriesScreen extends StatelessWidget {
     if (result.id == -1 && existingEntry != null) {
       entriesBloc.add(DeleteEntryEvent(existingEntry.id));
     } else {
-      entriesBloc.add(SaveEntryEvent(result));
+      entriesBloc.add(
+        SaveEntryEvent(
+          id: result.id,
+          lorebookId: result.lorebookId,
+          title: result.title,
+          content: result.content,
+        ),
+      );
     }
   }
+}
+
+class LoreEntryIn {
+  final int? id;
+  final int lorebookId;
+  final String title;
+  final String content;
+
+  LoreEntryIn({
+    required this.id,
+    required this.lorebookId,
+    required this.title,
+    required this.content,
+  });
 }

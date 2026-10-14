@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:den_ai/repositories/lorebooks_repository.dart';
+import 'package:den_ai/tools/file_tool.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
@@ -17,12 +18,16 @@ class LorebookFormBloc extends Bloc<LorebookFormEvent, LorebookFormState> {
 
   void _onSubmitForm(SubmitLorebookFormEvent event, Emitter<LorebookFormState> emit) async {
     emit(LorebookFormLoadingState());
+    String? coverPath;
+    if (event.coverFile != null) {
+      coverPath = await FileTool.saveAvatar(event.coverFile!);
+    }
     try {
       final saved = await _repository.saveLorebook(
         id: event.id,
         name: event.name,
         about: event.about,
-        coverFile: event.coverFile,
+        coverPath: coverPath,
         cropData: event.cropData,
       );
       emit(LorebookFormSuccessState(saved));

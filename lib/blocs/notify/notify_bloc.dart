@@ -17,7 +17,7 @@ class NotifyBloc extends Bloc<NotifyEvent, NotifyState> {
   Timer? _timer;
 
   NotifyBloc(this.remote) : super(NotifyInitialState()) {
-    _connect();
+    // _connect();
     on<ErrorReceivedNotifyEvent>(_onErrorReceived);
     on<ChatReceivedNotifyEvent>(_onChatReceived);
   }
@@ -33,7 +33,7 @@ class NotifyBloc extends Bloc<NotifyEvent, NotifyState> {
     try {
       final channel = _channel = await remote.wsConnect('/ws/client_id');
       _subscription = channel.stream.listen(
-            (message) => _onMessageReceived(jsonDecode(message)),
+        (message) => _onMessageReceived(jsonDecode(message)),
         onError: (error) => _handleReconnect(),
         onDone: () => _handleReconnect(),
       );
@@ -43,15 +43,16 @@ class NotifyBloc extends Bloc<NotifyEvent, NotifyState> {
   }
 
   Future<void> _onMessageReceived(Map<String, dynamic> message) async {
-    if (message['type'] != null && message['payload'] != null) {
-      if (message['type'] == WSType.error.name) {
-        add(ErrorReceivedNotifyEvent(message: WSMessageError.fromJson(message['payload'])));
-      }
+    // TODO
+    // if (message['type'] != null && message['payload'] != null) {
+    //   if (message['type'] == WSType.error.name) {
+    //     add(ErrorReceivedNotifyEvent(message: WSMessageError.fromJson(message['payload'])));
+    //   }
 
-      if (message['type'] == WSType.message.name) {
-        add(ChatReceivedNotifyEvent(message: WSMessageChat.fromJson(message['payload'])));
-      }
-    }
+    //   if (message['type'] == WSType.message.name) {
+    //     add(ChatReceivedNotifyEvent(message: WSMessageChat.fromJson(message['payload'])));
+    //   }
+    // }
   }
 
   void _handleReconnect() {

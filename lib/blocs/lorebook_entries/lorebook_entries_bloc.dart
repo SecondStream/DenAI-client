@@ -40,7 +40,6 @@ class LorebookEntriesBloc extends Bloc<LorebookEntriesEvent, LorebookEntriesStat
         cover: currentState.lorebook.cover,
         crop: currentState.lorebook.crop,
         entries: updatedEntries,
-        avatar: null,
       );
       emit(LorebookEntriesLoadedState(updatedBook));
     } catch (e) {
@@ -51,7 +50,12 @@ class LorebookEntriesBloc extends Bloc<LorebookEntriesEvent, LorebookEntriesStat
   Future<void> _onSaveEntry(SaveEntryEvent event, Emitter<LorebookEntriesState> emit) async {
     if (state is! LorebookEntriesLoadedState) return;
     try {
-      final updatedBook = await _repository.saveLoreEntry(event.entry);
+      final updatedBook = await _repository.saveLoreEntry(
+        event.id,
+        event.lorebookId,
+        event.title,
+        event.content,
+      );
       emit(LorebookEntriesLoadedState(updatedBook));
     } catch (e) {
       emit(LorebookEntriesErrorState(e.toString()));

@@ -1,4 +1,5 @@
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/blocs/chat/chat_bloc.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/widgets/message_bubble.dart';
 import 'package:den_ai/widgets/persona_avatar.dart';
@@ -6,7 +7,7 @@ import 'package:flutter/material.dart';
 
 class CharacterMessage extends StatelessWidget {
   final Char char;
-  final Message message;
+  final MessageView message;
   final bool isThinking;
   final Function(Message message)? onEditMessage;
   final Function(int messageId, MessageDirection direction)? onSwitchMessage;
@@ -36,7 +37,10 @@ class CharacterMessage extends StatelessWidget {
         Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Padding(padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5), child: Text(message.modelName, style: TextStyle(fontSize: 10),)),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+              child: Text(message.modelName, style: TextStyle(fontSize: 10)),
+            ),
             MessageBubble(
               position: MessagePosition.left,
               message: isThinking && message.content.isEmpty
@@ -49,12 +53,9 @@ class CharacterMessage extends StatelessWidget {
               Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  if (message.totalVariants > 1) ...[
+                  if (onSwitchMessage != null && message.totalVariants > 1) ...[
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 4,
-                        vertical: 2,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(12),
@@ -63,18 +64,11 @@ class CharacterMessage extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(
-                              Icons.arrow_left,
-                              size: 20,
-                              color: Colors.grey,
-                            ),
+                            icon: const Icon(Icons.arrow_left, size: 20, color: Colors.grey),
                             constraints: const BoxConstraints(),
                             padding: EdgeInsets.zero,
                             onPressed: onSwitchMessage != null
-                                ? () => onSwitchMessage?.call(
-                                    message.id,
-                                    MessageDirection.left,
-                                  )
+                                ? () => onSwitchMessage?.call(message.id, MessageDirection.left)
                                 : null,
                           ),
                           const SizedBox(width: 4),
@@ -88,18 +82,11 @@ class CharacterMessage extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           IconButton(
-                            icon: const Icon(
-                              Icons.arrow_right,
-                              size: 20,
-                              color: Colors.grey,
-                            ),
+                            icon: const Icon(Icons.arrow_right, size: 20, color: Colors.grey),
                             constraints: const BoxConstraints(),
                             padding: EdgeInsets.zero,
                             onPressed: onSwitchMessage != null
-                                ? () => onSwitchMessage?.call(
-                                    message.id,
-                                    MessageDirection.right,
-                                  )
+                                ? () => onSwitchMessage?.call(message.id, MessageDirection.right)
                                 : null,
                           ),
                         ],
@@ -109,20 +96,13 @@ class CharacterMessage extends StatelessWidget {
                   ],
                   if (onRegenerateMessage != null) ...[
                     Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
                         color: Colors.black.withValues(alpha: 0.3),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: IconButton(
-                        icon: Icon(
-                          Icons.refresh,
-                          size: 16,
-                          color: theme.colorScheme.primary,
-                        ),
+                        icon: Icon(Icons.refresh, size: 16, color: theme.colorScheme.primary),
                         constraints: const BoxConstraints(),
                         padding: const EdgeInsets.all(2),
                         onPressed: () => onRegenerateMessage?.call(message.id),
@@ -131,25 +111,16 @@ class CharacterMessage extends StatelessWidget {
                     const SizedBox(width: 8),
                   ],
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 6,
-                      vertical: 2,
-                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: IconButton(
-                      icon: const Icon(
-                        Icons.edit,
-                        size: 14,
-                        color: Colors.grey,
-                      ),
+                      icon: const Icon(Icons.edit, size: 14, color: Colors.grey),
                       constraints: const BoxConstraints(),
                       padding: const EdgeInsets.all(2),
-                      onPressed: onEditMessage != null
-                          ? () => onEditMessage?.call(message)
-                          : null,
+                      onPressed: onEditMessage != null ? () => onEditMessage?.call(message) : null,
                     ),
                   ),
                 ],

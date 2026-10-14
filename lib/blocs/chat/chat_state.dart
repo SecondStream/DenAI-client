@@ -9,7 +9,7 @@ class ChatLoadingState extends ChatState {}
 class ChatLoadedState extends ChatState {
   final int chatId;
   final Char char;
-  final List<Message> messages;
+  final List<MessageView> messages;
   final String? background;
   final UserCard? userCard;
   final List<UserCard>? availableCards;
@@ -32,7 +32,7 @@ class ChatLoadedState extends ChatState {
   ChatLoadedState copyWith({
     int? chatId,
     Char? char,
-    List<Message>? messages,
+    List<MessageView>? messages,
     String? background,
     UserCard? userCard,
     String? summary,
@@ -61,4 +61,37 @@ class ChatErrorState extends ChatState {
   final String? lastUserMessage;
 
   ChatErrorState(this.errType, this.error, {this.lastUserMessage});
+}
+
+class MessageView extends Message {
+  final int totalVariants;
+  final int currentIndex;
+
+  MessageView({
+    required this.totalVariants,
+    required this.currentIndex,
+    required super.id,
+    required super.role,
+    required super.content,
+    required super.createdAt,
+    super.parentId,
+    super.imagePath,
+    super.modelName = '',
+    super.isActive = true,
+  });
+
+  factory MessageView.fromMessage(Message message, int totalVariants, int currentIndex) {
+    return MessageView(
+      id: message.id,
+      role: message.role,
+      content: message.content,
+      createdAt: message.createdAt,
+      imagePath: message.imagePath,
+      modelName: message.modelName,
+      parentId: message.parentId,
+      isActive: message.isActive,
+      totalVariants: totalVariants,
+      currentIndex: currentIndex,
+    );
+  }
 }

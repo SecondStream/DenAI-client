@@ -3,6 +3,7 @@ import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/di_initializer.dart';
 import 'package:den_ai/env.dart';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'dart:io';
 
 import 'package:window_manager/window_manager.dart';
@@ -25,5 +26,7 @@ void main() async {
   }
   DiInitializer.init();
 
-  runApp(AppConfig(baseUrl: Env.baseUrl, child: ChatApp()));
+  final baseUrl = await getApplicationDocumentsDirectory();
+
+  runApp(AppConfig(baseUrl: baseUrl.path, child: ChatApp()));
 }

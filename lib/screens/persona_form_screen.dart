@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/tools/file_tool.dart';
@@ -22,7 +21,7 @@ abstract class PersonaFormScreenState<T extends StatefulWidget> extends State<T>
       if (selectedAvatarFile != null) {
         providerToCrop = FileImage(selectedAvatarFile!);
       } else if (userAvatar != null) {
-        providerToCrop = CachedNetworkImageProvider(userAvatar);
+        providerToCrop = FileImage(File(userAvatar));
       }
       if (providerToCrop == null) {
         _pickNewAvatarFile(context, persona);

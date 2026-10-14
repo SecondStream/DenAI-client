@@ -1,8 +1,7 @@
-import 'package:den_ai/repositories/provider/remote_provider.dart';
+import 'package:den_ai/repositories/database.dart';
 
 abstract class BaseRepository {
-  final RemoteProvider remote;
-  final String endpoint;
+  final AppDatabase db;
 
-  BaseRepository(this.remote, this.endpoint);
+  BaseRepository(this.db);
 }

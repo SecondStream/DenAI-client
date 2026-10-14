@@ -1,36 +1,32 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:den_ai/models/lorebook.dart';
+import 'package:den_ai/repositories/database.dart' show LoreEntryData;
+import 'package:drift/drift.dart';
 
-part 'lore_entry.g.dart';
-
-@JsonSerializable(fieldRename: FieldRename.snake)
 class LoreEntry {
   final int id;
   final int lorebookId;
   final String title;
-  @JsonKey(defaultValue: "")
   final String content;
 
-  LoreEntry({
-    required this.id,
-    required this.lorebookId,
-    required this.title,
-    required this.content,
-  });
+  LoreEntry({required this.id, required this.lorebookId, required this.title, this.content = ""});
 
-  factory LoreEntry.fromJson(Map<String, dynamic> json) => _$LoreEntryFromJson(json);
-  Map<String, dynamic> toJson() => _$LoreEntryToJson(this);
+  factory LoreEntry.fromDb(LoreEntryData data) {
+    return LoreEntry(
+      id: data.id,
+      lorebookId: data.lorebookId,
+      title: data.title,
+      content: data.content,
+    );
+  }
 }
 
-@JsonSerializable(fieldRename: FieldRename.snake)
-class LoreEntryIn {
-  final int? id;
-  final int lorebookId;
-  final String title;
-  @JsonKey(defaultValue: "")
-  final String content;
+@DataClassName('LoreEntryData')
+class LoreEntries extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  IntColumn get lorebookId => integer().references(Lorebooks, #id, onDelete: KeyAction.cascade)();
+  TextColumn get title => text().withLength(min: 1, max: 255)();
+  TextColumn get content => text().withDefault(const Constant(''))();
 
-  LoreEntryIn({this.id, required this.lorebookId, required this.title, required this.content});
-
-  factory LoreEntryIn.fromJson(Map<String, dynamic> json) => _$LoreEntryInFromJson(json);
-  Map<String, dynamic> toJson() => _$LoreEntryInToJson(this);
+  @override
+  Set<Column> get primaryKey => {id};
 }

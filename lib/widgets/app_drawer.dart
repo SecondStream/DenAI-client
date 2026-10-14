@@ -4,6 +4,7 @@ import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/blocs/drawer/drawer_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:den_ai/models/user_card.dart';
+import 'package:den_ai/widgets/cropped_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -112,7 +113,7 @@ class AppDrawer extends StatelessWidget {
           ),
           clipBehavior: Clip.antiAlias,
           child: avatarUrl != null
-              ? Image.network(avatarUrl, fit: BoxFit.cover)
+              ? CroppedAvatar(imageUrl: avatarUrl, cropData: card!.getCropData(), size: 120)
               : const Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
         );
       },

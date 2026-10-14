@@ -53,7 +53,11 @@ class SwitchMessageBranchEvent extends ChatEvent {
   SwitchMessageBranchEvent({required this.messageId, required this.direction});
 }
 
-class RegenerateLastAiMessageEvent extends ChatEvent {}
+class RegenerateLastAiMessageEvent extends ChatEvent {
+  final int messageId;
+
+  RegenerateLastAiMessageEvent(this.messageId);
+}
 
 class EditMessageEvent extends ChatEvent {
   final int messageId;

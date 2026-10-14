@@ -7,7 +7,10 @@ import 'package:den_ai/consts/consts.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/repositories/characters_repository.dart';
 import 'package:den_ai/repositories/chats_repository.dart';
+import 'package:den_ai/repositories/settings_repository.dart';
 import 'package:den_ai/repositories/user_cards_repository.dart';
+import 'package:den_ai/services/chat_generation_service.dart';
+import 'package:den_ai/tools/prompt_renderer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 part 'chat_event.dart';
@@ -16,14 +19,18 @@ part 'chat_state.dart';
 
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   static const String defUser = 'User';
+  final ChatGenerationService _generationService;
   final ChatsRepository _repository;
+  final SettingsRepository _settingsRepository;
   final CharactersRepository _charactersRepository;
   final UserCardsRepository _userCardsRepository;
   final AppConfig config;
   StreamSubscription<StreamMessage>? _messageSubscription;
 
   ChatBloc(
+    this._generationService,
     this._repository,
+    this._settingsRepository,
     this._charactersRepository,
     this._userCardsRepository,
     this.config,
@@ -44,7 +51,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<SelectImageEvent>(_onSelectImage);
     on<UpdateCharacterEvent>(_onUpdateCharacter);
 
-    _messageSubscription = _repository.allMessagesStream.listen(
+    _messageSubscription = _generationService.allMessagesStream.listen(
       (message) => add(ReceivedAiTokenEvent(message)),
       onError: (e, _) {
         if (e is StreamMessageError) add(ReceivedAiTokenErrorEvent(e));
@@ -60,10 +67,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     return super.close();
   }
 
-  void _onLoadChatHistory(
-    LoadChatHistoryEvent event,
-    Emitter<ChatState> emit,
-  ) async {
+  void _onLoadChatHistory(LoadChatHistoryEvent event, Emitter<ChatState> emit) async {
     emit(ChatLoadingState());
     try {
       final chat = await _repository.getChatById(event.chatId);
@@ -71,10 +75,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         ChatLoadedState(
           chatId: event.chatId,
           char: chat.char,
-          messages: chat.messages,
+          messages: _getChatActiveMV(chat.messages),
           background: chat.background ?? chat.char.background,
           userCard: chat.userCard,
-          summary: chat.summary,
+          summary: chat.summaries.lastOrNull?.content ?? '',
         ),
       );
     } catch (e) {
@@ -87,36 +91,27 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     final currentState = state as ChatLoadedState;
 
     try {
-      final updatedChat = await _repository.editMessage(
-        event.messageId,
-        event.newContent,
-      );
-      emit(currentState.copyWith(messages: updatedChat.messages));
+      final updatedChat = await _repository.editMessage(event.messageId, event.newContent);
+      emit(currentState.copyWith(messages: _getChatActiveMV(updatedChat.messages)));
     } catch (e) {
       emit(ChatErrorState(ErrType.editMessage, e));
     }
   }
 
-  void _onDeleteMessage(
-    DeleteMessageEvent event,
-    Emitter<ChatState> emit,
-  ) async {
+  void _onDeleteMessage(DeleteMessageEvent event, Emitter<ChatState> emit) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
 
     try {
       final Chat updatedChat = await _repository.deleteMessage(event.messageId);
 
-      emit(currentState.copyWith(messages: updatedChat.messages));
+      emit(currentState.copyWith(messages: _getChatActiveMV(updatedChat.messages)));
     } catch (e) {
       emit(ChatErrorState(ErrType.removeMessage, e));
     }
   }
 
-  void _onRegenerateMessage(
-    RegenerateLastAiMessageEvent event,
-    Emitter<ChatState> emit,
-  ) async {
+  void _onRegenerateMessage(RegenerateLastAiMessageEvent event, Emitter<ChatState> emit) async {
     if (state is! ChatLoadedState) return;
     var currentState = state as ChatLoadedState;
 
@@ -124,27 +119,34 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     final updatedMessages = List<Message>.from(currentState.messages);
 
-    if (updatedMessages.last.role == MessageRole.assistant) {
-      updatedMessages.removeLast();
-    }
+    updatedMessages.removeWhere((e) => e.id == event.messageId);
     updatedMessages.add(
-      Message(
-        id: -2,
-        role: MessageRole.assistant,
-        content: "",
-        createdAt: DateTime.now(),
-      ),
+      Message(id: -2, role: MessageRole.assistant, content: "", createdAt: DateTime.now()),
     );
 
-    emit(currentState.copyWith(messages: updatedMessages, isAiTyping: true));
+    emit(currentState.copyWith(messages: _getChatActiveMV(updatedMessages), isAiTyping: true));
 
-    unawaited(_repository.regenerateMessage(currentState.chatId));
+    _regenerateMessage(
+      currentState.chatId,
+      event.messageId,
+      SettingsBase(
+        // TODO
+        modelName: 'google/gemma-4-31b-it',
+        visionModelName: 'google/gemma-4-31b-it',
+        tokenizerPath: 'google/gemma-4-31b-it',
+        maxContextTokens: 16000,
+        temperature: 0.05,
+        minP: 0,
+        topP: 0.9,
+        repeatPenalty: 1.1,
+        globalSystemPrompt: '',
+        template: '',
+        provider: 'openai',
+      ),
+    );
   }
 
-  void _onSwitchMessageBranch(
-    SwitchMessageBranchEvent event,
-    Emitter<ChatState> emit,
-  ) async {
+  void _onSwitchMessageBranch(SwitchMessageBranchEvent event, Emitter<ChatState> emit) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
     try {
@@ -153,7 +155,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         event.direction,
       );
 
-      emit(currentState.copyWith(messages: updatedChat.messages));
+      emit(currentState.copyWith(messages: _getChatActiveMV(updatedChat.messages)));
     } catch (e) {
       emit(ChatErrorState(ErrType.switchMessage, e));
     }
@@ -166,9 +168,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     emit(ChatLoadingState());
 
     try {
-      final Chat? existingChat = await _repository.getActiveChatByCharId(
-        event.charId,
-      );
+      final Chat? existingChat = await _repository.getActiveChatByCharId(event.charId);
 
       if (existingChat != null) {
         emit(
@@ -176,9 +176,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
             chatId: existingChat.id,
             char: existingChat.char,
             background: existingChat.background ?? existingChat.char.background,
-            messages: existingChat.messages,
+            messages: _getChatActiveMV(existingChat.messages),
             userCard: existingChat.userCard,
-            summary: existingChat.summary,
+            summary: existingChat.summaries.lastOrNull?.content ?? '',
           ),
         );
       } else {
@@ -202,15 +202,19 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
             summary: '',
             messages: [
               if (char.greeting.isNotEmpty)
-                Message(
-                  id: -99,
-                  role: MessageRole.assistant,
-                  content: _replacePlaceholders(
-                    char.greeting,
-                    char.name,
-                    defaultUserCard?.name ?? defUser,
+                MessageView.fromMessage(
+                  Message(
+                    id: -99,
+                    role: MessageRole.assistant,
+                    content: _replacePlaceholders(
+                      char.greeting,
+                      char.name,
+                      defaultUserCard?.name ?? defUser,
+                    ),
+                    createdAt: DateTime.now(),
                   ),
-                  createdAt: DateTime.now(),
+                  1,
+                  1,
                 ),
             ],
           ),
@@ -231,10 +235,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     emit(currentState.copyWith(availableCards: cards));
   }
 
-  void _onSendUserMessage(
-    SendUserMessageEvent event,
-    Emitter<ChatState> emit,
-  ) async {
+  void _onSendUserMessage(SendUserMessageEvent event, Emitter<ChatState> emit) async {
     if (state is! ChatLoadedState) return;
     var currentState = state as ChatLoadedState;
     final imageFile = currentState.selectedImageFile;
@@ -242,25 +243,22 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     var activeChatId = currentState.chatId;
     final updatedMessages = List<Message>.from(currentState.messages);
     String localDisplayContent = event.text;
-    String? imagePath;
-    if (imageFile != null) {
-      imagePath = await _repository.uploadImage(imageFile);
-      if (imagePath != null) {
-        final String markdownTag = MessageTags.imgTemplate.replaceFirst(
-          MessageTags.urlMarker,
-          "${config.baseUrl}/$imagePath",
-        );
+    String? imagePath; // TODO
+    // if (imageFile != null) {
+    //   imagePath = await _repository.uploadImage(imageFile);
+    //   if (imagePath != null) {
+    //     final String markdownTag = MessageTags.imgTemplate.replaceFirst(
+    //       MessageTags.urlMarker,
+    //       "${config.baseUrl}/$imagePath",
+    //     );
 
-        if (localDisplayContent.contains(MessageTags.img)) {
-          localDisplayContent = localDisplayContent.replaceFirst(
-            MessageTags.img,
-            markdownTag,
-          );
-        } else {
-          localDisplayContent = "$localDisplayContent\n$markdownTag";
-        }
-      }
-    }
+    //     if (localDisplayContent.contains(MessageTags.img)) {
+    //       localDisplayContent = localDisplayContent.replaceFirst(MessageTags.img, markdownTag);
+    //     } else {
+    //       localDisplayContent = "$localDisplayContent\n$markdownTag";
+    //     }
+    //   }
+    // }
 
     final userMessage = Message(
       id: -1,
@@ -272,16 +270,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     updatedMessages.add(userMessage);
 
     updatedMessages.add(
-      Message(
-        id: -2,
-        role: MessageRole.assistant,
-        content: "",
-        createdAt: DateTime.now(),
-      ),
+      Message(id: -2, role: MessageRole.assistant, content: "", createdAt: DateTime.now()),
     );
 
     currentState = currentState.copyWith(
-      messages: updatedMessages,
+      messages: _getChatActiveMV(updatedMessages),
       isAiTyping: true,
       selectedImageFile: null,
       isResetImage: true,
@@ -299,19 +292,29 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         emit(currentState);
       }
 
-      unawaited(
-        _repository.sendMessage(
-          currentState.chatId,
-          event.text,
-          imagePath,
-          imageFile,
+      _sendMessage(
+        currentState.chatId,
+        event.text,
+        SettingsBase(
+          // TODO
+          modelName: 'google/gemma-4-31b-it',
+          visionModelName: 'google/gemma-4-31b-it',
+          tokenizerPath: 'google/gemma-4-31b-it',
+          maxContextTokens: 16000,
+          temperature: 0.05,
+          minP: 0,
+          topP: 0.9,
+          repeatPenalty: 1.1,
+          globalSystemPrompt: '',
+          template: '',
+          provider: 'openai',
         ),
       );
     } catch (e) {
       final chat = await _repository.getChatById(currentState.chatId);
       emit(
         currentState.copyWith(
-          messages: chat.messages,
+          messages: _getChatActiveMV(chat.messages),
           isAiTyping: false,
           selectedImageFile: imageFile,
         ),
@@ -319,10 +322,115 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  void _onReceivedAiToken(
-    ReceivedAiTokenEvent event,
-    Emitter<ChatState> emit,
-  ) async {
+  Future<void> _sendMessage(int chatId, String text, SettingsBase settings) async {
+    final userMessageId = await _repository.insertMessage(
+      chatId: chatId,
+      role: MessageRole.user,
+      content: text,
+    );
+    final chat = await _repository.getChatById(chatId);
+    final String? latestSummaryContent =
+        chat.summaries.isNotEmpty && chat.summaries.last.content.trim().isNotEmpty
+        ? chat.summaries.last.content.trim()
+        : null;
+    final systemContent = PromptRenderer.getSystemContent(
+      settings: settings,
+      chat: chat,
+      summary: latestSummaryContent,
+    );
+
+    final messages = _getMessages(chat, systemContent, settings);
+    return _generationService.requestAiResponse(
+      chatId: chat.id,
+      settings: settings,
+      formattedMessages: messages,
+      isNew: true,
+      parentId: userMessageId,
+      lastActiveMsgId: null,
+    );
+  }
+
+  Future<void> _regenerateMessage(int chatId, int messageId, SettingsBase settings) async {
+    await _repository.updateMessageActivity(messageId, false);
+    final chat = await _repository.getChatById(chatId);
+    final message = chat.messages.firstWhere((e) => e.id == messageId);
+    final String? latestSummaryContent =
+        chat.summaries.isNotEmpty && chat.summaries.last.content.trim().isNotEmpty
+        ? chat.summaries.last.content.trim()
+        : null;
+    final systemContent = PromptRenderer.getSystemContent(
+      settings: settings,
+      chat: chat,
+      summary: latestSummaryContent,
+    );
+
+    final messages = _getMessages(chat, systemContent, settings);
+    return _generationService.requestAiResponse(
+      chatId: chat.id,
+      settings: settings,
+      formattedMessages: messages,
+      isNew: true,
+      parentId: message.parentId,
+      lastActiveMsgId: message.id,
+    );
+  }
+
+  List<Map<String, String>> _getMessages(Chat chat, String systemContent, SettingsBase settings) {
+    var accumulatedTokens =
+        _calculateTokens(systemContent) +
+        TokenLimits.templateTokens * 2 +
+        TokenLimits.summaryTokens;
+
+    final messages = <Map<String, String>>[
+      {'role': 'system', 'content': systemContent},
+    ];
+    if (accumulatedTokens < settings.maxContextTokens) {
+      for (var i = chat.messages.length - 1; i >= 0; --i) {
+        var msg = chat.messages[i];
+        if (msg.isActive) {
+          final content = PromptRenderer.removeComments(msg.content);
+          accumulatedTokens += _calculateTokens(content) + TokenLimits.templateTokens;
+          if (accumulatedTokens < settings.maxContextTokens) {
+            messages.insert(1, {'role': msg.role.name, 'content': content});
+          } else {
+            break;
+          }
+        }
+      }
+    }
+
+    return messages;
+  }
+
+  int _calculateTokens(String text) {
+    return text.length;
+  }
+
+  List<MessageView> _getChatActiveMV(List<Message> messages) {
+    final Map<int, List<Message>> byParent = {};
+    for (final msg in messages) {
+      var list = byParent[msg.parentId ?? -1];
+      list ??= byParent[msg.parentId ?? -1] = <Message>[];
+      list.add(msg);
+    }
+
+    final messageViews = <MessageView>[];
+    for (final msg in messages) {
+      if (msg.isActive) {
+        messageViews.add(
+          MessageView.fromMessage(
+            msg,
+            msg.parentId != null ? byParent[msg.parentId]?.length ?? 1 : 1,
+            msg.parentId != null ? (byParent[msg.parentId]?.indexOf(msg) ?? 0) + 1 : 1,
+          ),
+        );
+      }
+    }
+
+    return messageViews;
+  }
+
+  void _onReceivedAiToken(ReceivedAiTokenEvent event, Emitter<ChatState> emit) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
     final message = event.message;
@@ -330,7 +438,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     if (message.status == MessageStatus.completed) {
       final chat = await _repository.getChatById(currentState.chatId);
-      emit(currentState.copyWith(messages: chat.messages, isAiTyping: false));
+      emit(currentState.copyWith(messages: _getChatActiveMV(chat.messages), isAiTyping: false));
     } else {
       final updatedMessages = List<Message>.from(currentState.messages);
       final lastIndex = updatedMessages.length - 1;
@@ -351,59 +459,42 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           ),
         );
       }
-      emit(currentState.copyWith(messages: updatedMessages, isAiTyping: true));
+      emit(currentState.copyWith(messages: _getChatActiveMV(updatedMessages), isAiTyping: true));
     }
   }
 
-  void _onReceivedAiTokenError(
-    ReceivedAiTokenErrorEvent event,
-    Emitter<ChatState> emit,
-  ) async {
+  void _onReceivedAiTokenError(ReceivedAiTokenErrorEvent event, Emitter<ChatState> emit) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
     final error = event.error;
     if (currentState.chatId != error.chatId) return;
 
-    emit(
-      ChatErrorState(
-        ErrType.sendMessage,
-        '',
-        lastUserMessage: error.lastUserMessage,
-      ),
-    );
+    emit(ChatErrorState(ErrType.sendMessage, '', lastUserMessage: error.lastUserMessage));
     final chat = await _repository.getChatById(currentState.chatId);
     emit(
       currentState.copyWith(
-        messages: chat.messages,
+        messages: _getChatActiveMV(chat.messages),
         isAiTyping: false,
         selectedImageFile: error.imageFile,
       ),
     );
   }
 
-  void _onChangeUserCard(
-    ChangeUserCardEvent event,
-    Emitter<ChatState> emit,
-  ) async {
+  void _onChangeUserCard(ChangeUserCardEvent event, Emitter<ChatState> emit) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
     try {
       if (currentState.chatId > 0) {
         await _repository.updateChatUserCard(currentState.chatId, event.cardId);
       }
-      final card = currentState.availableCards?.firstWhere(
-        (e) => e.id == event.cardId,
-      );
+      final card = currentState.availableCards?.firstWhere((e) => e.id == event.cardId);
       if (card != null) emit(currentState.copyWith(userCard: card));
     } catch (e) {
       emit(ChatErrorState(ErrType.updateCard, e));
     }
   }
 
-  void _onStartNewChatSession(
-    StartNewChatSessionEvent event,
-    Emitter<ChatState> emit,
-  ) async {
+  void _onStartNewChatSession(StartNewChatSessionEvent event, Emitter<ChatState> emit) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
 
@@ -414,9 +505,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         // ignore: empty_catches
       } catch (e) {}
     }
-    final char = await _charactersRepository.getCharacterById(
-      currentState.char.id,
-    );
+    final char = await _charactersRepository.getCharacterById(currentState.char.id);
     if (char == null) {
       emit(ChatErrorState(ErrType.loadChat, 'Character not found'));
       return;
@@ -430,15 +519,19 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         summary: '',
         messages: [
           if (char.greeting.isNotEmpty)
-            Message(
-              id: -99,
-              role: MessageRole.assistant,
-              content: _replacePlaceholders(
-                char.greeting,
-                char.name,
-                currentState.userCard?.name ?? defUser,
+            MessageView.fromMessage(
+              Message(
+                id: -99,
+                role: MessageRole.assistant,
+                content: _replacePlaceholders(
+                  char.greeting,
+                  char.name,
+                  currentState.userCard?.name ?? defUser,
+                ),
+                createdAt: DateTime.now(),
               ),
-              createdAt: DateTime.now(),
+              1,
+              1,
             ),
         ],
       ),
@@ -449,17 +542,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
 
-    final char = await _charactersRepository.getCharacterById(
-      currentState.char.id,
-    );
+    final char = await _charactersRepository.getCharacterById(currentState.char.id);
 
     emit(currentState.copyWith(char: char));
   }
 
-  void _onUpdateChatSummary(
-    UpdateChatSummaryEvent event,
-    Emitter<ChatState> emit,
-  ) async {
+  void _onUpdateChatSummary(UpdateChatSummaryEvent event, Emitter<ChatState> emit) async {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
 
@@ -470,7 +558,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         currentState.chatId,
         event.newSummary,
       );
-      emit(currentState.copyWith(summary: updatedChat.summary));
+      emit(currentState.copyWith(summary: updatedChat.summaries.lastOrNull?.content ?? ''));
     } catch (e) {
       emit(ChatErrorState(ErrType.saveSummary, e));
     }
@@ -479,56 +567,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   void _onSelectImage(SelectImageEvent event, Emitter<ChatState> emit) {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
-    emit(
-      currentState.copyWith(
-        selectedImageFile: event.fileImage,
-        isResetImage: true,
-      ),
-    );
+    emit(currentState.copyWith(selectedImageFile: event.fileImage, isResetImage: true));
   }
 
   String _replacePlaceholders(String text, String charName, String userName) {
-    final regex = RegExp(r'\{\{(char|user)\}\}', caseSensitive: false);
-
-    final res = text.replaceAllMapped(regex, (match) {
-      final tag = match.group(1)?.toLowerCase();
-
-      if (tag == 'char') return charName;
-      if (tag == 'user') return userName;
-
-      return match.group(0) ?? '';
-    });
-    return _removeComments(res);
-  }
-
-  String _removeComments(String text) {
-    if(text.isEmpty) return text;
-    return _removeLineComments(_removeBlockComments(text));
-  }
-
-  String _removeBlockComments(String text) {
-    final pattern = RegExp(r'/\*[\s\S]*?\*/', multiLine: true);
-
-    // Просто заменяем все совпадения на пустую строку
-    return text.replaceAll(pattern, '');
-  }
-
-  String _removeLineComments(String text) {
-    // RegExp:
-    // Группа 1 (strings) - ловит строки в одинарных или двойных кавычках
-    // Группа 2 (comment) - ловит пробел + // + всё до конца строки (исключая \n)
-    final pattern = RegExp(
-        r'(' r"'(?:\\.|[^'\\])*'" r'|"(?:\\.|[^"\\])*")|(\s//[^\n]*)'
-    );
-
-    return text.replaceAllMapped(pattern, (match) {
-      // Если совпала группа 1 (строка в кавычках), возвращаем её без изменений
-      if (match.group(1) != null) {
-        return match.group(1)!;
-      }
-      // Если совпал комментарий (группа 2), удаляем его (возвращаем пустую строку)
-      // Символ \n при этом сохраняется в исходном тексте
-      return '';
-    });
+    final res = PromptRenderer.renderNames(text, charName: charName, userName: userName);
+    return PromptRenderer.removeComments(res);
   }
 }

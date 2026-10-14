@@ -1,5 +1,3 @@
-import 'package:den_ai/models/models.dart';
-
 abstract class LorebookEntriesEvent {
   const LorebookEntriesEvent();
 }
@@ -15,6 +13,15 @@ class DeleteEntryEvent extends LorebookEntriesEvent {
 }
 
 class SaveEntryEvent extends LorebookEntriesEvent {
-  final LoreEntryIn entry;
-  const SaveEntryEvent(this.entry);
+  final int? id;
+  final int lorebookId;
+  final String title;
+  final String content;
+
+  const SaveEntryEvent({
+    required this.id,
+    required this.lorebookId,
+    required this.title,
+    required this.content,
+  });
 }
