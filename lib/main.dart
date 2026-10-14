@@ -1,7 +1,6 @@
 import 'package:den_ai/application/app.dart';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/di_initializer.dart';
-import 'package:den_ai/env.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'dart:io';
@@ -16,7 +15,7 @@ void main() async {
     WindowOptions windowOptions = WindowOptions(
       size: Size(1280, 900),
       center: true,
-      minimumSize: Size(800, 700),
+      minimumSize: Size(800, 800),
       title: "DenAI",
     );
     windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -27,6 +26,5 @@ void main() async {
   DiInitializer.init();
 
   final baseUrl = await getApplicationDocumentsDirectory();
-
   runApp(AppConfig(baseUrl: baseUrl.path, child: ChatApp()));
 }

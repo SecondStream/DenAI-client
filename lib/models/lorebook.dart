@@ -55,9 +55,6 @@ class Lorebooks extends Table {
   TextColumn get about => text().withDefault(const Constant(''))();
   TextColumn get cover => text()();
   TextColumn get crop => text().nullable()();
-
-  @override
-  Set<Column> get primaryKey => {id};
 }
 
 class CharLorebooks extends Table {

@@ -1,8 +1,11 @@
+import 'package:den_ai/models/provider.dart';
+import 'package:den_ai/repositories/database.dart' show SettingsData;
 import 'package:drift/drift.dart';
 
 class SettingsBase {
   final String modelName;
   final String visionModelName;
+  final String embeddingModelName;
   final String tokenizerPath;
   final int maxContextTokens;
   final double temperature;
@@ -11,11 +14,12 @@ class SettingsBase {
   final double repeatPenalty;
   final String globalSystemPrompt;
   final String template;
-  final String provider;
+  final Provider provider;
 
   SettingsBase({
     required this.modelName,
     required this.visionModelName,
+    required this.embeddingModelName,
     required this.tokenizerPath,
     required this.maxContextTokens,
     required this.temperature,
@@ -26,6 +30,23 @@ class SettingsBase {
     required this.template,
     required this.provider,
   });
+
+  factory SettingsBase.fromDb(SettingsData data, {required Provider provider}) {
+    return SettingsBase(
+      modelName: data.modelName,
+      visionModelName: data.visionModelName,
+      embeddingModelName: data.embeddingModelName,
+      tokenizerPath: data.tokenizerPath,
+      maxContextTokens: data.maxContextTokens,
+      temperature: data.temperature,
+      minP: data.minP,
+      topP: data.topP,
+      repeatPenalty: data.repeatPenalty,
+      globalSystemPrompt: data.globalSystemPrompt,
+      template: data.template,
+      provider: provider,
+    );
+  }
 }
 
 @DataClassName('SettingsData')
@@ -34,6 +55,7 @@ class SettingsTable extends Table {
 
   TextColumn get modelName => text()();
   TextColumn get visionModelName => text()();
+  TextColumn get embeddingModelName => text()();
   TextColumn get tokenizerPath => text()();
   IntColumn get maxContextTokens => integer()();
 
@@ -44,8 +66,6 @@ class SettingsTable extends Table {
 
   TextColumn get globalSystemPrompt => text()();
   TextColumn get template => text()();
-  TextColumn get provider => text()();
 
-  @override
-  Set<Column> get primaryKey => {id};
+  IntColumn get providerId => integer().references(Providers, #id)();
 }

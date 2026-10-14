@@ -10,3 +10,7 @@ class TokenLimits {
   static const int templateTokens = 3;
   static const int summaryTokens = 500;
 }
+
+class DefaultSettings {
+  static const int singleSettingsId = 1;
+}

@@ -131,13 +131,14 @@ class AppLocalization {
 
       // --- Экран настроек ---
       'global_settings_title': 'General AI settings',
-      'section_ollama_tokenizer': 'Selecting a model and tokenizer',
+      'section_ollama_tokenizer': 'Model and tokenizer',
       'section_context_window': 'Context window size',
       'section_sampling_params': 'Sampling Parameters',
       'section_system_prompt': 'Global Instructions',
       'section_system_template': 'System Template',
       'label_main_model': 'Primary Text Model',
       'label_vision_model': 'Vision Model',
+      'label_embedding_model': 'Embedding Model',
       'label_tokenizer': 'Local Tokenizer Dictionary',
       'label_provider': 'Provider',
       'label_context_limit': 'Context Token Limit',
@@ -309,13 +310,14 @@ class AppLocalization {
 
       // --- Экран настроек ---
       'global_settings_title': 'Общие настройки ИИ',
-      'section_ollama_tokenizer': 'Выбор модели и токенизатора',
+      'section_ollama_tokenizer': 'Модель и токенизатор',
       'section_context_window': 'Размер контекстного окна',
       'section_sampling_params': 'Параметры сэмплинга',
       'section_system_prompt': 'Глобальные инструкции',
       'section_system_template': 'Системный шаблон',
       'label_main_model': 'Основная текстовая модель',
       'label_vision_model': 'Vision модель',
+      'label_embedding_model': 'Embedding модель',
       'label_tokenizer': 'Локальный словарь токенизатора',
       'label_provider': 'Провайдер',
       'label_context_limit': 'Лимит токенов контекста',
@@ -510,6 +512,8 @@ class AppLocalization {
   String get labelMainModel => _localizedValues[locale.languageCode]?['label_main_model'] ?? empty;
   String get labelVisionModel =>
       _localizedValues[locale.languageCode]?['label_vision_model'] ?? empty;
+  String get labelEmbeddingModel =>
+      _localizedValues[locale.languageCode]?['label_embedding_model'] ?? empty;
   String get labelTokenizer => _localizedValues[locale.languageCode]?['label_tokenizer'] ?? empty;
   String get labelProvider => _localizedValues[locale.languageCode]?['label_provider'] ?? empty;
   String get labelContextLimit =>
@@ -576,14 +580,10 @@ class AppLocalization {
   String get charNoLorebooks =>
       _localizedValues[locale.languageCode]?['char_no_lorebooks_count'] ?? empty;
 
-  String get export =>
-      _localizedValues[locale.languageCode]?['export'] ?? empty;
-  String get import =>
-      _localizedValues[locale.languageCode]?['import'] ?? empty;
-  String get exportExt =>
-      _localizedValues[locale.languageCode]?['export_ext'] ?? empty;
-  String get imortExt =>
-      _localizedValues[locale.languageCode]?['import_ext'] ?? empty;
+  String get export => _localizedValues[locale.languageCode]?['export'] ?? empty;
+  String get import => _localizedValues[locale.languageCode]?['import'] ?? empty;
+  String get exportExt => _localizedValues[locale.languageCode]?['export_ext'] ?? empty;
+  String get imortExt => _localizedValues[locale.languageCode]?['import_ext'] ?? empty;
 
   String getError(ErrType type, Object exception) {
     switch (type) {

@@ -59,7 +59,4 @@ class Chats extends Table {
       integer().nullable().references(UserCards, #id, onDelete: KeyAction.setNull)();
 
   TextColumn get background => text().nullable()();
-
-  @override
-  Set<Column> get primaryKey => {id};
 }

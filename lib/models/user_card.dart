@@ -60,7 +60,4 @@ class UserCards extends Table {
   TextColumn get description => text().withDefault(const Constant(''))();
   BoolColumn get isDefault => boolean().withDefault(const Constant(false))();
   BoolColumn get isRemoved => boolean().withDefault(const Constant(false))();
-
-  @override
-  Set<Column> get primaryKey => {id};
 }

@@ -4,12 +4,12 @@ publish_to: 'none'
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.9.2
+  sdk: ^3.10.7
 
 dependencies:
-  cached_network_image: ^3.4.1
+  cached_network_image: ^4.0.4
   dio: ^5.9.2
-  drift: 2.15.0
+  drift: ^2.35.2
   file_selector: ^1.1.0
   flutter:
     sdk: flutter
@@ -20,21 +20,25 @@ dependencies:
   gpt_markdown: ^1.1.7
 
   intl: ^0.20.2
-  json_annotation: 4.8.1
+  dart_sentencepiece_tokenizer: ^1.0.0
+
+  json_annotation: ^4.12.0
   path: ^1.9.1
   path_provider: ^2.1.5
-  sqlite3: 2.4.0
-  sqlite3_flutter_libs: ^0.5.41
+  sqlite3: ^3.7.1
   web_socket_channel: ^3.0.3
   window_manager: ^0.5.1
 
 dev_dependencies:
   build_runner: ^2.4.0
-  drift_dev: 2.15.0
+  drift_dev: ^2.35.1
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
-  json_serializable: 6.7.1
+  flutter_lints: ^6.0.0
+  json_serializable: ^6.14.1
 
 flutter:
   uses-material-design: true
+
+  assets:
+    - assets/tokenizers/

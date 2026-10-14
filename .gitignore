@@ -8,8 +8,6 @@
 .buildlog/
 .history
 
-
-
 # Flutter repo-specific
 /bin/cache/
 /bin/internal/bootstrap.bat
@@ -126,3 +124,5 @@ app.*.symbols
 *.iws
 .vscode/
 
+# FVM Version Cache
+.fvm/

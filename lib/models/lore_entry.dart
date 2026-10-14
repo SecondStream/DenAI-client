@@ -26,7 +26,4 @@ class LoreEntries extends Table {
   IntColumn get lorebookId => integer().references(Lorebooks, #id, onDelete: KeyAction.cascade)();
   TextColumn get title => text().withLength(min: 1, max: 255)();
   TextColumn get content => text().withDefault(const Constant(''))();
-
-  @override
-  Set<Column> get primaryKey => {id};
 }

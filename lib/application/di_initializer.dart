@@ -9,6 +9,7 @@ import 'package:den_ai/repositories/provider/interceptor.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
 import 'package:den_ai/repositories/user_cards_repository.dart';
 import 'package:den_ai/services/chat_generation_service.dart';
+import 'package:den_ai/services/token_counter_service.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 
@@ -26,14 +27,14 @@ class DiInitializer {
     di.registerSingleton(AppRouteObserver());
 
     final client = OpenAIClient(
-      url: 'https://routerai.ru/api/v1',
-      key: 'sk-HC458Rw5HzWj050i2OFYGoyJwsFe8Rvx',
       defaultModel: 'google/gemma-4-31b-it',
       defaultVisionModel: 'google/gemma-4-31b-it',
+      defaultEmbeddingModel: 'baai/bge-m3',
       dio: dio,
     );
     final chatsRepo = ChatsRepository(database);
 
+    di.registerSingleton(TokenCounterService());
     di.registerSingleton(chatsRepo);
     di.registerSingleton(client);
     di.registerSingleton(CharactersRepository(database));

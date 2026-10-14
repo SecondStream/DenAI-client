@@ -1,5 +1,6 @@
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/widgets/app_drawer.dart';
+import 'package:den_ai/widgets/dialogs/edit_provider_dialog.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:den_ai/blocs/settings/settings_bloc.dart';
@@ -17,6 +18,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   final _formKey = GlobalKey<FormState>();
   String? _selectedModel;
   String? _selectedVisionModel;
+  String? _selectedEmbeddingModel;
   String? _selectedTokenizer;
 
   double _maxContext = 8192;
@@ -47,6 +49,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     if (_isInitialized) return;
     _selectedModel = settings.modelName;
     _selectedVisionModel = settings.visionModelName;
+    _selectedEmbeddingModel = settings.embeddingModelName;
     _selectedTokenizer = settings.tokenizerPath;
     _maxContext = settings.maxContextTokens.toDouble();
     _temperature = settings.temperature;
@@ -58,13 +61,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _isInitialized = true;
   }
 
+  final TextEditingController _providerNameTextController = TextEditingController();
+  final TextEditingController _providerUrlTextController = TextEditingController();
+  final TextEditingController _providerKeyTextController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
 
     return BlocProvider<SettingsBloc>(
-      create: (context) => SettingsBloc(GetIt.instance.get())..add(LoadAllSettingsEvent()),
+      create: (context) =>
+          SettingsBloc(GetIt.instance.get(), GetIt.instance.get())..add(LoadAllSettingsEvent()),
       child: Scaffold(
         appBar: AppBar(title: Text(loc.globalSettingsTitle)),
         drawer: AppDrawer(),
@@ -85,6 +92,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
               return SizedBox.shrink();
             }
 
+            final provider = state.providers.firstWhere((e) => e.id == state.settings.provider.id);
+
             _initializeFields(state.settings);
 
             return Padding(
@@ -98,35 +107,118 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _buildSectionTitle(theme, loc.sectionOllamaTokenizer),
+                          _buildSectionTitle(theme, 'Провайдер API'),
                           const SizedBox(height: 16),
 
-                          _buildDropdownTokenizers(
+                          // _buildTextField(
+                          //   context,
+                          //   controller: _providerNameTextController,
+                          //   label: 'Название',
+                          //   hint: 'Любое для удобства',
+                          //   minLines: 1,
+                          //   maxLines: 1,
+                          //   validator: (v) => v!.trim().isEmpty ? 'Введите имя' : null,
+                          // ),
+                          // _buildTextField(
+                          //   context,
+                          //   controller: _providerUrlTextController,
+                          //   label: 'Адрес API',
+                          //   hint: 'https://openrouter.ai/api/v1',
+                          //   minLines: 1,
+                          //   maxLines: 1,
+                          //   validator: (v) => v!.trim().isEmpty ? 'Укажите адрес API' : null,
+                          // ),
+                          // _buildTextField(
+                          //   context,
+                          //   controller: _providerKeyTextController,
+                          //   label: 'Ключ АPI',
+                          //   hint: 'sk-XXXXXXXXXXXXXXXXXXXXXXXXXX',
+                          //   minLines: 1,
+                          //   maxLines: 1,
+                          //   validator: (v) => v!.trim().isEmpty ? 'Укажите ключ API' : null,
+                          // ),
+                          _buildDropdownProviders(
                             label: loc.labelProvider,
-                            value: state.settings.provider,
+                            value: state.settings.provider.id,
                             items: state.providers,
                             onChanged: (v) {
-                              if (v != null &&
-                                  v != state.settings.provider &&
-                                  state.providers.contains(v)) {
+                              if (v != null && v != state.settings.provider.id) {
                                 _isInitialized = false;
-                                context.read<SettingsBloc>().add(UpdateProviderEvent(provider: v));
+                                context.read<SettingsBloc>().add(
+                                  UpdateProviderEvent(providerId: v),
+                                );
                               }
                             },
                           ),
+                          Row(
+                            mainAxisSize: MainAxisSize.max,
+                            spacing: 16,
+                            children: [
+                              Flexible(
+                                fit: FlexFit.tight,
+                                flex: 8,
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: theme.colorScheme.primary,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 18),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  icon: const Icon(Icons.edit, size: 22),
+                                  label: Text(
+                                    'Изменить',
+                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                  ),
+                                  onPressed: () => _openEditProvider(context, provider),
+                                ),
+                              ),
+                              Flexible(
+                                fit: FlexFit.tight,
+                                flex: 15,
+                                child: ElevatedButton.icon(
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: theme.colorScheme.primary,
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(vertical: 18),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                  ),
+                                  icon: const Icon(Icons.api, size: 22),
+                                  label: Text(
+                                    'Добавить провайдер',
+                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                                  ),
+                                  onPressed: () => _openEditProvider(context, null),
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 30),
+                          _buildSectionTitle(theme, loc.sectionOllamaTokenizer),
+                          const SizedBox(height: 16),
 
-                          _buildDropdown(
+                          _buildDropdownModels(
                             label: loc.labelMainModel,
                             value: _selectedModel,
                             items: state.models,
                             onChanged: (v) => setState(() => _selectedModel = v),
                           ),
 
-                          _buildDropdown(
+                          _buildDropdownModels(
                             label: loc.labelVisionModel,
                             value: _selectedVisionModel,
                             items: state.visionModels,
                             onChanged: (v) => setState(() => _selectedVisionModel = v),
+                          ),
+
+                          _buildDropdownModels(
+                            label: loc.labelEmbeddingModel,
+                            value: _selectedEmbeddingModel,
+                            items: state.embeddingModels,
+                            onChanged: (v) => setState(() => _selectedEmbeddingModel = v),
                           ),
 
                           _buildDropdownTokenizers(
@@ -148,33 +240,34 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             displayValue: loc.contextSize(_maxContext.toInt()),
                             onChanged: (v) => setState(() => _maxContext = v),
                           ),
+                          Spacer(),
 
-                          const SizedBox(height: 16),
-                          _buildSectionTitle(theme, loc.sectionSystemTemplate),
-                          const SizedBox(height: 12),
-                          Expanded(
-                            child: TextField(
-                              controller: _templateController,
-                              maxLines: null,
-                              expands: true,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                height: 1.4,
-                                color: Colors.white,
-                              ),
-                              textAlignVertical: TextAlignVertical.top,
-                              decoration: InputDecoration(
-                                hintText: loc.hintSystemTemplate,
-                                fillColor: theme.cardColor,
-                                filled: true,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                                contentPadding: const EdgeInsets.all(16),
-                              ),
-                            ),
-                          ),
+                          // const SizedBox(height: 16),
+                          // _buildSectionTitle(theme, loc.sectionSystemTemplate),
+                          // const SizedBox(height: 12),
+                          // Expanded(
+                          //   child: TextField(
+                          //     controller: _templateController,
+                          //     maxLines: null,
+                          //     expands: true,
+                          //     style: const TextStyle(
+                          //       fontSize: 14,
+                          //       height: 1.4,
+                          //       color: Colors.white,
+                          //     ),
+                          //     textAlignVertical: TextAlignVertical.top,
+                          //     decoration: InputDecoration(
+                          //       hintText: loc.hintSystemTemplate,
+                          //       fillColor: theme.cardColor,
+                          //       filled: true,
+                          //       border: OutlineInputBorder(
+                          //         borderRadius: BorderRadius.circular(12),
+                          //         borderSide: BorderSide.none,
+                          //       ),
+                          //       contentPadding: const EdgeInsets.all(16),
+                          //     ),
+                          //   ),
+                          // ),
                         ],
                       ),
                     ),
@@ -269,6 +362,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                 final updatedSettings = SettingsBase(
                                   modelName: _selectedModel!,
                                   visionModelName: _selectedVisionModel!,
+                                  embeddingModelName: _selectedEmbeddingModel!,
                                   tokenizerPath: _selectedTokenizer!,
                                   maxContextTokens: _maxContext.toInt(),
                                   temperature: _temperature,
@@ -311,17 +405,18 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildDropdownTokenizers({
+  Widget _buildDropdownProviders({
     required String label,
-    required String? value,
-    required List items,
-    required ValueChanged<String?> onChanged,
+    required int? value,
+    required List<Provider> items,
+    required ValueChanged<int?> onChanged,
   }) {
     final theme = Theme.of(context);
+    final List<int> itemIds = items.map((e) => e.id).toList();
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
-      child: DropdownButtonFormField<String>(
-        initialValue: items.contains(value) ? value : (items.isNotEmpty ? items.first : null),
+      child: DropdownButtonFormField<int>(
+        initialValue: itemIds.contains(value) ? value : (itemIds.isNotEmpty ? itemIds.first : null),
         onChanged: onChanged,
         style: const TextStyle(color: Colors.white, fontSize: 14),
         decoration: InputDecoration(
@@ -334,12 +429,43 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
         ),
         dropdownColor: theme.cardColor,
-        items: items.map((m) => DropdownMenuItem<String>(value: m, child: Text(m))).toList(),
+        items: items.map((m) => DropdownMenuItem<int>(value: m.id, child: Text(m.name))).toList(),
       ),
     );
   }
 
-  Widget _buildDropdown({
+  Widget _buildDropdownTokenizers({
+    required String label,
+    required String? value,
+    required List<TokenizerInfo> items,
+    required ValueChanged<String?> onChanged,
+  }) {
+    final theme = Theme.of(context);
+    final List<String> itemIds = items.map((e) => e.id).toList();
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16),
+      child: DropdownButtonFormField<String>(
+        initialValue: itemIds.contains(value) ? value : (itemIds.isNotEmpty ? itemIds.first : null),
+        onChanged: onChanged,
+        style: const TextStyle(color: Colors.white, fontSize: 14),
+        decoration: InputDecoration(
+          labelText: label,
+          fillColor: theme.cardColor,
+          filled: true,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+        ),
+        dropdownColor: theme.cardColor,
+        items: items
+            .map((m) => DropdownMenuItem<String>(value: m.id, child: Text(m.displayName)))
+            .toList(),
+      ),
+    );
+  }
+
+  Widget _buildDropdownModels({
     required String label,
     required String? value,
     required List<ModelInfo> items,
@@ -424,6 +550,58 @@ class _SettingsScreenState extends State<SettingsScreen> {
         ],
       ),
     );
+  }
+
+  Widget _buildTextField(
+    BuildContext context, {
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    int? minLines,
+    int? maxLines,
+    String? Function(String?)? validator,
+  }) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: TextFormField(
+        controller: controller,
+        minLines: minLines,
+        maxLines: maxLines,
+        validator: validator,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          alignLabelWithHint: true,
+          fillColor: theme.cardColor,
+          filled: true,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          contentPadding: const EdgeInsets.all(16),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openEditProvider(BuildContext context, Provider? provider) async {
+    final bloc = context.read<SettingsBloc>();
+    final res = await EditProviderDialog.open(context, provider: provider);
+    if (res != null && context.mounted) {
+      final id = res.id;
+      if (id != null && res.id! < 0 && provider != null) {
+        bloc.add(DeleteProviderEvent(provider.id));
+      } else {
+        if (provider == null) {
+          bloc.add(SaveProviderEvent(name: res.name, url: res.url, key: res.key));
+        } else {
+          if (provider.name != res.name || provider.url != res.url || provider.key != res.key) {
+            bloc.add(SaveProviderEvent(id: id, name: res.name, url: res.url, key: res.key));
+          }
+        }
+      }
+    }
   }
 }
 

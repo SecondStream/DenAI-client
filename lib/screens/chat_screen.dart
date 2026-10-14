@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/routes.dart';
@@ -71,6 +70,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return BlocProvider<ChatBloc>(
       create: (context) {
         final bloc = ChatBloc(
+          GetIt.instance.get(),
           GetIt.instance.get(),
           GetIt.instance.get(),
           GetIt.instance.get(),

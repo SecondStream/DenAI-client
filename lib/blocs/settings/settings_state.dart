@@ -16,13 +16,15 @@ class SettingsErrorState extends SettingsState {
 class SettingsLoadedState extends SettingsState {
   final List<ModelInfo> models;
   final List<ModelInfo> visionModels;
-  final List<String> tokenizers;
-  final List<String> providers;
+  final List<ModelInfo> embeddingModels;
+  final List<TokenizerInfo> tokenizers;
+  final List<Provider> providers;
   final SettingsBase settings;
 
   SettingsLoadedState({
     required this.models,
     required this.visionModels,
+    required this.embeddingModels,
     required this.tokenizers,
     required this.settings,
     required this.providers,
@@ -31,13 +33,15 @@ class SettingsLoadedState extends SettingsState {
   SettingsLoadedState copyWith({
     List<ModelInfo>? models,
     List<ModelInfo>? visionModels,
-    List<String>? tokenizers,
+    List<ModelInfo>? embeddingModels,
+    List<TokenizerInfo>? tokenizers,
     SettingsBase? settings,
-    List<String>? providers,
+    List<Provider>? providers,
   }) {
     return SettingsLoadedState(
       models: models ?? this.models,
       visionModels: models ?? this.visionModels,
+      embeddingModels: embeddingModels ?? this.embeddingModels,
       tokenizers: tokenizers ?? this.tokenizers,
       settings: settings ?? this.settings,
       providers: providers ?? this.providers,

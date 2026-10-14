@@ -26,7 +26,4 @@ class Summaries extends Table {
   TextColumn get content => text().withDefault(const Constant(''))();
   IntColumn get lastSummarizedMessageId => integer()();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
-
-  @override
-  Set<Column> get primaryKey => {id};
 }

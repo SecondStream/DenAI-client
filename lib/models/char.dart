@@ -80,7 +80,4 @@ class Chars extends Table {
   TextColumn get scenario => text().withDefault(const Constant(''))();
   TextColumn get greeting => text().withDefault(const Constant(''))();
   TextColumn get prompt => text().withDefault(const Constant(''))();
-
-  @override
-  Set<Column> get primaryKey => {id};
 }

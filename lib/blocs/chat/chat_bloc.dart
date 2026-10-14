@@ -10,6 +10,7 @@ import 'package:den_ai/repositories/chats_repository.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
 import 'package:den_ai/repositories/user_cards_repository.dart';
 import 'package:den_ai/services/chat_generation_service.dart';
+import 'package:den_ai/services/token_counter_service.dart';
 import 'package:den_ai/tools/prompt_renderer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -20,6 +21,7 @@ part 'chat_state.dart';
 class ChatBloc extends Bloc<ChatEvent, ChatState> {
   static const String defUser = 'User';
   final ChatGenerationService _generationService;
+  final TokenCounterService _tokenCounterService;
   final ChatsRepository _repository;
   final SettingsRepository _settingsRepository;
   final CharactersRepository _charactersRepository;
@@ -29,6 +31,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   ChatBloc(
     this._generationService,
+    this._tokenCounterService,
     this._repository,
     this._settingsRepository,
     this._charactersRepository,
@@ -129,20 +132,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     _regenerateMessage(
       currentState.chatId,
       event.messageId,
-      SettingsBase(
-        // TODO
-        modelName: 'google/gemma-4-31b-it',
-        visionModelName: 'google/gemma-4-31b-it',
-        tokenizerPath: 'google/gemma-4-31b-it',
-        maxContextTokens: 16000,
-        temperature: 0.05,
-        minP: 0,
-        topP: 0.9,
-        repeatPenalty: 1.1,
-        globalSystemPrompt: '',
-        template: '',
-        provider: 'openai',
-      ),
+      await _settingsRepository.getSettings(),
     );
   }
 
@@ -292,24 +282,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         emit(currentState);
       }
 
-      _sendMessage(
-        currentState.chatId,
-        event.text,
-        SettingsBase(
-          // TODO
-          modelName: 'google/gemma-4-31b-it',
-          visionModelName: 'google/gemma-4-31b-it',
-          tokenizerPath: 'google/gemma-4-31b-it',
-          maxContextTokens: 16000,
-          temperature: 0.05,
-          minP: 0,
-          topP: 0.9,
-          repeatPenalty: 1.1,
-          globalSystemPrompt: '',
-          template: '',
-          provider: 'openai',
-        ),
-      );
+      _sendMessage(currentState.chatId, event.text, await _settingsRepository.getSettings());
     } catch (e) {
       final chat = await _repository.getChatById(currentState.chatId);
       emit(
@@ -343,7 +316,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     return _generationService.requestAiResponse(
       chatId: chat.id,
       settings: settings,
-      formattedMessages: messages,
+      formattedMessages: await messages,
       isNew: true,
       parentId: userMessageId,
       lastActiveMsgId: null,
@@ -364,7 +337,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       summary: latestSummaryContent,
     );
 
-    final messages = _getMessages(chat, systemContent, settings);
+    final messages = await _getMessages(chat, systemContent, settings);
     return _generationService.requestAiResponse(
       chatId: chat.id,
       settings: settings,
@@ -375,9 +348,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     );
   }
 
-  List<Map<String, String>> _getMessages(Chat chat, String systemContent, SettingsBase settings) {
+  Future<List<Map<String, String>>> _getMessages(
+    Chat chat,
+    String systemContent,
+    SettingsBase settings,
+  ) async {
     var accumulatedTokens =
-        _calculateTokens(systemContent) +
+        (await _calculateTokens(systemContent, settings)) +
         TokenLimits.templateTokens * 2 +
         TokenLimits.summaryTokens;
 
@@ -389,7 +366,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         var msg = chat.messages[i];
         if (msg.isActive) {
           final content = PromptRenderer.removeComments(msg.content);
-          accumulatedTokens += _calculateTokens(content) + TokenLimits.templateTokens;
+          accumulatedTokens +=
+              (await _calculateTokens(content, settings)) + TokenLimits.templateTokens;
           if (accumulatedTokens < settings.maxContextTokens) {
             messages.insert(1, {'role': msg.role.name, 'content': content});
           } else {
@@ -402,8 +380,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     return messages;
   }
 
-  int _calculateTokens(String text) {
-    return text.length;
+  Future<int> _calculateTokens(String text, SettingsBase settings) async {
+    final tokens = await _tokenCounterService.countTokens(
+      text: text,
+      tokenizerPath: settings.tokenizerPath,
+    );
+    print('$text | Symbols: ${text.length}, Tokens: $tokens');
+    return tokens;
   }
 
   List<MessageView> _getChatActiveMV(List<Message> messages) {

@@ -65,7 +65,4 @@ class Messages extends Table {
   TextColumn get imagePath => text().nullable()();
   TextColumn get modelName => text().withDefault(const Constant(''))();
   BoolColumn get isActive => boolean().withDefault(const Constant(true))();
-
-  @override
-  Set<Column> get primaryKey => {id};
 }
