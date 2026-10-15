@@ -1,6 +1,8 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'dart:math' as math;
+import 'dart:typed_data';
 
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
@@ -15,6 +17,7 @@ import 'package:den_ai/repositories/user_cards_repository.dart';
 import 'package:den_ai/services/chat_generation_service.dart';
 import 'package:den_ai/services/lore_search_service.dart';
 import 'package:den_ai/services/token_counter_service.dart';
+import 'package:den_ai/tools/file_tool.dart';
 import 'package:den_ai/tools/prompt_renderer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -240,27 +243,27 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   void _onSendUserMessage(SendUserMessageEvent event, Emitter<ChatState> emit) async {
     if (state is! ChatLoadedState) return;
     var currentState = state as ChatLoadedState;
+    final settings = await _settingsRepository.getSettings();
     final imageFile = currentState.selectedImageFile;
 
     var activeChatId = currentState.chatId;
     final updatedMessages = List<Message>.from(currentState.messages);
     String localDisplayContent = event.text;
-    String? imagePath; // TODO
-    // if (imageFile != null) {
-    //   imagePath = await _repository.uploadImage(imageFile);
-    //   if (imagePath != null) {
-    //     final String markdownTag = MessageTags.imgTemplate.replaceFirst(
-    //       MessageTags.urlMarker,
-    //       "${config.baseUrl}/$imagePath",
-    //     );
+    String? imagePath;
+    if (imageFile != null) {
+      imagePath = await FileTool.saveAttachment(imageFile);
 
-    //     if (localDisplayContent.contains(MessageTags.img)) {
-    //       localDisplayContent = localDisplayContent.replaceFirst(MessageTags.img, markdownTag);
-    //     } else {
-    //       localDisplayContent = "$localDisplayContent\n$markdownTag";
-    //     }
-    //   }
-    // }
+      final String markdownTag = MessageTags.imgTemplate.replaceFirst(
+        MessageTags.urlMarker,
+        "${config.baseUrl}/$imagePath",
+      );
+
+      if (localDisplayContent.contains(MessageTags.img)) {
+        localDisplayContent = localDisplayContent.replaceFirst(MessageTags.img, markdownTag);
+      } else {
+        localDisplayContent = "$localDisplayContent\n$markdownTag";
+      }
+    }
 
     final userMessage = Message(
       id: -1,
@@ -294,7 +297,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         emit(currentState);
       }
 
-      _sendMessage(currentState.chatId, event.text, await _settingsRepository.getSettings());
+      _sendMessage(currentState.chatId, event.text, settings, imageFile, imagePath: imagePath);
     } catch (e) {
       final chat = await _repository.getChatById(currentState.chatId);
       emit(
@@ -307,11 +310,29 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     }
   }
 
-  Future<void> _sendMessage(int chatId, String text, SettingsBase settings) async {
+  Future<void> _sendMessage(
+    int chatId,
+    String text,
+    SettingsBase settings,
+    File? imageFile, {
+    String? imagePath,
+  }) async {
+    if (imageFile != null) {
+      final Uint8List imageBytes = await imageFile.readAsBytes();
+      final String base64Image = base64Encode(imageBytes);
+      final imageDescription =
+          '${MessageTags.imgXmlStart}${await _client.describeImage(base64Image: base64Image, prompt: DefaultSettings.describeImagePrompt, settings: settings)}${MessageTags.imgXmlEnd}';
+      if (text.contains(MessageTags.img)) {
+        text = text.replaceAll(MessageTags.img, imageDescription);
+      } else {
+        text += '\n$imageDescription';
+      }
+    }
     final userMessageId = await _repository.insertMessage(
       chatId: chatId,
       role: MessageRole.user,
       content: text,
+      imagePath: imagePath,
     );
     final chat = await _repository.getChatById(chatId);
     final String? latestSummaryContent =
@@ -326,7 +347,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     final messages = await _getMessages(chat, systemContent, settings, text);
 
-    try {} catch (e) {}
     return _generationService.requestAiResponse(
       chatId: chat.id,
       settings: settings,
@@ -335,6 +355,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       parentId: userMessageId,
       lastActiveMsgId: null,
       lastUserTextForError: text,
+      lastUserImageForError: imageFile,
     );
   }
 
@@ -458,7 +479,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       text: text,
       tokenizerPath: settings.tokenizerPath,
     );
-    print('$text | Symbols: ${text.length}, Tokens: $tokens');
     return tokens;
   }
 

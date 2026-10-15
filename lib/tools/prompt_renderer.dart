@@ -1,3 +1,4 @@
+import 'package:den_ai/consts/consts.dart';
 import 'package:den_ai/models/chat.dart';
 import 'package:den_ai/models/settings_base.dart';
 
@@ -80,6 +81,21 @@ class PromptRenderer {
   static String removeComments(String text) {
     String cleanText = text.replaceAll(RegExp(r'/\*.*?\*/', dotAll: true), '');
     return cleanText;
+  }
+
+  static String replaceImageDescToMarkdown(String text, String imagePath) {
+    final String markdownTag = MessageTags.imgTemplate.replaceFirst(
+      MessageTags.urlMarker,
+      imagePath,
+    );
+    final int startIdx = text.indexOf(MessageTags.imgXmlStart);
+    final int endIdx = text.indexOf(MessageTags.imgXmlEnd);
+
+    if (startIdx != -1 && endIdx != -1) {
+      final String xmlTag = text.substring(startIdx, endIdx + '</attached_image>'.length);
+      text = text.replaceFirst(xmlTag, markdownTag);
+    }
+    return text;
   }
 
   static String renderMessage(String text, {required String charName, required String userName}) {

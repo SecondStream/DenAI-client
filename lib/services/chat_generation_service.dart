@@ -175,7 +175,6 @@ class ChatGenerationService {
       final List<Message> activeMessages = chat.messages.where((m) => m.isActive).toList();
 
       for (final msg in activeMessages.reversed) {
-        print('SUMMARIZE: $accumulatedTokens');
         if (firstPass) {
           firstPass = false;
           accumulatedTokens +=

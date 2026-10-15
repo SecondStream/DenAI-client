@@ -54,6 +54,7 @@ class SettingsRepository extends BaseRepository {
     final settingsCompanion = SettingsTableCompanion(
       modelName: Value(settings.modelName),
       visionModelName: Value(settings.visionModelName),
+      embeddingModelName: Value(settings.embeddingModelName),
       tokenizerPath: Value(settings.tokenizerPath),
       maxContextTokens: Value(settings.maxContextTokens),
       temperature: Value(settings.temperature),

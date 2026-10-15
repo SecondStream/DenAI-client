@@ -150,6 +150,46 @@ class OpenAIClient {
     throw Error();
   }
 
+  Future<String> describeImage({
+    required String base64Image,
+    required String prompt,
+    required SettingsBase settings,
+  }) async {
+    try {
+      final response = await dio.post(
+        '${settings.provider.url.replaceAll(RegExp(r'/$'), '')}$urlChat',
+        options: Options(headers: _getHeaders(settings.provider.key)),
+        data: {
+          'model': settings.visionModelName,
+          'messages': [
+            {
+              'role': 'user',
+              'content': [
+                {'type': 'text', 'text': prompt},
+                {
+                  'type': 'image_url',
+                  'image_url': {'url': 'data:image/jpeg;base64,$base64Image'},
+                },
+              ],
+            },
+          ],
+        },
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data as Map<String, dynamic>;
+        final choices = data['choices'] as List<dynamic>;
+        if (choices.isNotEmpty) {
+          final firstChoice = choices.first as Map<String, dynamic>;
+          final message = firstChoice['message'] as Map<String, dynamic>;
+          return (message['content'] as String? ?? '').trim();
+        }
+      }
+      // ignore: empty_catches
+    } catch (e) {}
+    return '';
+  }
+
   Future<List<dynamic>> _getRemoteModels(SettingsBase settings) async {
     final String openrouterUrl = '${settings.provider.url.replaceAll(RegExp(r'/$'), '')}$urlModels';
 
@@ -194,13 +234,6 @@ class OpenAIClient {
             final String modality = architecture["modality"] as String? ?? "";
             final String inputModality = modality.split("->").first;
             if (!inputModality.contains("image")) {
-              continue;
-            }
-          } else {
-            final String lowerName = name.toLowerCase();
-            if (!lowerName.contains("vision") &&
-                !lowerName.contains("vl") &&
-                !lowerName.contains("llava")) {
               continue;
             }
           }
@@ -273,12 +306,7 @@ class OpenAIClient {
             isEmbedding = true;
           }
         } else {
-          final String lowerName = name.toLowerCase();
-          if (lowerName.contains("embedding") ||
-              lowerName.contains("bge-") ||
-              lowerName.contains("e5-")) {
-            isEmbedding = true;
-          }
+          isEmbedding = true;
         }
 
         if (!isEmbedding) continue;

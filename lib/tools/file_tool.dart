@@ -9,6 +9,7 @@ import 'package:path_provider/path_provider.dart';
 abstract class FileTool {
   static const String _avatarsDir = 'avatars';
   static const String _backgroundsDir = 'backgrounds';
+  static const String _attachmentsDir = 'attachments';
 
   static Future<File?> pickImage() async {
     const XTypeGroup typeGroup = XTypeGroup(
@@ -50,6 +51,10 @@ abstract class FileTool {
       await targetDir.create(recursive: true);
     }
     return targetDir;
+  }
+
+  static Future<String> saveAttachment(File file) {
+    return saveImage(file, _attachmentsDir, prefix: 'image');
   }
 
   static Future<String> saveAvatar(File file) {

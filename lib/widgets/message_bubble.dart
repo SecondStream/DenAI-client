@@ -1,16 +1,15 @@
+import 'package:den_ai/application/config.dart';
+import 'package:den_ai/widgets/local_r_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gpt_markdown/custom_widgets/markdown_config.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
+import 'package:path/path.dart' as p;
 
 class MessageBubble extends StatelessWidget {
   final MessagePosition position;
   final String message;
 
-  const MessageBubble({
-    super.key,
-    required this.position,
-    required this.message,
-  });
+  const MessageBubble({super.key, required this.position, required this.message});
 
   @override
   Widget build(BuildContext context) {
@@ -29,27 +28,24 @@ class MessageBubble extends StatelessWidget {
           bottomRight: Radius.circular(isRight ? 0 : 12),
         ),
       ),
-      constraints: BoxConstraints(
-        maxWidth: MediaQuery.of(context).size.width * 0.65,
-      ),
+      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.65),
       child: GptMarkdown(
         message,
-        style: TextStyle(
-          color: isRight ? Colors.white70 : Colors.white,
-          fontSize: 15,
-          height: 1.4,
-        ),
+        style: TextStyle(color: isRight ? Colors.white70 : Colors.white, fontSize: 15, height: 1.4),
         inlineComponents: [
           ATagMd(),
           ImageMd(),
           StrikeMd(),
           BoldMd(),
-          CustomItalicComponent(
-            italicColor: isRight ? Colors.white38 : Colors.white54,
-          ),
+          CustomItalicComponent(italicColor: isRight ? Colors.white38 : Colors.white54),
           UnderLineMd(),
           SourceTag(),
         ],
+        imageBuilder: (context, imageUrl, width, height) => LocalRoundedImage(
+          imagePath: p.join(AppConfig.of(context).baseUrl, imageUrl),
+          width: width,
+          height: height,
+        ),
       ),
     );
   }
@@ -63,15 +59,10 @@ class CustomItalicComponent extends ItalicMd {
   CustomItalicComponent({this.italicColor = Colors.grey});
 
   @override
-  RegExp get exp =>
-      RegExp(r"(?:(?<!\*)\*(?<!\s)(.+?)(?:(?<!\s)\*(?!\*)|$))", dotAll: true);
+  RegExp get exp => RegExp(r"(?:(?<!\*)\*(?<!\s)(.+?)(?:(?<!\s)\*(?!\*)|$))", dotAll: true);
 
   @override
-  InlineSpan span(
-    BuildContext context,
-    String text,
-    final GptMarkdownConfig config,
-  ) {
+  InlineSpan span(BuildContext context, String text, final GptMarkdownConfig config) {
     final match = exp.firstMatch(text);
     final data = match?[1] ?? text.replaceAll('*', '');
 

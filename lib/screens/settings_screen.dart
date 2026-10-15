@@ -61,9 +61,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _isInitialized = true;
   }
 
-  final TextEditingController _providerNameTextController = TextEditingController();
-  final TextEditingController _providerUrlTextController = TextEditingController();
-  final TextEditingController _providerKeyTextController = TextEditingController();
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -520,39 +517,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
           ),
           Slider(value: value, min: min, max: max, divisions: divisions, onChanged: onChanged),
         ],
-      ),
-    );
-  }
-
-  Widget _buildTextField(
-    BuildContext context, {
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    int? minLines,
-    int? maxLines,
-    String? Function(String?)? validator,
-  }) {
-    final theme = Theme.of(context);
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: TextFormField(
-        controller: controller,
-        minLines: minLines,
-        maxLines: maxLines,
-        validator: validator,
-        decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
-          alignLabelWithHint: true,
-          fillColor: theme.cardColor,
-          filled: true,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-          contentPadding: const EdgeInsets.all(16),
-        ),
       ),
     );
   }

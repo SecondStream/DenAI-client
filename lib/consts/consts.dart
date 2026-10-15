@@ -1,6 +1,6 @@
 class MessageTags {
   static const String urlMarker = '{url}';
-  static const String imgTemplate = '\n![x200]($urlMarker)\n';
+  static const String imgTemplate = '\n![x250]($urlMarker)\n';
   static const String img = '[img]';
   static const String imgXmlStart = '<attached_image>';
   static const String imgXmlEnd = '</attached_image>';
@@ -13,6 +13,13 @@ class TokenLimits {
 
 class DefaultSettings {
   static const int singleSettingsId = 1;
+
+  static const describeImagePrompt = """
+Analyze this image carefully. Describe what is depicted in the image in one or two concise sentences.
+Do not describe style, genre, lighting, shadows, etc. Focus strictly on facts, objects, colors, and characters.
+Do not add any greetings, preachy text, or commentary. Output only the description.
+The answer must contain ONLY a description of the image and not a single word more.
+""";
   static const String summarizePrompt = """
 You are an advanced roleplay story summarizer.
 Task: Update the existing story log summary with the new events from the chat logs provided below.
