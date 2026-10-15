@@ -104,6 +104,7 @@ class AppLocalization {
       'prompt_hint': 'Rules for LLM. For example: Always reply in English',
       'delete_button': 'Delete',
       'save_button': 'Save Changes',
+      'change': 'Change',
       'char_create_button': 'Create Character',
       'validation_сhar_name': 'Enter a name',
       'avatar_label': 'Avatar',
@@ -188,6 +189,20 @@ class AppLocalization {
       'import': 'Import',
       'export_ext': 'Card V2',
       'import_ext': 'PNG/JSON',
+
+      'api_provider': 'API Provider',
+      'api_provider_add': 'Add provider',
+      'provider_adding': 'Adding a provider',
+      'provider_editing': 'Editing a provider',
+      'provider_name_label': 'Name',
+      'provider_name_hint': 'Anything you like, for your convenience',
+      'provider_name_err': 'Please enter a name',
+      'provider_url_label': 'API URL',
+      'provider_url_hint': 'https://yourprovider.com/api/v1',
+      'provider_url_err': 'Please enter an API URL',
+      'provider_key_label': 'API Key',
+      'provider_key_hint': 'sk-XXXXXXXXXXXXXXXXXXXXXXXXXXX',
+      'provider_key_err': 'Please enter an API key',
     },
     'ru': {
       // --- Базовые сообщения ---
@@ -218,6 +233,7 @@ class AppLocalization {
       'cancel': 'Отмена',
       'save': 'Сохранить',
       'delete': 'Удалить',
+      'change': 'Изменить',
       'no': 'Нет',
       'yes': 'Да',
       'ready': 'Готово',
@@ -367,6 +383,20 @@ class AppLocalization {
       'import': 'Импорт',
       'export_ext': 'Card V2',
       'import_ext': 'PNG/JSON',
+
+      'api_provider': 'Провайдер API',
+      'api_provider_add': 'Добавить провайдер',
+      'provider_adding': 'Добавление провайдера',
+      'provider_editing': 'Изменение провайдера',
+      'provider_name_label': 'Название',
+      'provider_name_hint': 'Любое, для удобства',
+      'provider_name_err': 'Введите название',
+      'provider_url_label': 'Адрес API',
+      'provider_url_hint': 'https://youprovider.com/api/v1',
+      'provider_url_err': 'Введите адрес API',
+      'provider_key_label': 'Ключ API',
+      'provider_key_hint': 'sk-XXXXXXXXXXXXXXXXXXXXXXXXXXX',
+      'provider_key_err': 'Введите ключ API',
     },
   };
 
@@ -482,6 +512,7 @@ class AppLocalization {
   String get cancel => _localizedValues[locale.languageCode]?['cancel'] ?? empty;
   String get save => _localizedValues[locale.languageCode]?['save'] ?? empty;
   String get delete => _localizedValues[locale.languageCode]?['delete'] ?? empty;
+  String get change => _localizedValues[locale.languageCode]?['change'] ?? empty;
   String get no => _localizedValues[locale.languageCode]?['no'] ?? empty;
   String get yes => _localizedValues[locale.languageCode]?['yes'] ?? empty;
   String get ready => _localizedValues[locale.languageCode]?['ready'] ?? empty;
@@ -584,6 +615,26 @@ class AppLocalization {
   String get import => _localizedValues[locale.languageCode]?['import'] ?? empty;
   String get exportExt => _localizedValues[locale.languageCode]?['export_ext'] ?? empty;
   String get imortExt => _localizedValues[locale.languageCode]?['import_ext'] ?? empty;
+  String get apiProvider => _localizedValues[locale.languageCode]?['api_provider'] ?? empty;
+  String get apiProviderAdd => _localizedValues[locale.languageCode]?['api_provider_add'] ?? empty;
+  String get providerAdding => _localizedValues[locale.languageCode]?['provider_adding'] ?? empty;
+  String get providerEditing => _localizedValues[locale.languageCode]?['provider_editing'] ?? empty;
+  String get providerNameLabel =>
+      _localizedValues[locale.languageCode]?['provider_name_label'] ?? empty;
+  String get providerNameHint =>
+      _localizedValues[locale.languageCode]?['provider_name_hint'] ?? empty;
+  String get providerNameErr =>
+      _localizedValues[locale.languageCode]?['provider_name_err'] ?? empty;
+  String get providerUrlLabel =>
+      _localizedValues[locale.languageCode]?['provider_url_label'] ?? empty;
+  String get providerUrlHint =>
+      _localizedValues[locale.languageCode]?['provider_url_hint'] ?? empty;
+  String get providerUrlErr => _localizedValues[locale.languageCode]?['provider_url_err'] ?? empty;
+  String get providerKeyLabel =>
+      _localizedValues[locale.languageCode]?['provider_key_label'] ?? empty;
+  String get providerKeyHint =>
+      _localizedValues[locale.languageCode]?['provider_key_hint'] ?? empty;
+  String get providerKeyErr => _localizedValues[locale.languageCode]?['provider_key_err'] ?? empty;
 
   String getError(ErrType type, Object exception) {
     switch (type) {

@@ -1,5 +1,6 @@
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/clients/openai_client.dart';
+import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/repositories/characters_repository.dart';
 import 'package:den_ai/repositories/chats_repository.dart';
 import 'package:den_ai/repositories/database.dart';
@@ -9,6 +10,7 @@ import 'package:den_ai/repositories/provider/interceptor.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
 import 'package:den_ai/repositories/user_cards_repository.dart';
 import 'package:den_ai/services/chat_generation_service.dart';
+import 'package:den_ai/services/lore_search_service.dart';
 import 'package:den_ai/services/token_counter_service.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
@@ -33,14 +35,17 @@ class DiInitializer {
       dio: dio,
     );
     final chatsRepo = ChatsRepository(database);
+    final tokenCounter = TokenCounterService();
 
-    di.registerSingleton(TokenCounterService());
+    di.registerSingleton(LoreVectorStorage());
+    di.registerSingleton(LoreSearchService());
+    di.registerSingleton(tokenCounter);
     di.registerSingleton(chatsRepo);
     di.registerSingleton(client);
     di.registerSingleton(CharactersRepository(database));
     di.registerSingleton(UserCardsRepository(database));
     di.registerSingleton(SettingsRepository(database));
     di.registerSingleton(LorebooksRepository(database));
-    di.registerSingleton(ChatGenerationService(client: client, repository: chatsRepo));
+    di.registerSingleton(ChatGenerationService(client, chatsRepo, tokenCounter));
   }
 }

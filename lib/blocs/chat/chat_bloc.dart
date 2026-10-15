@@ -1,15 +1,19 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:math' as math;
 
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/consts/consts.dart';
+import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/repositories/characters_repository.dart';
 import 'package:den_ai/repositories/chats_repository.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
 import 'package:den_ai/repositories/user_cards_repository.dart';
 import 'package:den_ai/services/chat_generation_service.dart';
+import 'package:den_ai/services/lore_search_service.dart';
 import 'package:den_ai/services/token_counter_service.dart';
 import 'package:den_ai/tools/prompt_renderer.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,6 +26,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   static const String defUser = 'User';
   final ChatGenerationService _generationService;
   final TokenCounterService _tokenCounterService;
+  final LoreSearchService _loreSearchService;
+  final LoreVectorStorage _loreVectorStorage;
+  final OpenAIClient _client;
   final ChatsRepository _repository;
   final SettingsRepository _settingsRepository;
   final CharactersRepository _charactersRepository;
@@ -29,9 +36,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final AppConfig config;
   StreamSubscription<StreamMessage>? _messageSubscription;
 
+  final Map<int, List<List<double>>> _loreVectors = {};
+
   ChatBloc(
+    this._client,
     this._generationService,
     this._tokenCounterService,
+    this._loreSearchService,
+    this._loreVectorStorage,
     this._repository,
     this._settingsRepository,
     this._charactersRepository,
@@ -312,15 +324,60 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       summary: latestSummaryContent,
     );
 
-    final messages = _getMessages(chat, systemContent, settings);
+    final messages = await _getMessages(chat, systemContent, settings, text);
+
+    try {} catch (e) {}
     return _generationService.requestAiResponse(
       chatId: chat.id,
       settings: settings,
-      formattedMessages: await messages,
+      formattedMessages: messages,
       isNew: true,
       parentId: userMessageId,
       lastActiveMsgId: null,
+      lastUserTextForError: text,
     );
+  }
+
+  Future<Map<String, String>?> _getLoreMessage(
+    Chat chat,
+    SettingsBase settings,
+    String text,
+  ) async {
+    try {
+      final lorebooks = chat.char.lorebooks;
+      if (lorebooks.isNotEmpty && text.length >= DefaultSettings.minLenForLore) {
+        String? loreContent;
+        final queryVectors = await _client.getEmbeddings(texts: [text], settings: settings);
+        final queryVector = queryVectors[0];
+        if (queryVector.isNotEmpty) {
+          for (final book in lorebooks) {
+            if (!_loreVectors.containsKey(book.id)) {
+              _loreVectors[book.id] = await _loreVectorStorage.loadVectors(book.id);
+            }
+            final vectors = _loreVectors[book.id]!;
+            if (vectors.isNotEmpty) {
+              final searchRes = _loreSearchService.findRelevantLore(
+                userInput: text,
+                entriesText: book.getEntriesTexts(),
+                allVectors: vectors,
+                queryVector: queryVector,
+              );
+
+              if (searchRes.isNotEmpty) {
+                loreContent = loreContent == null ? searchRes : '$loreContent\n\n$searchRes';
+              }
+            }
+          }
+        }
+
+        if (loreContent != null && loreContent.isNotEmpty) {
+          return {"role": "system", "content": loreContent};
+        }
+
+        return null;
+      }
+    } catch (e) {}
+    return null;
   }
 
   Future<void> _regenerateMessage(int chatId, int messageId, SettingsBase settings) async {
@@ -337,7 +394,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       summary: latestSummaryContent,
     );
 
-    final messages = await _getMessages(chat, systemContent, settings);
+    final userMessageText = message.parentId != null
+        ? chat.messages.firstWhere((e) => e.id == message.parentId!).content
+        : '';
+    final messages = await _getMessages(chat, systemContent, settings, userMessageText);
     return _generationService.requestAiResponse(
       chatId: chat.id,
       settings: settings,
@@ -352,11 +412,19 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     Chat chat,
     String systemContent,
     SettingsBase settings,
+    String userText,
   ) async {
     var accumulatedTokens =
         (await _calculateTokens(systemContent, settings)) +
         TokenLimits.templateTokens * 2 +
         TokenLimits.summaryTokens;
+
+    final loreMessage = await _getLoreMessage(chat, settings, userText);
+    if (loreMessage != null) {
+      accumulatedTokens +=
+          await _calculateTokens(loreMessage['content'] ?? '', settings) +
+          TokenLimits.templateTokens;
+    }
 
     final messages = <Map<String, String>>[
       {'role': 'system', 'content': systemContent},
@@ -375,6 +443,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           }
         }
       }
+    }
+
+    if (loreMessage != null) {
+      final targetIndex = math.max(1, messages.length - 2);
+      messages.insert(targetIndex, loreMessage);
     }
 
     return messages;

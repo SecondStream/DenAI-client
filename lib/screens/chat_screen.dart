@@ -76,6 +76,9 @@ class _ChatScreenState extends State<ChatScreen> {
           GetIt.instance.get(),
           GetIt.instance.get(),
           GetIt.instance.get(),
+          GetIt.instance.get(),
+          GetIt.instance.get(),
+          GetIt.instance.get(),
           config,
         );
         if (widget.chatId != null) {

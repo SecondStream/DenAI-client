@@ -13,7 +13,8 @@ import 'package:drift/drift.dart'
         TypedResult,
         Value,
         innerJoin,
-        leftOuterJoin;
+        leftOuterJoin,
+        Expression;
 
 import '../models/models.dart';
 
@@ -38,7 +39,13 @@ class ChatsRepository extends BaseRepository {
 
     final query = db.select(db.chats).join([
       leftOuterJoin(db.chars, db.chars.id.equalsExp(db.chats.charId)),
-      leftOuterJoin(db.messages, db.messages.id.isIn(latestMessageIds)),
+      leftOuterJoin(
+        db.messages,
+        Expression.and([
+          db.messages.id.isIn(latestMessageIds),
+          db.messages.chatId.equalsExp(db.chats.id),
+        ]),
+      ),
     ]);
 
     final List<TypedResult> rows = await query.get();
@@ -88,11 +95,14 @@ class ChatsRepository extends BaseRepository {
       final userCardData = chatRow.readTableOrNull(db.userCards);
       final finalUserCard = userCardData != null ? UserCard.fromDb(userCardData) : null;
 
-      final charQuery = db.select(db.chars).join([
-        leftOuterJoin(db.charLorebooks, db.charLorebooks.charId.equalsExp(db.chars.id)),
-        leftOuterJoin(db.lorebooks, db.lorebooks.id.equalsExp(db.charLorebooks.lorebookId)),
-        leftOuterJoin(db.loreEntries, db.loreEntries.lorebookId.equalsExp(db.lorebooks.id)),
-      ])..where(db.chars.id.equals(chatData.charId));
+      final charQuery =
+          db.select(db.chars).join([
+              leftOuterJoin(db.charLorebooks, db.charLorebooks.charId.equalsExp(db.chars.id)),
+              leftOuterJoin(db.lorebooks, db.lorebooks.id.equalsExp(db.charLorebooks.lorebookId)),
+              leftOuterJoin(db.loreEntries, db.loreEntries.lorebookId.equalsExp(db.lorebooks.id)),
+            ])
+            ..where(db.chars.id.equals(chatData.charId))
+            ..orderBy([OrderingTerm.asc(db.loreEntries.id)]);
 
       final charRows = await charQuery.get();
       if (charRows.isEmpty) {
@@ -152,7 +162,8 @@ class ChatsRepository extends BaseRepository {
           await (db.select(db.summaries)
                 ..where((tbl) => tbl.chatId.equals(chatId))
                 ..orderBy([
-                  (tbl) => OrderingTerm(expression: tbl.createdAt, mode: OrderingMode.asc),
+                  (tbl) =>
+                      OrderingTerm(expression: tbl.lastSummarizedMessageId, mode: OrderingMode.asc),
                 ]))
               .get();
 
@@ -515,6 +526,17 @@ class ChatsRepository extends BaseRepository {
 
       return await getChatById(chatId);
     });
+  }
+
+  Future<void> addSummary(int chatId, int anchorMessageId, String content) async {
+    final companion = SummariesCompanion.insert(
+      chatId: chatId,
+      lastSummarizedMessageId: anchorMessageId,
+      content: Value(content),
+      createdAt: Value(DateTime.now()),
+    );
+
+    await db.into(db.summaries).insert(companion);
   }
 
   StreamTransformer<Uint8List, String> get unit8BufferToString =>

@@ -19,7 +19,12 @@ class LorebookEntriesScreen extends StatelessWidget {
     final loc = AppLocalization.of(context);
 
     return BlocProvider<LorebookEntriesBloc>(
-      create: (context) => LorebookEntriesBloc(GetIt.instance.get())..add(LoadEntriesEvent(bookId)),
+      create: (context) => LorebookEntriesBloc(
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+      )..add(LoadEntriesEvent(bookId)),
       child: Scaffold(
         appBar: AppBar(
           title: BlocBuilder<LorebookEntriesBloc, LorebookEntriesState>(

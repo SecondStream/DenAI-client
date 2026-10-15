@@ -17,11 +17,15 @@ class CharactersRepository extends BaseRepository {
   }
 
   Future<Char?> getCharacterById(int characterId) async {
-    final query = db.select(db.chars).join([
-      leftOuterJoin(db.charLorebooks, db.charLorebooks.charId.equalsExp(db.chars.id)),
-      leftOuterJoin(db.lorebooks, db.lorebooks.id.equalsExp(db.charLorebooks.lorebookId)),
-      leftOuterJoin(db.loreEntries, db.loreEntries.lorebookId.equalsExp(db.lorebooks.id)),
-    ])..where(db.chars.id.equals(characterId));
+    final query =
+        db.select(db.chars).join([
+            leftOuterJoin(db.charLorebooks, db.charLorebooks.charId.equalsExp(db.chars.id)),
+            leftOuterJoin(db.lorebooks, db.lorebooks.id.equalsExp(db.charLorebooks.lorebookId)),
+            leftOuterJoin(db.loreEntries, db.loreEntries.lorebookId.equalsExp(db.lorebooks.id)),
+          ])
+          ..where(db.chars.id.equals(characterId))
+          ..orderBy([OrderingTerm.asc(db.loreEntries.id)]);
+
     final List<TypedResult> rows = await query.get();
     if (rows.isEmpty) return null;
     final charData = rows.first.readTable(db.chars);

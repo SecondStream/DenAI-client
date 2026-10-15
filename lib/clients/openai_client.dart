@@ -8,6 +8,7 @@ import 'package:dio/dio.dart';
 class OpenAIClient {
   static const String urlChat = "/chat/completions";
   static const String urlModels = "/models";
+  static const String urlEmbeddings = "/embeddings";
   final String defaultModel;
   final String defaultVisionModel;
   final String defaultEmbeddingModel;
@@ -40,7 +41,7 @@ class OpenAIClient {
 
     print('PAYLOAD: $payload');
 
-    const int maxRetries = 4;
+    const int maxRetries = 1;
     final random = Random();
 
     double retryDelaySeconds = 25.0 + random.nextDouble();
@@ -113,6 +114,40 @@ class OpenAIClient {
         retryDelaySeconds += 5.0 + random.nextDouble();
       }
     }
+  }
+
+  Future<List<List<double>>> getEmbeddings({
+    required List<String> texts,
+    required SettingsBase settings,
+  }) async {
+    if (texts.isEmpty) return const [];
+
+    try {
+      final response = await dio.post(
+        '${settings.provider.url.replaceAll(RegExp(r'/$'), '')}$urlEmbeddings',
+        options: Options(headers: _getHeaders(settings.provider.key)),
+        data: {'model': settings.embeddingModelName, 'input': texts},
+      );
+
+      if (response.statusCode == 200 && response.data != null) {
+        final data = response.data as Map<String, dynamic>;
+        final dataList = data['data'] as List<dynamic>;
+
+        final List<List<double>> result = [];
+        if (dataList.length != texts.length) throw Error();
+        for (final item in dataList) {
+          if (item is Map<String, dynamic>) {
+            final embeddingList = item['embedding'] as List<dynamic>;
+            result.add(embeddingList.map((e) => double.tryParse(e.toString()) ?? 0.0).toList());
+          }
+        }
+        return result;
+      }
+    } catch (e) {
+      rethrow;
+    }
+
+    throw Error();
   }
 
   Future<List<dynamic>> _getRemoteModels(SettingsBase settings) async {

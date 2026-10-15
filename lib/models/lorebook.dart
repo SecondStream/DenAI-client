@@ -46,6 +46,14 @@ class Lorebook extends Persona {
     final Map<String, dynamic> map = jsonDecode(validJson);
     return CropData.fromJson(map);
   }
+
+  List<String> getEntriesTexts() {
+    final texts = <String>[];
+    for (final entry in entries) {
+      texts.add('${entry.title}\n${entry.content}');
+    }
+    return texts;
+  }
 }
 
 @DataClassName('LorebookData')

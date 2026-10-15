@@ -13,9 +13,12 @@ class LorebooksRepository extends BaseRepository {
   }
 
   Future<Lorebook> getLorebook(int id) async {
-    final query = db.select(db.lorebooks).join([
-      leftOuterJoin(db.loreEntries, db.loreEntries.lorebookId.equalsExp(db.lorebooks.id)),
-    ])..where(db.lorebooks.id.equals(id));
+    final query =
+        db.select(db.lorebooks).join([
+            leftOuterJoin(db.loreEntries, db.loreEntries.lorebookId.equalsExp(db.lorebooks.id)),
+          ])
+          ..where(db.lorebooks.id.equals(id))
+          ..orderBy([OrderingTerm.asc(db.loreEntries.id)]);
 
     final List<TypedResult> rows = await query.get();
 
@@ -74,8 +77,14 @@ class LorebooksRepository extends BaseRepository {
     return await getLorebook(finalId);
   }
 
-  Future<Lorebook> saveLoreEntry(int? id, int lorebookId, String title, String content) async {
+  Future<(Lorebook, int?)> saveLoreEntry(
+    int? id,
+    int lorebookId,
+    String title,
+    String content,
+  ) async {
     return await db.transaction(() async {
+      int? saved = id;
       if (id != null && id > 0) {
         final companion = LoreEntriesCompanion(
           lorebookId: Value(lorebookId),
@@ -91,10 +100,10 @@ class LorebooksRepository extends BaseRepository {
           content: Value(content),
         );
 
-        await db.into(db.loreEntries).insert(companion);
+        saved = await db.into(db.loreEntries).insert(companion);
       }
 
-      return await getLorebook(lorebookId);
+      return (await getLorebook(lorebookId), saved);
     });
   }
 

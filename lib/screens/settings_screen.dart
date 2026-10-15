@@ -107,36 +107,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          _buildSectionTitle(theme, 'Провайдер API'),
+                          _buildSectionTitle(theme, loc.apiProvider),
                           const SizedBox(height: 16),
-
-                          // _buildTextField(
-                          //   context,
-                          //   controller: _providerNameTextController,
-                          //   label: 'Название',
-                          //   hint: 'Любое для удобства',
-                          //   minLines: 1,
-                          //   maxLines: 1,
-                          //   validator: (v) => v!.trim().isEmpty ? 'Введите имя' : null,
-                          // ),
-                          // _buildTextField(
-                          //   context,
-                          //   controller: _providerUrlTextController,
-                          //   label: 'Адрес API',
-                          //   hint: 'https://openrouter.ai/api/v1',
-                          //   minLines: 1,
-                          //   maxLines: 1,
-                          //   validator: (v) => v!.trim().isEmpty ? 'Укажите адрес API' : null,
-                          // ),
-                          // _buildTextField(
-                          //   context,
-                          //   controller: _providerKeyTextController,
-                          //   label: 'Ключ АPI',
-                          //   hint: 'sk-XXXXXXXXXXXXXXXXXXXXXXXXXX',
-                          //   minLines: 1,
-                          //   maxLines: 1,
-                          //   validator: (v) => v!.trim().isEmpty ? 'Укажите ключ API' : null,
-                          // ),
                           _buildDropdownProviders(
                             label: loc.labelProvider,
                             value: state.settings.provider.id,
@@ -168,7 +140,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                   icon: const Icon(Icons.edit, size: 22),
                                   label: Text(
-                                    'Изменить',
+                                    loc.change,
                                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                                   ),
                                   onPressed: () => _openEditProvider(context, provider),
@@ -188,7 +160,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                                   ),
                                   icon: const Icon(Icons.api, size: 22),
                                   label: Text(
-                                    'Добавить провайдер',
+                                    loc.apiProviderAdd,
                                     style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                                   ),
                                   onPressed: () => _openEditProvider(context, null),

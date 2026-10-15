@@ -56,7 +56,7 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
             size: 22,
           ),
           const SizedBox(width: 10),
-          Text(widget.provider == null ? 'Добавление провайдера' : 'Изменение провайдера'),
+          Text(widget.provider == null ? loc.providerAdding : loc.providerEditing),
         ],
       ),
       content: SizedBox(
@@ -75,8 +75,8 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                   fontWeight: FontWeight.bold,
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Название',
-                  hintText: 'Любое для удобства',
+                  labelText: loc.providerNameLabel,
+                  hintText: loc.providerNameHint,
                   hintStyle: TextStyle(color: Colors.grey.shade600),
                   fillColor: theme.cardColor,
                   filled: true,
@@ -86,7 +86,7 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                   ),
                   contentPadding: const EdgeInsets.all(16),
                 ),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Введите название' : null,
+                validator: (v) => v == null || v.trim().isEmpty ? loc.providerNameErr : null,
               ),
               const SizedBox(height: 20),
               TextFormField(
@@ -97,8 +97,8 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                   fontWeight: FontWeight.bold,
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Адрес API',
-                  hintText: 'https://youprovider.com/api/v1',
+                  labelText: loc.providerUrlLabel,
+                  hintText: loc.providerUrlHint,
                   hintStyle: TextStyle(color: Colors.grey.shade600),
                   fillColor: theme.cardColor,
                   filled: true,
@@ -108,7 +108,7 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                   ),
                   contentPadding: const EdgeInsets.all(16),
                 ),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Введите адрес API' : null,
+                validator: (v) => v == null || v.trim().isEmpty ? loc.providerUrlErr : null,
               ),
               SizedBox(height: 20),
               TextFormField(
@@ -119,8 +119,8 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                   fontWeight: FontWeight.bold,
                 ),
                 decoration: InputDecoration(
-                  labelText: 'Ключ API',
-                  hintText: 'sk-XXXXXXXXXXXXXXXXXXXXXXXXXXX',
+                  labelText: loc.providerKeyLabel,
+                  hintText: loc.providerKeyHint,
                   hintStyle: TextStyle(color: Colors.grey.shade600),
                   fillColor: theme.cardColor,
                   filled: true,
@@ -130,7 +130,7 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                   ),
                   contentPadding: const EdgeInsets.all(16),
                 ),
-                validator: (v) => v == null || v.trim().isEmpty ? 'Введите ключ API' : null,
+                validator: (v) => v == null || v.trim().isEmpty ? loc.providerNameErr : null,
               ),
             ],
           ),
