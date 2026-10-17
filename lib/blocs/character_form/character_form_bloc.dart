@@ -1,11 +1,17 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:typed_data';
+import 'package:den_ai/clients/openai_client.dart';
+import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/repositories/lorebooks_repository.dart';
+import 'package:den_ai/repositories/settings_repository.dart';
+import 'package:den_ai/tools/character_card_tool.dart';
 import 'package:den_ai/tools/file_tool.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/repositories/characters_repository.dart';
+import 'package:path_provider/path_provider.dart';
 
 part 'character_form_event.dart';
 
@@ -14,8 +20,17 @@ part 'character_form_state.dart';
 class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
   final CharactersRepository _repository;
   final LorebooksRepository _loreRepository;
+  final SettingsRepository _settingsRepository;
+  final OpenAIClient _client;
+  final LoreVectorStorage _vectorStorage;
 
-  CharacterFormBloc(this._repository, this._loreRepository) : super(CharacterFormInitialState()) {
+  CharacterFormBloc(
+    this._repository,
+    this._loreRepository,
+    this._settingsRepository,
+    this._client,
+    this._vectorStorage,
+  ) : super(CharacterFormInitialState()) {
     on<SubmitCharacterFormEvent>(_onSubmitForm);
     on<DeleteCharacterEvent>(_onDeleteCharacter);
     on<InitCharacterFormEvent>(_onInitCharacterForm);
@@ -54,33 +69,74 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
   Future<void> _onSelectedCard(SelectedCardEvent event, Emitter<CharacterFormState> emit) async {
     final currentState = state;
     if (currentState is! CharacterFormLoadedState) return;
+
     emit(CharacterFormLoadingState());
+
     try {
-      throw Exception(); // TODO
-      // final char = await _repository.loadByCard(event.card);
-      // final avatarPath = char.getAvatar(event.baseUrl);
-      // var avatar = avatarPath != null ? await _repository.loadAvatar(avatarPath) : null;
-      // List<Lorebook> allLorebooks = currentState.allLorebooks;
-      // if (char.lorebooks.isNotEmpty) {
-      //   try {
-      //     allLorebooks = await _loreRepository.getAllLorebooks();
-      //   } catch (_) {}
-      // }
-      // emit(
-      //   CharacterFormLoadedCardState(
-      //     character: char,
-      //     allLorebooks: allLorebooks,
-      //     selectedLorebookIds: char.lorebooks.isNotEmpty
-      //         ? char.lorebooks.map((e) => e.id).toList()
-      //         : [],
-      //     avatar: avatar,
-      //   ),
-      // );
-      // //TODO: tmp
-      // await Future.delayed(Duration(milliseconds: 100));
-      // emit((state as CharacterFormLoadedState).copy());
+      final bytes = await event.card.readAsBytes();
+      final importedData = CharacterCardTool.importCardFromPng(bytes);
+
+      if (importedData == null) {
+        throw Exception('Не удалось распарсить карточку персонажа');
+      }
+
+      String localAvatarPath = await FileTool.saveAvatar(event.card);
+      final bookIds = <int>[];
+
+      final booksToImport = importedData.lorebooks.take(3);
+
+      for (final book in booksToImport) {
+        final List<String> entryTexts = book.entries
+            .map((e) => '${e.title}\n${e.content}')
+            .where((content) => content.isNotEmpty)
+            .toList();
+
+        List<List<double>> embeddings = [];
+
+        if (entryTexts.isNotEmpty) {
+          final settings = await _settingsRepository.getSettings();
+          embeddings = await _client.getEmbeddings(texts: entryTexts, settings: settings);
+        }
+
+        final Lorebook newBook = await _loreRepository.saveLorebook(
+          name: book.name,
+          about: book.description,
+        );
+
+        Lorebook? updatedBook;
+        for (final entry in book.entries) {
+          (updatedBook, _) = await _loreRepository.saveLoreEntry(
+            null,
+            newBook.id,
+            entry.title,
+            entry.content,
+          );
+        }
+
+        if (updatedBook != null && embeddings.isNotEmpty) {
+          _vectorStorage.saveVectors(updatedBook.id, embeddings);
+        }
+
+        bookIds.add(newBook.id);
+      }
+
+      final Char newChar = await _repository.saveCharacter(
+        id: currentState.character?.id,
+        name: importedData.name,
+        avatarPath: localAvatarPath,
+        appearance: importedData.description,
+        personality: importedData.personality,
+        scenario: importedData.scenario,
+        greeting: importedData.greeting,
+        prompt: importedData.instructions,
+        lorebookIds: bookIds,
+        cropData: null,
+      );
+
+      emit(CharacterFormSuccessState(newChar));
     } catch (e) {
       emit(CharacterFormErrorState(ErrType.loadCharacter, e));
+      emit(currentState.copy());
     }
   }
 
@@ -129,25 +185,43 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
     if (currentState is! CharacterFormLoadedState) return;
     emit(CharacterFormLoadingState());
     try {
-      final remotePath = await _repository.exportCard(
-        id: event.id,
+      final lorebooks = (event.lorebookIds.isNotEmpty)
+          ? await _loreRepository.getLorebooks(event.lorebookIds)
+          : <Lorebook>[];
+      final character = Char(
+        id: -1,
         name: event.name,
+        lorebooks: lorebooks,
         appearance: event.appearance,
         personality: event.personality,
         scenario: event.scenario,
         greeting: event.greeting,
         prompt: event.prompt,
-        lorebookIds: event.lorebookIds,
-        avatarFile: event.avatarFile,
       );
 
-      if (remotePath != null) {
-        // TODO: tmp
-        final file = await _repository.loadAvatar('${event.baseUrl}/$remotePath');
-        if (file != null) {
-          await file.copy(event.path);
+      Uint8List? avatar = event.avatarFile != null ? await event.avatarFile!.readAsBytes() : null;
+
+      if (avatar == null && event.id != null) {
+        final char = await _repository.getCharacterById(event.id!);
+        if (char != null) {
+          final docDir = (await getApplicationDocumentsDirectory()).path;
+          final avatarPath = char.getAvatar(docDir);
+          if (avatarPath != null) {
+            avatar = await File(avatarPath).readAsBytes();
+          }
         }
       }
+
+      final res = await CharacterCardTool.exportCard(character: character, avatarBytes: avatar);
+
+      emit(
+        CharacterFormExportCardSucessState(
+          json: res.cardJson,
+          image: res.cardPng,
+          name: character.name.isNotEmpty ? character.name : 'character_card',
+        ),
+      );
+
       emit(currentState.copy());
     } catch (e) {
       emit(CharacterFormErrorState(ErrType.saveCharacter, e));

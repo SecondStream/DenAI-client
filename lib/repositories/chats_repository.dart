@@ -352,29 +352,6 @@ class ChatsRepository extends BaseRepository {
     await (db.update(db.chats)..where((tbl) => tbl.id.equals(chatId))).write(companion);
   }
 
-  // Future<void> regenerateMessage(int chatId) async {
-  //   try {
-  //     final ResponseBody? r = await remote.post<ResponseBody, Map<String, dynamic>>(
-  //       '$endpoint/$chatId/regenerate',
-  //       options: Options(responseType: ResponseType.stream),
-  //     );
-
-  //     if (r != null) {
-  //       final stream = r.stream
-  //           .transform(unit8BufferToString)
-  //           .transform(const LineSplitter())
-  //           .where((line) => line.trim().isNotEmpty) // maybe ping
-  //           .map((jsonStr) => StreamMessage.fromJson(jsonDecode(jsonStr)));
-
-  //       await for (final message in stream) {
-  //         _messageController.add(message);
-  //       }
-  //     }
-  //   } catch (e) {
-  //     _messageController.addError(StreamMessageError(chatId: chatId));
-  //   }
-  // }
-
   Future<int> insertMessage({
     required int chatId,
     required MessageRole role,

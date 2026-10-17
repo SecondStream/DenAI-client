@@ -2,12 +2,14 @@ import 'dart:io';
 
 class StreamMessage {
   final int chatId;
+  final int charId;
   final String token;
   final String model;
   final MessageStatus status;
 
   StreamMessage({
     required this.chatId,
+    required this.charId,
     required this.token,
     required this.model,
     required this.status,

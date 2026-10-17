@@ -349,6 +349,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     return _generationService.requestAiResponse(
       chatId: chat.id,
+      charId: chat.char.id,
       settings: settings,
       formattedMessages: messages,
       isNew: true,
@@ -397,6 +398,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
         return null;
       }
+      // ignore: empty_catches
     } catch (e) {}
     return null;
   }
@@ -421,6 +423,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     final messages = await _getMessages(chat, systemContent, settings, userMessageText);
     return _generationService.requestAiResponse(
       chatId: chat.id,
+      charId: chat.char.id,
       settings: settings,
       formattedMessages: messages,
       isNew: true,

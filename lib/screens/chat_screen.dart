@@ -287,6 +287,8 @@ class _ChatScreenState extends State<ChatScreen> {
     bool isLastMessage,
   ) {
     late Widget messageWidget;
+    final isRegeneratinonActive =
+        !isTyping && isLastMessage && message.parentId != null && message.parentId! > 0;
     if (message.role == MessageRole.user) {
       messageWidget = UserMessage(
         message: message,
@@ -301,18 +303,18 @@ class _ChatScreenState extends State<ChatScreen> {
         isThinking: isTyping,
         onEditMessage: isTyping ? null : (_) => _showEditMessageDialog(context, loc, message),
 
-        onSwitchMessage: isTyping || !isLastMessage
-            ? null
-            : (messageId, direction) {
+        onSwitchMessage: isRegeneratinonActive
+            ? (messageId, direction) {
                 context.read<ChatBloc>().add(
                   SwitchMessageBranchEvent(messageId: messageId, direction: direction),
                 );
-              },
-        onRegenerateMessage: isTyping || !isLastMessage
-            ? null
-            : (messageId) {
+              }
+            : null,
+        onRegenerateMessage: isRegeneratinonActive
+            ? (messageId) {
                 context.read<ChatBloc>().add(RegenerateLastAiMessageEvent(messageId));
-              },
+              }
+            : null,
       );
     }
 

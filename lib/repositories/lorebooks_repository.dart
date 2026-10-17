@@ -40,6 +40,36 @@ class LorebooksRepository extends BaseRepository {
     return Lorebook.fromDb(lorebookData, entries: finalEntries);
   }
 
+  Future<List<Lorebook>> getLorebooks(List<int> ids) async {
+    if (ids.isEmpty) return <Lorebook>[];
+
+    final query =
+        db.select(db.lorebooks).join([
+            leftOuterJoin(db.loreEntries, db.loreEntries.lorebookId.equalsExp(db.lorebooks.id)),
+          ])
+          ..where(db.lorebooks.id.isIn(ids))
+          ..orderBy([OrderingTerm.asc(db.lorebooks.id), OrderingTerm.asc(db.loreEntries.id)]);
+
+    final List<TypedResult> rows = await query.get();
+    final Map<int, ({LorebookData book, List<LoreEntry> entries})> grouped = {};
+
+    for (final row in rows) {
+      final bookData = row.readTable(db.lorebooks);
+      final entryData = row.readTableOrNull(db.loreEntries);
+
+      final entry = grouped.putIfAbsent(
+        bookData.id,
+        () => (book: bookData, entries: <LoreEntry>[]),
+      );
+
+      if (entryData != null) {
+        entry.entries.add(LoreEntry.fromDb(entryData));
+      }
+    }
+
+    return grouped.values.map((item) => Lorebook.fromDb(item.book, entries: item.entries)).toList();
+  }
+
   Future<void> deleteLorebook(int id) async {
     await (db.delete(db.lorebooks)..where((tbl) => tbl.id.equals(id))).go();
   }

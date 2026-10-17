@@ -39,7 +39,6 @@ class SubmitCharacterFormEvent extends CharacterFormEvent {
 }
 
 class ExportCardEvent extends CharacterFormEvent {
-  final String path;
   final String baseUrl;
   final int? id;
   final String name;
@@ -52,7 +51,6 @@ class ExportCardEvent extends CharacterFormEvent {
   final List<int> lorebookIds;
 
   ExportCardEvent({
-    required this.path,
     required this.baseUrl,
     this.id,
     required this.name,

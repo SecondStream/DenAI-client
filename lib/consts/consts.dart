@@ -1,6 +1,6 @@
 class MessageTags {
   static const String urlMarker = '{url}';
-  static const String imgTemplate = '\n![x250]($urlMarker)\n';
+  static const String imgTemplate = '\n![250x]($urlMarker)\n';
   static const String img = '[img]';
   static const String imgXmlStart = '<attached_image>';
   static const String imgXmlEnd = '</attached_image>';

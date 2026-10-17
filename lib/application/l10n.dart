@@ -189,6 +189,7 @@ class AppLocalization {
       'import': 'Import',
       'export_ext': 'Card V2',
       'import_ext': 'PNG/JSON',
+      'export_label': 'Character card',
 
       'api_provider': 'API Provider',
       'api_provider_add': 'Add provider',
@@ -383,6 +384,7 @@ class AppLocalization {
       'import': 'Импорт',
       'export_ext': 'Card V2',
       'import_ext': 'PNG/JSON',
+      'export_label': 'Карточка персонажа',
 
       'api_provider': 'Провайдер API',
       'api_provider_add': 'Добавить провайдер',
@@ -635,6 +637,7 @@ class AppLocalization {
   String get providerKeyHint =>
       _localizedValues[locale.languageCode]?['provider_key_hint'] ?? empty;
   String get providerKeyErr => _localizedValues[locale.languageCode]?['provider_key_err'] ?? empty;
+  String get exportLabel => _localizedValues[locale.languageCode]?['export_label'] ?? empty;
 
   String getError(ErrType type, Object exception) {
     switch (type) {

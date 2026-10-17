@@ -31,12 +31,12 @@ abstract class FileTool {
     return file != null ? File(file.path) : null;
   }
 
-  static Future<String?> getExportPath(AppLocalization loc, String charName) async {
-    const XTypeGroup typeGroup = XTypeGroup(label: 'PNG images', extensions: <String>['png']);
+  static Future<String?> getExportPath(AppLocalization loc, String charName, String ext) async {
+    final XTypeGroup typeGroup = XTypeGroup(label: loc.exportLabel, extensions: <String>[ext]);
 
     final output = await getSaveLocation(
       acceptedTypeGroups: <XTypeGroup>[typeGroup],
-      suggestedName: '$charName.png',
+      suggestedName: '$charName.$ext',
       confirmButtonText: loc.export,
       canCreateDirectories: true,
     );

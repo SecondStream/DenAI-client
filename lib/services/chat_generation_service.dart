@@ -19,6 +19,7 @@ class ChatGenerationService {
   Stream<StreamMessage> get allMessagesStream => _messageController.stream;
 
   final Map<int, StreamSubscription<String>> _activeGenerations = {};
+  final Map<int, Timer> _timers = {};
 
   ChatGenerationService(this._client, this._repository, this._tokenCounterService);
 
@@ -36,6 +37,7 @@ class ChatGenerationService {
 
   Future<void> requestAiResponse({
     required int chatId,
+    required int charId,
     required SettingsBase settings,
     required List<Map<String, String>> formattedMessages,
     required bool isNew,
@@ -49,6 +51,7 @@ class ChatGenerationService {
     _messageController.add(
       StreamMessage(
         chatId: chatId,
+        charId: charId,
         token: "",
         model: settings.modelName,
         status: MessageStatus.thinking,
@@ -58,6 +61,22 @@ class ChatGenerationService {
     bool isSuccess = true;
     String accumulatedText = "";
 
+    int lastTokenTimestamp = DateTime.now().millisecondsSinceEpoch;
+    _timers[chatId] = Timer.periodic(const Duration(milliseconds: 500), (timer) {
+      final now = DateTime.now().millisecondsSinceEpoch;
+      if (now - lastTokenTimestamp >= 500) {
+        _messageController.add(
+          StreamMessage(
+            chatId: chatId,
+            charId: charId,
+            token: accumulatedText,
+            model: settings.modelName,
+            status: MessageStatus.typing,
+          ),
+        );
+      }
+    });
+
     final Stream<String> tokenStream = _client.sendMessage(
       settings: settings,
       messages: formattedMessages,
@@ -65,11 +84,14 @@ class ChatGenerationService {
 
     final subscription = tokenStream.listen(
       (String token) {
+        lastTokenTimestamp = DateTime.now().millisecondsSinceEpoch;
+
         accumulatedText += token;
 
         _messageController.add(
           StreamMessage(
             chatId: chatId,
+            charId: charId,
             token: accumulatedText,
             model: settings.modelName,
             status: MessageStatus.typing,
@@ -108,13 +130,12 @@ class ChatGenerationService {
           _messageController.add(
             StreamMessage(
               chatId: chatId,
+              charId: charId,
               token: accumulatedText,
               model: settings.modelName,
               status: MessageStatus.completed,
             ),
           );
-
-          unawaited(checkAndRunBackgroundSummarize(chatId: chatId, settings: settings));
         } catch (e) {
           await _rollbackAiAnswer(
             parentId: parentId,
@@ -140,6 +161,10 @@ class ChatGenerationService {
   }
 
   void _cleanup(int chatId) {
+    if (_timers.containsKey(chatId)) {
+      _timers[chatId]?.cancel();
+      _timers.remove(chatId);
+    }
     _activeGenerations.remove(chatId);
   }
 

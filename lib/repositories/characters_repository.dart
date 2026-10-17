@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:den_ai/repositories/database.dart'
     show LorebookData, CharsCompanion, CharLorebooksCompanion;
 import 'package:drift/drift.dart';
@@ -68,64 +67,8 @@ class CharactersRepository extends BaseRepository {
     return Char.fromDb(charData, lorebooks: finalLorebooks);
   }
 
-  Future<Char?> loadByCard(File card) async {
-    return null; // TODO
-    // final formMap = {
-    //   'card': await MultipartFile.fromFile(
-    //     card.path,
-    //     filename: card.path.split(Platform.pathSeparator).last,
-    //   ),
-    // };
-    // final formData = FormData.fromMap(formMap);
-    // final response = await remote.post('$endpoint/card', data: formData);
-    // _clearCache();
-    // return Char.fromJson(response);
-  }
-
-  Future<File?> loadAvatar(String url) async {
-    return null; // TODO
-    // return remote.download(url);
-  }
-
   Future<int> deleteCharacter(int id) async {
     return await (db.delete(db.chars)..where((tbl) => tbl.id.equals(id))).go();
-  }
-
-  Future<String?> exportCard({
-    int? id,
-    required String name,
-    required String appearance,
-    required String personality,
-    required String scenario,
-    required String greeting,
-    required String prompt,
-    required List<int> lorebookIds,
-    File? avatarFile,
-  }) async {
-    return null; // TODO
-    // final Map<String, dynamic> formMap = {
-    //   'name': name,
-    //   'appearance': appearance,
-    //   'personality': personality,
-    //   'scenario': scenario,
-    //   'greeting': greeting,
-    //   'prompt': prompt,
-    //   'lorebook_ids': jsonEncode(lorebookIds),
-    // };
-
-    // if (id != null && id > 0) {
-    //   formMap['id'] = id.toString();
-    // }
-
-    // if (avatarFile != null) {
-    //   formMap['avatar_file'] = await MultipartFile.fromFile(
-    //     avatarFile.path,
-    //     filename: avatarFile.path.split(Platform.pathSeparator).last,
-    //   );
-    // }
-
-    // final formData = FormData.fromMap(formMap);
-    // return await remote.post('$endpoint/card-export', data: formData);
   }
 
   Future<Char> saveCharacter({
@@ -154,7 +97,7 @@ class CharactersRepository extends BaseRepository {
           scenario: Value(scenario),
           greeting: Value(greeting),
           prompt: Value(prompt),
-          crop: crop != null ? Value(crop) : const Value.absent(),
+          crop: crop != null || avatarPath != null ? Value(crop) : const Value.absent(),
           avatar: avatarPath != null ? Value(avatarPath) : const Value.absent(),
           background: backgroundPath != null ? Value(backgroundPath) : const Value.absent(),
         );

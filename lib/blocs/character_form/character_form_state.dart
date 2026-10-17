@@ -55,3 +55,11 @@ class CharacterFormErrorState extends CharacterFormState {
 class CharacterDeleteSuccessState extends CharacterFormState {
   const CharacterDeleteSuccessState();
 }
+
+class CharacterFormExportCardSucessState extends CharacterFormState {
+  final String name;
+  final Map<String, dynamic> json;
+  final Uint8List? image;
+
+  const CharacterFormExportCardSucessState({required this.name, required this.json, this.image});
+}

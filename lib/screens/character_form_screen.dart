@@ -1,4 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/blocs/character_form/character_form_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
@@ -99,9 +101,13 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     var isEditing = _characterId != null;
 
     return BlocProvider<CharacterFormBloc>(
-      create: (context) =>
-          CharacterFormBloc(GetIt.instance.get(), GetIt.instance.get())
-            ..add(InitCharacterFormEvent(_characterId)),
+      create: (context) => CharacterFormBloc(
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+      )..add(InitCharacterFormEvent(_characterId)),
       child: Scaffold(
         appBar: AppBar(
           title: Text(isEditing ? loc.characterFormTitleEdit : loc.characterFormTitleCreate),
@@ -110,6 +116,8 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
           listener: (context, state) {
             if (state is CharacterFormSuccessState || state is CharacterDeleteSuccessState) {
               context.pop(true);
+            } else if (state is CharacterFormExportCardSucessState) {
+              _exportCardSave(context, loc, state.name, jsonEncode(state.json), state.image);
             }
           },
           builder: (context, state) {
@@ -491,25 +499,20 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
 
   Future<void> _exportCard(BuildContext context, AppLocalization loc) async {
     if (!_formKey.currentState!.validate()) return;
-    final name = _nameController.text.trim();
-    final path = await FileTool.getExportPath(loc, name.isNotEmpty ? name : 'char_card');
-    if (path != null && context.mounted) {
-      context.read<CharacterFormBloc>().add(
-        ExportCardEvent(
-          path: path,
-          baseUrl: AppConfig.of(context).baseUrl,
-          id: _characterId,
-          name: name,
-          appearance: _appearanceController.text.trim(),
-          personality: _personalityController.text.trim(),
-          scenario: _scenarioController.text.trim(),
-          greeting: _greetingController.text.trim(),
-          prompt: _promptController.text.trim(),
-          avatarFile: selectedAvatarFile,
-          lorebookIds: _selectedLorebookIds,
-        ),
-      );
-    }
+    context.read<CharacterFormBloc>().add(
+      ExportCardEvent(
+        baseUrl: AppConfig.of(context).baseUrl,
+        id: _characterId,
+        name: _nameController.text.trim(),
+        appearance: _appearanceController.text.trim(),
+        personality: _personalityController.text.trim(),
+        scenario: _scenarioController.text.trim(),
+        greeting: _greetingController.text.trim(),
+        prompt: _promptController.text.trim(),
+        avatarFile: selectedAvatarFile,
+        lorebookIds: _selectedLorebookIds,
+      ),
+    );
   }
 
   void _submitForm(BuildContext context) {
@@ -529,5 +532,24 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
         lorebookIds: _selectedLorebookIds,
       ),
     );
+  }
+
+  Future<void> _exportCardSave(
+    BuildContext context,
+    AppLocalization loc,
+    String name,
+    String json,
+    Uint8List? image,
+  ) async {
+    final fileExt = image != null ? 'png' : 'json';
+    final path = await FileTool.getExportPath(loc, name, fileExt);
+    if (path != null) {
+      final file = File(path);
+      if (image != null) {
+        await file.writeAsBytes(image, flush: true);
+      } else {
+        await file.writeAsString(json, flush: true);
+      }
+    }
   }
 }

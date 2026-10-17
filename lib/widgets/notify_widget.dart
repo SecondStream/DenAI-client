@@ -16,7 +16,7 @@ class NotifyWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider<NotifyBloc>(
-      create: (context) => NotifyBloc(GetIt.instance.get()),
+      create: (context) => NotifyBloc(GetIt.instance.get(), GetIt.instance.get()),
       child: BlocListener<NotifyBloc, NotifyState>(
         listener: (ctx, state) {
           final context = navKey.currentState?.context;
