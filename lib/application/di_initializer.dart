@@ -14,11 +14,14 @@ import 'package:den_ai/services/lore_search_service.dart';
 import 'package:den_ai/services/token_counter_service.dart';
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DiInitializer {
-  static void init() {
+  static Future<void> init() async {
     final di = GetIt.instance;
 
+    final prefs = await SharedPreferences.getInstance();
+    di.registerSingleton(prefs);
     final dio = Dio();
     dio.interceptors.add(ErrorInterceptor());
     dio.interceptors.add(LogInterceptor());
