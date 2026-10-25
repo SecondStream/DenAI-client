@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/models/models.dart';
@@ -8,7 +9,6 @@ import 'package:den_ai/repositories/settings_repository.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 part 'settings_event.dart';
 
@@ -101,9 +101,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     } catch (_) {}
 
     try {
-      final Directory appDocDir = await getApplicationDocumentsDirectory();
-      final Directory customTokenizersDir = Directory(p.join(appDocDir.path, 'tokenizers'));
-
+      final Directory customTokenizersDir = Directory(AppEnv.tokenizersDir);
       if (!await customTokenizersDir.exists()) {
         await customTokenizersDir.create(recursive: true);
       } else {
@@ -115,7 +113,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           }
         }
       }
-    } catch (e) {}
+    } catch (_) {}
 
     return tokenizers;
   }

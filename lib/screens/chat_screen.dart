@@ -66,7 +66,6 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
-    final config = AppConfig.of(context);
     return BlocProvider<ChatBloc>(
       create: (context) {
         final bloc = ChatBloc(
@@ -79,7 +78,6 @@ class _ChatScreenState extends State<ChatScreen> {
           GetIt.instance.get(),
           GetIt.instance.get(),
           GetIt.instance.get(),
-          config,
         );
         if (widget.chatId != null) {
           bloc.add(LoadChatHistoryEvent(widget.chatId!));

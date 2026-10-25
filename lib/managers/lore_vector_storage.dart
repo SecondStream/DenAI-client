@@ -1,14 +1,13 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:den_ai/application/env.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 class LoreVectorStorage {
   static const String _subDir = 'lore_vectors';
 
   Future<File> _getVectorFile(int lorebookId) async {
-    final Directory appDocDir = await getApplicationDocumentsDirectory();
-    final Directory targetDir = Directory(p.join(appDocDir.path, _subDir));
+    final Directory targetDir = Directory(p.join(AppEnv.supportDir, _subDir));
 
     if (!await targetDir.exists()) {
       await targetDir.create(recursive: true);

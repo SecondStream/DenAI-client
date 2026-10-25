@@ -4,7 +4,6 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
-import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/consts/consts.dart';
@@ -36,7 +35,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final SettingsRepository _settingsRepository;
   final CharactersRepository _charactersRepository;
   final UserCardsRepository _userCardsRepository;
-  final AppConfig config;
   StreamSubscription<StreamMessage>? _messageSubscription;
 
   final Map<int, List<List<double>>> _loreVectors = {};
@@ -51,7 +49,6 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     this._settingsRepository,
     this._charactersRepository,
     this._userCardsRepository,
-    this.config,
   ) : super(ChatInitialState()) {
     on<LoadChatHistoryEvent>(_onLoadChatHistory);
     on<SendUserMessageEvent>(_onSendUserMessage);
@@ -255,7 +252,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       final String markdownTag = MessageTags.imgTemplate.replaceFirst(
         MessageTags.urlMarker,
-        "${config.baseUrl}/$imagePath",
+        imagePath,
       );
 
       if (localDisplayContent.contains(MessageTags.img)) {

@@ -1,10 +1,10 @@
 import 'dart:io';
 
+import 'package:den_ai/application/env.dart';
 import 'package:path/path.dart' as p;
 
 import 'package:den_ai/application/l10n.dart';
 import 'package:file_selector/file_selector.dart';
-import 'package:path_provider/path_provider.dart';
 
 abstract class FileTool {
   static const String _avatarsDir = 'avatars';
@@ -45,8 +45,7 @@ abstract class FileTool {
   }
 
   static Future<Directory> _getDirectory(String subDir) async {
-    final Directory appDocDir = await getApplicationDocumentsDirectory();
-    final Directory targetDir = Directory(p.join(appDocDir.path, subDir));
+    final Directory targetDir = Directory(p.join(AppEnv.supportDir, subDir));
     if (!await targetDir.exists()) {
       await targetDir.create(recursive: true);
     }
@@ -66,17 +65,12 @@ abstract class FileTool {
   }
 
   static Future<String> saveImage(File file, String directoryName, {required String prefix}) async {
-    final Directory targetFolder = await _getDirectory(_avatarsDir);
+    final Directory targetFolder = await _getDirectory(directoryName);
     final String extension = p.extension(file.path);
     final int timestamp = DateTime.now().millisecondsSinceEpoch;
     final String fileName = '${prefix}_$timestamp$extension';
     final String finalPath = p.join(targetFolder.path, fileName);
     await file.copy(finalPath);
-    return p.join(_avatarsDir, fileName);
-  }
-
-  static Future<File> getFileFromRelativePath(String relativePath) async {
-    final Directory appDocDir = await getApplicationDocumentsDirectory();
-    return File(p.join(appDocDir.path, relativePath));
+    return p.join(directoryName, fileName);
   }
 }

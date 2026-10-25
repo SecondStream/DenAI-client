@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/repositories/lorebooks_repository.dart';
@@ -11,7 +12,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/repositories/characters_repository.dart';
-import 'package:path_provider/path_provider.dart';
 
 part 'character_form_event.dart';
 
@@ -204,8 +204,7 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
       if (avatar == null && event.id != null) {
         final char = await _repository.getCharacterById(event.id!);
         if (char != null) {
-          final docDir = (await getApplicationDocumentsDirectory()).path;
-          final avatarPath = char.getAvatar(docDir);
+          final avatarPath = char.getAvatar(AppEnv.supportDir);
           if (avatarPath != null) {
             avatar = await File(avatarPath).readAsBytes();
           }

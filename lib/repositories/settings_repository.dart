@@ -41,7 +41,7 @@ class SettingsRepository extends BaseRepository {
         minP: 0.05,
         topP: 0.9,
         repeatPenalty: 1.1,
-        globalSystemPrompt: 'You are a helpful roleplay assistant.',
+        globalSystemPrompt: '',
         template: '',
         providerId: newProviderId,
       );
