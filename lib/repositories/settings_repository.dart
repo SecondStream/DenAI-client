@@ -3,10 +3,12 @@ import 'package:den_ai/models/provider.dart';
 import 'package:den_ai/models/settings_base.dart';
 import 'package:den_ai/repositories/base_repository.dart';
 import 'package:drift/drift.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'database.dart';
 
 class SettingsRepository extends BaseRepository {
-  SettingsRepository(super.db);
+  final FlutterSecureStorage _storage;
+  SettingsRepository(super.db, this._storage);
 
   Future<SettingsBase> getSettings() async {
     final query = db.select(db.settingsTable).join([
@@ -19,17 +21,18 @@ class SettingsRepository extends BaseRepository {
       final row = rows.first;
       final settingsData = row.readTable(db.settingsTable);
       final providerData = row.readTable(db.providers);
-
-      return SettingsBase.fromDb(settingsData, provider: Provider.fromDb(providerData));
+      final key = await _storage.read(key: 'provider_${providerData.id}');
+      return SettingsBase.fromDb(settingsData, provider: Provider.fromDb(providerData, key ?? ''));
     }
 
     return await db.transaction(() async {
       final defaultProvider = ProvidersCompanion.insert(
         name: 'Ollama',
         url: 'http://localhost:11434/v1',
-        key: 'OLLAMA_KEY',
       );
       final int newProviderId = await db.into(db.providers).insert(defaultProvider);
+      await _storage.write(key: 'provider_$newProviderId', value: 'OLLAMA_KEY');
+
       final defaultSettings = SettingsTableCompanion.insert(
         id: const Value(DefaultSettings.singleSettingsId),
         modelName: 'google/gemma-4-31b-it',
@@ -88,8 +91,8 @@ class SettingsRepository extends BaseRepository {
     final List<ProviderData> rows = await (db.select(
       db.providers,
     )..orderBy([(tbl) => OrderingTerm(expression: tbl.name, mode: OrderingMode.asc)])).get();
-
-    return rows.map((row) => Provider.fromDb(row)).toList();
+    final providers = await _storage.readAll();
+    return rows.map((row) => Provider.fromDb(row, providers['provider_${row.id}'] ?? '')).toList();
   }
 
   Future<Provider> saveProvider({
@@ -102,17 +105,19 @@ class SettingsRepository extends BaseRepository {
 
     if (id != null && id > 0) {
       finalId = id;
-      final companion = ProvidersCompanion(name: Value(name), url: Value(url), key: Value(key));
+      final companion = ProvidersCompanion(name: Value(name), url: Value(url));
       await (db.update(db.providers)..where((tbl) => tbl.id.equals(id))).write(companion);
     } else {
-      final companion = ProvidersCompanion.insert(name: name, url: url, key: key);
+      final companion = ProvidersCompanion.insert(name: name, url: url);
       finalId = await db.into(db.providers).insert(companion);
     }
+
+    await _storage.write(key: 'provider_$finalId', value: key);
 
     final ProviderData freshRow = await (db.select(
       db.providers,
     )..where((tbl) => tbl.id.equals(finalId))).getSingle();
-    return Provider.fromDb(freshRow);
+    return Provider.fromDb(freshRow, key);
   }
 
   Future<void> deleteProvider(int providerId) async {
@@ -136,5 +141,6 @@ class SettingsRepository extends BaseRepository {
 
       await (db.delete(db.providers)..where((tbl) => tbl.id.equals(providerId))).go();
     });
+    await _storage.delete(key: 'provider_$providerId');
   }
 }

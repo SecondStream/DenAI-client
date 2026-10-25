@@ -3283,17 +3283,8 @@ class $ProvidersTable extends Providers
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _keyMeta = const VerificationMeta('key');
   @override
-  late final GeneratedColumn<String> key = GeneratedColumn<String>(
-    'key',
-    aliasedName,
-    false,
-    type: DriftSqlType.string,
-    requiredDuringInsert: true,
-  );
-  @override
-  List<GeneratedColumn> get $columns => [id, name, url, key];
+  List<GeneratedColumn> get $columns => [id, name, url];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3325,14 +3316,6 @@ class $ProvidersTable extends Providers
     } else if (isInserting) {
       context.missing(_urlMeta);
     }
-    if (data.containsKey('key')) {
-      context.handle(
-        _keyMeta,
-        key.isAcceptableOrUnknown(data['key']!, _keyMeta),
-      );
-    } else if (isInserting) {
-      context.missing(_keyMeta);
-    }
     return context;
   }
 
@@ -3354,10 +3337,6 @@ class $ProvidersTable extends Providers
         DriftSqlType.string,
         data['${effectivePrefix}url'],
       )!,
-      key: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
-        data['${effectivePrefix}key'],
-      )!,
     );
   }
 
@@ -3371,20 +3350,13 @@ class ProviderData extends DataClass implements Insertable<ProviderData> {
   final int id;
   final String name;
   final String url;
-  final String key;
-  const ProviderData({
-    required this.id,
-    required this.name,
-    required this.url,
-    required this.key,
-  });
+  const ProviderData({required this.id, required this.name, required this.url});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['url'] = Variable<String>(url);
-    map['key'] = Variable<String>(key);
     return map;
   }
 
@@ -3393,7 +3365,6 @@ class ProviderData extends DataClass implements Insertable<ProviderData> {
       id: Value(id),
       name: Value(name),
       url: Value(url),
-      key: Value(key),
     );
   }
 
@@ -3406,7 +3377,6 @@ class ProviderData extends DataClass implements Insertable<ProviderData> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       url: serializer.fromJson<String>(json['url']),
-      key: serializer.fromJson<String>(json['key']),
     );
   }
   @override
@@ -3416,23 +3386,19 @@ class ProviderData extends DataClass implements Insertable<ProviderData> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'url': serializer.toJson<String>(url),
-      'key': serializer.toJson<String>(key),
     };
   }
 
-  ProviderData copyWith({int? id, String? name, String? url, String? key}) =>
-      ProviderData(
-        id: id ?? this.id,
-        name: name ?? this.name,
-        url: url ?? this.url,
-        key: key ?? this.key,
-      );
+  ProviderData copyWith({int? id, String? name, String? url}) => ProviderData(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    url: url ?? this.url,
+  );
   ProviderData copyWithCompanion(ProvidersCompanion data) {
     return ProviderData(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       url: data.url.present ? data.url.value : this.url,
-      key: data.key.present ? data.key.value : this.key,
     );
   }
 
@@ -3441,54 +3407,46 @@ class ProviderData extends DataClass implements Insertable<ProviderData> {
     return (StringBuffer('ProviderData(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('url: $url, ')
-          ..write('key: $key')
+          ..write('url: $url')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, url, key);
+  int get hashCode => Object.hash(id, name, url);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ProviderData &&
           other.id == this.id &&
           other.name == this.name &&
-          other.url == this.url &&
-          other.key == this.key);
+          other.url == this.url);
 }
 
 class ProvidersCompanion extends UpdateCompanion<ProviderData> {
   final Value<int> id;
   final Value<String> name;
   final Value<String> url;
-  final Value<String> key;
   const ProvidersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.url = const Value.absent(),
-    this.key = const Value.absent(),
   });
   ProvidersCompanion.insert({
     this.id = const Value.absent(),
     required String name,
     required String url,
-    required String key,
   }) : name = Value(name),
-       url = Value(url),
-       key = Value(key);
+       url = Value(url);
   static Insertable<ProviderData> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<String>? url,
-    Expression<String>? key,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (url != null) 'url': url,
-      if (key != null) 'key': key,
     });
   }
 
@@ -3496,13 +3454,11 @@ class ProvidersCompanion extends UpdateCompanion<ProviderData> {
     Value<int>? id,
     Value<String>? name,
     Value<String>? url,
-    Value<String>? key,
   }) {
     return ProvidersCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       url: url ?? this.url,
-      key: key ?? this.key,
     );
   }
 
@@ -3518,9 +3474,6 @@ class ProvidersCompanion extends UpdateCompanion<ProviderData> {
     if (url.present) {
       map['url'] = Variable<String>(url.value);
     }
-    if (key.present) {
-      map['key'] = Variable<String>(key.value);
-    }
     return map;
   }
 
@@ -3529,8 +3482,7 @@ class ProvidersCompanion extends UpdateCompanion<ProviderData> {
     return (StringBuffer('ProvidersCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('url: $url, ')
-          ..write('key: $key')
+          ..write('url: $url')
           ..write(')'))
         .toString();
   }
@@ -7575,14 +7527,12 @@ typedef $$ProvidersTableCreateCompanionBuilder =
       Value<int> id,
       required String name,
       required String url,
-      required String key,
     });
 typedef $$ProvidersTableUpdateCompanionBuilder =
     ProvidersCompanion Function({
       Value<int> id,
       Value<String> name,
       Value<String> url,
-      Value<String> key,
     });
 
 final class $$ProvidersTableReferences
@@ -7629,11 +7579,6 @@ class $$ProvidersTableFilterComposer
 
   ColumnFilters<String> get url => $composableBuilder(
     column: $table.url,
-    builder: (column) => ColumnFilters(column),
-  );
-
-  ColumnFilters<String> get key => $composableBuilder(
-    column: $table.key,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7686,11 +7631,6 @@ class $$ProvidersTableOrderingComposer
     column: $table.url,
     builder: (column) => ColumnOrderings(column),
   );
-
-  ColumnOrderings<String> get key => $composableBuilder(
-    column: $table.key,
-    builder: (column) => ColumnOrderings(column),
-  );
 }
 
 class $$ProvidersTableAnnotationComposer
@@ -7710,9 +7650,6 @@ class $$ProvidersTableAnnotationComposer
 
   GeneratedColumn<String> get url =>
       $composableBuilder(column: $table.url, builder: (column) => column);
-
-  GeneratedColumn<String> get key =>
-      $composableBuilder(column: $table.key, builder: (column) => column);
 
   Expression<T> settingsTableRefs<T extends Object>(
     Expression<T> Function($$SettingsTableTableAnnotationComposer a) f,
@@ -7771,20 +7708,13 @@ class $$ProvidersTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> url = const Value.absent(),
-                Value<String> key = const Value.absent(),
-              }) => ProvidersCompanion(id: id, name: name, url: url, key: key),
+              }) => ProvidersCompanion(id: id, name: name, url: url),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
                 required String url,
-                required String key,
-              }) => ProvidersCompanion.insert(
-                id: id,
-                name: name,
-                url: url,
-                key: key,
-              ),
+              }) => ProvidersCompanion.insert(id: id, name: name, url: url),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (

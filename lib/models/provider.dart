@@ -7,10 +7,10 @@ class Provider {
   final String url;
   final String key;
 
-  Provider({required this.id, required this.name, required this.url, required this.key});
+  Provider._({required this.id, required this.name, required this.url, required this.key});
 
-  factory Provider.fromDb(ProviderData data) {
-    return Provider(id: data.id, name: data.name, url: data.url, key: data.key);
+  factory Provider.fromDb(ProviderData data, String key) {
+    return Provider._(id: data.id, name: data.name, url: data.url, key: key);
   }
 }
 
@@ -28,5 +28,4 @@ class Providers extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get name => text()();
   TextColumn get url => text()();
-  TextColumn get key => text()();
 }
