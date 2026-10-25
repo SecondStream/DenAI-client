@@ -90,68 +90,82 @@ abstract class CharacterCardTool {
 
         chunks.insert(1, charaChunk);
         finalPngBytes = Uint8List.fromList(encode.encodeChunks(chunks));
-        // ignore: empty_catches
-      } catch (e) {}
+      } catch (_) {}
     }
 
     return (cardJson: cardV2, cardPng: finalPngBytes);
   }
 
-  static ImportedCardData? importCardFromPng(Uint8List pngBytes) {
+  static (ImportedCardData?, bool) importCard(Uint8List fileBytes) {
     try {
-      final chunks = extract.extractChunks(pngBytes);
-      final textChunks = chunks.where((chunk) => chunk['name'] == 'tEXt');
+      Map<String, dynamic>? cardJson;
+      var isPng = false;
 
-      for (final chunk in textChunks) {
-        final decodedChunk = chunk_text.decode(chunk['data']);
-        if (decodedChunk['keyword'] == 'chara') {
-          final base64Data = decodedChunk['text']!;
-          final jsonString = utf8.decode(base64Decode(base64Data));
-          final Map<String, dynamic> cardJson = jsonDecode(jsonString);
-          final data = cardJson['data'] as Map<String, dynamic>? ?? cardJson;
+      try {
+        final maybeJsonString = utf8.decode(fileBytes).trim();
+        if (maybeJsonString.startsWith('{') && maybeJsonString.endsWith('}')) {
+          cardJson = jsonDecode(maybeJsonString) as Map<String, dynamic>?;
+        }
+      } catch (_) {}
+      if (cardJson == null) {
+        final chunks = extract.extractChunks(fileBytes);
+        isPng = true;
+        final textChunks = chunks.where((chunk) => chunk['name'] == 'tEXt');
 
-          final List<ImportedLorebookData> importedLorebooks = [];
-          final charBook = data['character_book'] as Map<String, dynamic>?;
-
-          if (charBook != null) {
-            final entriesJson = charBook['entries'] as List<dynamic>? ?? [];
-            final List<ImportedLoreEntryData> importedEntries = [];
-
-            for (final entry in entriesJson) {
-              if (entry is Map<String, dynamic>) {
-                importedEntries.add(
-                  ImportedLoreEntryData(
-                    title: entry['name'] ?? entry['keys']?.firstOrNull ?? '',
-                    content: entry['content'] ?? '',
-                  ),
-                );
-              }
-            }
-
-            importedLorebooks.add(
-              ImportedLorebookData(
-                name: charBook['name'] ?? 'Локальный лорбук',
-                description: charBook['description'] ?? '',
-                entries: importedEntries,
-              ),
-            );
+        for (final chunk in textChunks) {
+          final decodedChunk = chunk_text.decode(chunk['data']);
+          if (decodedChunk['keyword'] == 'chara') {
+            final base64Data = decodedChunk['text']!;
+            final jsonString = utf8.decode(base64Decode(base64Data));
+            cardJson = jsonDecode(jsonString) as Map<String, dynamic>?;
+            break;
           }
-
-          return ImportedCardData(
-            name: data['name'] ?? '',
-            description: data['description'] ?? '',
-            personality: data['personality'] ?? '',
-            scenario: data['scenario'] ?? '',
-            greeting: data['first_mes'] ?? '',
-            definition: data['creator_notes'] ?? '',
-            instructions: data['system_prompt'] ?? '',
-            tags: List<String>.from(data['tags'] ?? []),
-            lorebooks: importedLorebooks,
-          );
         }
       }
-      // ignore: empty_catches
-    } catch (e) {}
-    return null;
+
+      if (cardJson != null) {
+        final data = cardJson['data'] as Map<String, dynamic>? ?? cardJson;
+
+        final List<ImportedLorebookData> importedLorebooks = [];
+        final charBook = data['character_book'] as Map<String, dynamic>?;
+
+        if (charBook != null) {
+          final entriesJson = charBook['entries'] as List<dynamic>? ?? [];
+          final List<ImportedLoreEntryData> importedEntries = [];
+
+          for (final entry in entriesJson) {
+            if (entry is Map<String, dynamic>) {
+              importedEntries.add(
+                ImportedLoreEntryData(
+                  title: entry['name'] ?? entry['keys']?.firstOrNull ?? '',
+                  content: entry['content'] ?? '',
+                ),
+              );
+            }
+          }
+
+          importedLorebooks.add(
+            ImportedLorebookData(
+              name: charBook['name'] ?? 'Локальный лорбук',
+              description: charBook['description'] ?? '',
+              entries: importedEntries,
+            ),
+          );
+        }
+
+        return (ImportedCardData(
+          name: data['name'] ?? '',
+          description: data['description'] ?? '',
+          personality: data['personality'] ?? '',
+          scenario: data['scenario'] ?? '',
+          greeting: data['first_mes'] ?? '',
+          definition: data['creator_notes'] ?? '',
+          instructions: data['system_prompt'] ?? '',
+          tags: List<String>.from(data['tags'] ?? []),
+          lorebooks: importedLorebooks,
+        ), isPng);
+      }
+    } catch (_) {}
+    return (null, false);
   }
 }

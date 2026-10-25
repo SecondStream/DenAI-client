@@ -74,13 +74,13 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
 
     try {
       final bytes = await event.card.readAsBytes();
-      final importedData = CharacterCardTool.importCardFromPng(bytes);
+      final (importedData, isPng) = CharacterCardTool.importCard(bytes);
 
       if (importedData == null) {
         throw Exception('Не удалось распарсить карточку персонажа');
       }
 
-      String localAvatarPath = await FileTool.saveAvatar(event.card);
+      String? localAvatarPath = isPng ? await FileTool.saveAvatar(event.card) : null;
       final bookIds = <int>[];
 
       final booksToImport = importedData.lorebooks.take(3);
