@@ -126,3 +126,4 @@ app.*.symbols
 
 # FVM Version Cache
 .fvm/
+assets/tokenizers/gemma_4.json
