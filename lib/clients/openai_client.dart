@@ -214,6 +214,7 @@ class OpenAIClient {
     }
   }
 
+  void clearCache() => cachedModelsList = null;
   Future<List<ModelInfo>> fetchModels(SettingsBase settings, {bool vision = false}) async {
     try {
       if (cachedModelsList == null || cachedModelsList!.isEmpty) {

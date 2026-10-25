@@ -29,8 +29,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   void _onLoadAllSettings(LoadAllSettingsEvent event, Emitter<SettingsState> emit) async {
     emit(SettingsLoadingState());
     try {
-      final providers = await _repository.getAllProviders();
       final settings = await _repository.getSettings();
+      final providers = await _repository.getAllProviders();
       final models = await _client.fetchModels(settings);
       final visionModels = await _client.fetchVisionModels(settings);
       final embeddingModels = await _client.fetchEmbeddingModels(settings);
@@ -123,8 +123,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     final currentState = state as SettingsLoadedState;
     emit(SettingsLoadingState());
     try {
-      await _repository.updateActiveProviderId(event.providerId);
-      final settings = await _repository.getSettings();
+      final settings = await _repository.updateActiveProviderId(event.providerId);
+      _client.clearCache();
       final models = await _client.fetchModels(settings);
       final visionModels = await _client.fetchVisionModels(settings);
       final embeddingModels = await _client.fetchEmbeddingModels(settings);
@@ -152,8 +152,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       key: event.key,
     );
     if (event.id == null) {
-      await _repository.updateActiveProviderId(provider.id);
-      final settings = await _repository.getSettings();
+      final settings = await _repository.updateActiveProviderId(provider.id);
+      _client.clearCache();
       final models = await _client.fetchModels(settings);
       final visionModels = await _client.fetchVisionModels(settings);
       final embeddingModels = await _client.fetchEmbeddingModels(settings);
@@ -177,6 +177,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     emit(SettingsLoadingState());
     await _repository.deleteProvider(event.providerId);
     final settings = await _repository.getSettings();
+    _client.clearCache();
     final models = await _client.fetchModels(settings);
     final visionModels = await _client.fetchVisionModels(settings);
     final embeddingModels = await _client.fetchEmbeddingModels(settings);
