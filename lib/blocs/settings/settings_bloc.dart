@@ -5,10 +5,13 @@ import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+
 part 'settings_event.dart';
+
 part 'settings_state.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
@@ -70,20 +73,37 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   }
 
   Future<List<TokenizerInfo>> getAvailableTokenizers() async {
-    final List<TokenizerInfo> tokenizers = <TokenizerInfo>[
-      TokenizerInfo(id: 'assets/tokenizers/gemma4.json', displayName: 'Gemma 4'),
-      TokenizerInfo(id: 'assets/tokenizers/llama3.json', displayName: 'Llama 3'),
-      TokenizerInfo(id: 'assets/tokenizers/qwen35.json', displayName: 'Qwen 3.5'),
-      TokenizerInfo(id: 'assets/tokenizers/ministral3.json', displayName: 'Ministral 3'),
-      TokenizerInfo(
-        id: 'assets/tokenizers/cl100k_base.json',
-        displayName: 'OpenAI / Anthropic (cl100k)',
-      ),
-    ];
+    final List<TokenizerInfo> tokenizers = <TokenizerInfo>[];
+
+    try {
+      final AssetManifest manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+      final assetPaths = manifest.listAssets().where(
+        (path) => path.startsWith('assets/tokenizers/') && path.endsWith('.json'),
+      );
+
+      for (final assetPath in assetPaths) {
+        final fileNameWithoutExtension = p.basenameWithoutExtension(assetPath);
+        String displayName;
+
+        if (fileNameWithoutExtension == 'cl100k_base') {
+          displayName = 'OpenAI / Anthropic (cl100k)';
+        } else {
+          displayName = fileNameWithoutExtension
+              .replaceAll(RegExp(r'[-_]'), ' ')
+              .split(' ')
+              .where((word) => word.isNotEmpty)
+              .map((word) => '${word[0].toUpperCase()}${word.substring(1)}')
+              .join(' ');
+        }
+
+        tokenizers.add(TokenizerInfo(id: assetPath, displayName: displayName));
+      }
+    } catch (_) {}
 
     try {
       final Directory appDocDir = await getApplicationDocumentsDirectory();
       final Directory customTokenizersDir = Directory(p.join(appDocDir.path, 'tokenizers'));
+
       if (!await customTokenizersDir.exists()) {
         await customTokenizersDir.create(recursive: true);
       } else {
@@ -91,12 +111,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         for (final entity in entities) {
           if (entity is File && p.extension(entity.path).toLowerCase() == '.json') {
             final String fileName = p.basename(entity.path);
-
             tokenizers.add(TokenizerInfo(id: entity.path, displayName: fileName));
           }
         }
       }
-      // ignore: empty_catches
     } catch (e) {}
 
     return tokenizers;
