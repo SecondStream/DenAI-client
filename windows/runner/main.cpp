@@ -7,6 +7,8 @@
 #include <algorithm>
 #include <iostream>
 #include <cstdio>
+#include <exception>
+#include <iostream>
 
 #include "flutter_window.h"
 #include "utils.h"
@@ -36,21 +38,36 @@ int APIENTRY wWinMain(_In_ HINSTANCE instance, _In_opt_ HINSTANCE prev,
   int height = 900;
   int posX = -1;
   int posY = -1;
+  try {
+    std::wstring appData = GetAppDataPath() + L"\\com.secondstream\\den_ai\\shared_preferences.json";
+    std::ifstream file(appData);
+    
+    if (file.is_open()) {
 
-  std::wstring appData = GetAppDataPath() + L"\\com.example\\den_ai\\shared_preferences.json";
-  std::ifstream file(appData);
-  
-  if (file.is_open()) {
-    std::string jsonContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-    file.close();
-    if (!jsonContent.empty()) {
-      FlatJsonParser parser(jsonContent);
-      std::map<std::string, std::string> data = parser.parse();
-      width = std::stoi(data["flutter.window_width"]);
-      height = std::stoi(data["flutter.window_height"]);
-      posX = std::stoi(data["flutter.window_x"]);
-      posY = std::stoi(data["flutter.window_y"]);
+      std::string jsonContent((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+      file.close();
+      if (!jsonContent.empty()) {
+        FlatJsonParser parser(jsonContent);
+        std::map<std::string, std::string> data = parser.parse();
+        if (data.count("flutter.window_width")) {
+          width = std::stoi(data["flutter.window_width"]);
+        }
+        if (data.count("flutter.window_height")) {
+          height = std::stoi(data["flutter.window_height"]);
+        }
+        if (data.count("flutter.window_x")) {
+          posX = std::stoi(data["flutter.window_x"]);
+        }
+        if (data.count("flutter.window_y")) {
+          posY = std::stoi(data["flutter.window_y"]);
+        }
+      }
     }
+  } catch (const std::exception& e) {
+    std::cerr << "error:" << e.what() << std::endl;
+  }
+  catch (...) {
+    std::cerr << "unknown error " << std::endl;
   }
 
   if (posX == -1 || posY == -1) {

@@ -1,4 +1,4 @@
-package com.example.chat_bot_client
+package com.secondstream.den_ai
 
 import io.flutter.embedding.android.FlutterActivity
 
