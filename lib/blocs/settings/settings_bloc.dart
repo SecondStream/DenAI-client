@@ -150,6 +150,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       name: event.name,
       url: event.url,
       key: event.key,
+      additionalArgs: event.additionalArgs,
     );
     if (event.id == null) {
       final settings = await _repository.updateActiveProviderId(provider.id);

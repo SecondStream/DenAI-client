@@ -100,12 +100,17 @@ class SettingsRepository extends BaseRepository {
     required String name,
     required String url,
     required String key,
+    required String additionalArgs,
   }) async {
     final int finalId;
 
     if (id != null && id > 0) {
       finalId = id;
-      final companion = ProvidersCompanion(name: Value(name), url: Value(url));
+      final companion = ProvidersCompanion(
+        name: Value(name),
+        url: Value(url),
+        additionalArgs: Value(additionalArgs),
+      );
       await (db.update(db.providers)..where((tbl) => tbl.id.equals(id))).write(companion);
     } else {
       final companion = ProvidersCompanion.insert(name: name, url: url);

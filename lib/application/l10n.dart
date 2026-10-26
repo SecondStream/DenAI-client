@@ -177,7 +177,7 @@ class AppLocalization {
       'lorebook_selection_title': 'Connecting Knowledge Bases',
       'no_lorebooks_warning':
           'No knowledge books have been created in the system yet.\nFirst, create a book in the Knowledge Book Manager.',
-      'char_lorebooks': 'Knowledge Bases (Local RAG)',
+      'char_lorebooks': 'Knowledge Bases',
       'char_lorebooks_count': 'Connected: {num} pcs.',
       'char_no_lorebooks_count': 'No connected books',
 
@@ -204,6 +204,9 @@ class AppLocalization {
       'provider_key_label': 'API Key',
       'provider_key_hint': 'sk-XXXXXXXXXXXXXXXXXXXXXXXXXXX',
       'provider_key_err': 'Please enter an API key',
+      'provider_add_label': 'Additional parameters',
+      'provider_add_hint': 'In JSON format',
+      'provider_add_err': 'Invalid JSON',
     },
     'ru': {
       // --- Базовые сообщения ---
@@ -372,7 +375,7 @@ class AppLocalization {
       'lorebook_selection_title': 'Подключение баз знаний',
       'no_lorebooks_warning':
           'В системе еще не создано ни одной книги знаний.\nСначала создайте книгу в Менеджере книг знаний.',
-      'char_lorebooks': 'Базы знаний (Локальная информация)',
+      'char_lorebooks': 'Книги знаний',
       'char_lorebooks_count': 'Подключено: {num} шт.',
       'char_no_lorebooks_count': 'Нет подключенных книг',
 
@@ -399,6 +402,9 @@ class AppLocalization {
       'provider_key_label': 'Ключ API',
       'provider_key_hint': 'sk-XXXXXXXXXXXXXXXXXXXXXXXXXXX',
       'provider_key_err': 'Введите ключ API',
+      'provider_add_label': 'Дополнительные параметры',
+      'provider_add_hint': 'В формате JSON',
+      'provider_add_err': 'Невалидный JSON',
     },
   };
 
@@ -637,6 +643,11 @@ class AppLocalization {
   String get providerKeyHint =>
       _localizedValues[locale.languageCode]?['provider_key_hint'] ?? empty;
   String get providerKeyErr => _localizedValues[locale.languageCode]?['provider_key_err'] ?? empty;
+  String get providerAddLabel =>
+      _localizedValues[locale.languageCode]?['provider_add_label'] ?? empty;
+  String get providerAddHint =>
+      _localizedValues[locale.languageCode]?['provider_add_hint'] ?? empty;
+  String get providerAddErr => _localizedValues[locale.languageCode]?['provider_add_err'] ?? empty;
   String get exportLabel => _localizedValues[locale.languageCode]?['export_label'] ?? empty;
 
   String getError(ErrType type, Object exception) {

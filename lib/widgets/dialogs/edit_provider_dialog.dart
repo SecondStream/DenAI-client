@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/consts/consts.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
@@ -25,6 +27,7 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
   late final TextEditingController _nameController;
   late final TextEditingController _urlController;
   late final TextEditingController _keyController;
+  late final TextEditingController _addController;
 
   @override
   void initState() {
@@ -32,12 +35,15 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
     _nameController = TextEditingController(text: widget.provider?.name ?? '');
     _urlController = TextEditingController(text: widget.provider?.url ?? '');
     _keyController = TextEditingController(text: widget.provider?.key ?? '');
+    _addController = TextEditingController(text: widget.provider?.additionalArgs ?? '');
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _urlController.dispose();
+    _keyController.dispose();
+    _addController.dispose();
     super.dispose();
   }
 
@@ -130,7 +136,40 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                   ),
                   contentPadding: const EdgeInsets.all(16),
                 ),
-                validator: (v) => v == null || v.trim().isEmpty ? loc.providerNameErr : null,
+                validator: (v) => v == null || v.trim().isEmpty ? loc.providerKeyErr : null,
+              ),
+              SizedBox(height: 20),
+              TextFormField(
+                controller: _addController,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                ),
+                minLines: 3,
+                maxLines: 10,
+                decoration: InputDecoration(
+                  labelText: loc.providerAddLabel,
+                  hintText: loc.providerAddHint,
+                  hintStyle: TextStyle(color: Colors.grey.shade600),
+                  fillColor: theme.cardColor,
+                  filled: true,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  contentPadding: const EdgeInsets.all(16),
+                ),
+                validator: (v) {
+                  if (v == null || v.trim().isEmpty) {
+                    return null;
+                  }
+                  try {
+                    jsonDecode(v);
+                    return null;
+                  } catch (_) {}
+                  return loc.providerAddErr;
+                },
               ),
             ],
           ),
@@ -144,7 +183,7 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
             if (widget.provider != null && widget.provider!.id != DefaultSettings.singleSettingsId)
               TextButton(
                 onPressed: () {
-                  context.pop(ProviderIn(id: -1, name: '', url: '', key: ''));
+                  context.pop(ProviderIn(id: -1, name: '', url: '', key: '', additionalArgs: ''));
                 },
                 child: Text(
                   loc.delete,
@@ -178,6 +217,7 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                           name: _nameController.text.trim(),
                           url: _urlController.text.trim(),
                           key: _keyController.text.trim(),
+                          additionalArgs: _addController.text.trim(),
                         ),
                       );
                     }

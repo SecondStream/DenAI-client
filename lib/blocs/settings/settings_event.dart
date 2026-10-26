@@ -14,7 +14,14 @@ class SaveProviderEvent extends SettingsEvent {
   final String name;
   final String url;
   final String key;
-  SaveProviderEvent({this.id, required this.name, required this.url, required this.key});
+  final String additionalArgs;
+  SaveProviderEvent({
+    this.id,
+    required this.name,
+    required this.url,
+    required this.key,
+    required this.additionalArgs,
+  });
 }
 
 class DeleteProviderEvent extends SettingsEvent {

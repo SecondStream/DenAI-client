@@ -378,7 +378,7 @@ class OpenAIClient {
   }
 
   Map<String, dynamic> _getPayload(SettingsBase settings, List<Map<String, String>> messages) {
-    return {
+    final basePayload = {
       "model": settings.modelName,
       "messages": messages,
       "stream": true,
@@ -386,10 +386,15 @@ class OpenAIClient {
       "top_p": double.parse(settings.topP.toStringAsFixed(2)),
       "min_p": double.parse(settings.minP.toStringAsFixed(2)),
       "frequency_penalty": double.parse((settings.repeatPenalty - 1.0).toStringAsFixed(2)),
-      "provider": {
-        "order": ["coreweave"],
-        "ignore": ["openinference"],
-      },
     };
+
+    final String extraJson = settings.provider.additionalArgs.trim();
+    if (extraJson.isNotEmpty) {
+      try {
+        final extraParams = jsonDecode(extraJson) as Map<String, dynamic>;
+        return {...basePayload, ...extraParams};
+      } catch (_) {}
+    }
+    return basePayload;
   }
 }

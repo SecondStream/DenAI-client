@@ -530,10 +530,28 @@ class _SettingsScreenState extends State<SettingsScreen> {
         bloc.add(DeleteProviderEvent(provider.id));
       } else {
         if (provider == null) {
-          bloc.add(SaveProviderEvent(name: res.name, url: res.url, key: res.key));
+          bloc.add(
+            SaveProviderEvent(
+              name: res.name,
+              url: res.url,
+              key: res.key,
+              additionalArgs: res.additionalArgs,
+            ),
+          );
         } else {
-          if (provider.name != res.name || provider.url != res.url || provider.key != res.key) {
-            bloc.add(SaveProviderEvent(id: id, name: res.name, url: res.url, key: res.key));
+          if (provider.name != res.name ||
+              provider.url != res.url ||
+              provider.key != res.key ||
+              res.additionalArgs != provider.additionalArgs) {
+            bloc.add(
+              SaveProviderEvent(
+                id: id,
+                name: res.name,
+                url: res.url,
+                key: res.key,
+                additionalArgs: res.additionalArgs,
+              ),
+            );
           }
         }
       }

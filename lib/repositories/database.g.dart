@@ -3283,8 +3283,20 @@ class $ProvidersTable extends Providers
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _additionalArgsMeta = const VerificationMeta(
+    'additionalArgs',
+  );
   @override
-  List<GeneratedColumn> get $columns => [id, name, url];
+  late final GeneratedColumn<String> additionalArgs = GeneratedColumn<String>(
+    'additional_args',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, name, url, additionalArgs];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -3316,6 +3328,15 @@ class $ProvidersTable extends Providers
     } else if (isInserting) {
       context.missing(_urlMeta);
     }
+    if (data.containsKey('additional_args')) {
+      context.handle(
+        _additionalArgsMeta,
+        additionalArgs.isAcceptableOrUnknown(
+          data['additional_args']!,
+          _additionalArgsMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3337,6 +3358,10 @@ class $ProvidersTable extends Providers
         DriftSqlType.string,
         data['${effectivePrefix}url'],
       )!,
+      additionalArgs: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}additional_args'],
+      )!,
     );
   }
 
@@ -3350,13 +3375,20 @@ class ProviderData extends DataClass implements Insertable<ProviderData> {
   final int id;
   final String name;
   final String url;
-  const ProviderData({required this.id, required this.name, required this.url});
+  final String additionalArgs;
+  const ProviderData({
+    required this.id,
+    required this.name,
+    required this.url,
+    required this.additionalArgs,
+  });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['name'] = Variable<String>(name);
     map['url'] = Variable<String>(url);
+    map['additional_args'] = Variable<String>(additionalArgs);
     return map;
   }
 
@@ -3365,6 +3397,7 @@ class ProviderData extends DataClass implements Insertable<ProviderData> {
       id: Value(id),
       name: Value(name),
       url: Value(url),
+      additionalArgs: Value(additionalArgs),
     );
   }
 
@@ -3377,6 +3410,7 @@ class ProviderData extends DataClass implements Insertable<ProviderData> {
       id: serializer.fromJson<int>(json['id']),
       name: serializer.fromJson<String>(json['name']),
       url: serializer.fromJson<String>(json['url']),
+      additionalArgs: serializer.fromJson<String>(json['additionalArgs']),
     );
   }
   @override
@@ -3386,19 +3420,29 @@ class ProviderData extends DataClass implements Insertable<ProviderData> {
       'id': serializer.toJson<int>(id),
       'name': serializer.toJson<String>(name),
       'url': serializer.toJson<String>(url),
+      'additionalArgs': serializer.toJson<String>(additionalArgs),
     };
   }
 
-  ProviderData copyWith({int? id, String? name, String? url}) => ProviderData(
+  ProviderData copyWith({
+    int? id,
+    String? name,
+    String? url,
+    String? additionalArgs,
+  }) => ProviderData(
     id: id ?? this.id,
     name: name ?? this.name,
     url: url ?? this.url,
+    additionalArgs: additionalArgs ?? this.additionalArgs,
   );
   ProviderData copyWithCompanion(ProvidersCompanion data) {
     return ProviderData(
       id: data.id.present ? data.id.value : this.id,
       name: data.name.present ? data.name.value : this.name,
       url: data.url.present ? data.url.value : this.url,
+      additionalArgs: data.additionalArgs.present
+          ? data.additionalArgs.value
+          : this.additionalArgs,
     );
   }
 
@@ -3407,46 +3451,53 @@ class ProviderData extends DataClass implements Insertable<ProviderData> {
     return (StringBuffer('ProviderData(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('url: $url')
+          ..write('url: $url, ')
+          ..write('additionalArgs: $additionalArgs')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, name, url);
+  int get hashCode => Object.hash(id, name, url, additionalArgs);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is ProviderData &&
           other.id == this.id &&
           other.name == this.name &&
-          other.url == this.url);
+          other.url == this.url &&
+          other.additionalArgs == this.additionalArgs);
 }
 
 class ProvidersCompanion extends UpdateCompanion<ProviderData> {
   final Value<int> id;
   final Value<String> name;
   final Value<String> url;
+  final Value<String> additionalArgs;
   const ProvidersCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
     this.url = const Value.absent(),
+    this.additionalArgs = const Value.absent(),
   });
   ProvidersCompanion.insert({
     this.id = const Value.absent(),
     required String name,
     required String url,
+    this.additionalArgs = const Value.absent(),
   }) : name = Value(name),
        url = Value(url);
   static Insertable<ProviderData> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<String>? url,
+    Expression<String>? additionalArgs,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (name != null) 'name': name,
       if (url != null) 'url': url,
+      if (additionalArgs != null) 'additional_args': additionalArgs,
     });
   }
 
@@ -3454,11 +3505,13 @@ class ProvidersCompanion extends UpdateCompanion<ProviderData> {
     Value<int>? id,
     Value<String>? name,
     Value<String>? url,
+    Value<String>? additionalArgs,
   }) {
     return ProvidersCompanion(
       id: id ?? this.id,
       name: name ?? this.name,
       url: url ?? this.url,
+      additionalArgs: additionalArgs ?? this.additionalArgs,
     );
   }
 
@@ -3474,6 +3527,9 @@ class ProvidersCompanion extends UpdateCompanion<ProviderData> {
     if (url.present) {
       map['url'] = Variable<String>(url.value);
     }
+    if (additionalArgs.present) {
+      map['additional_args'] = Variable<String>(additionalArgs.value);
+    }
     return map;
   }
 
@@ -3482,7 +3538,8 @@ class ProvidersCompanion extends UpdateCompanion<ProviderData> {
     return (StringBuffer('ProvidersCompanion(')
           ..write('id: $id, ')
           ..write('name: $name, ')
-          ..write('url: $url')
+          ..write('url: $url, ')
+          ..write('additionalArgs: $additionalArgs')
           ..write(')'))
         .toString();
   }
@@ -4783,10 +4840,11 @@ class $$CharsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (charLorebooksRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           CharData,
                           $CharsTable,
-                          CharLorebook
+                          CharLorebook,
+                          $CharLorebooksTable
                         >(
                           currentTable: table,
                           referencedTable: $$CharsTableReferences
@@ -4797,27 +4855,24 @@ class $$CharsTableTableManager
                                 table,
                                 p0,
                               ).charLorebooksRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.charId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'char_id',
                           typedResults: items,
                         ),
                       if (chatsRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           CharData,
                           $CharsTable,
-                          ChatData
+                          ChatData,
+                          $ChatsTable
                         >(
                           currentTable: table,
                           referencedTable: $$CharsTableReferences
                               ._chatsRefsTable(db),
                           managerFromTypedResult: (p0) =>
                               $$CharsTableReferences(db, table, p0).chatsRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.charId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'char_id',
                           typedResults: items,
                         ),
                     ];
@@ -5169,10 +5224,11 @@ class $$LorebooksTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (charLorebooksRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           LorebookData,
                           $LorebooksTable,
-                          CharLorebook
+                          CharLorebook,
+                          $CharLorebooksTable
                         >(
                           currentTable: table,
                           referencedTable: $$LorebooksTableReferences
@@ -5183,17 +5239,16 @@ class $$LorebooksTableTableManager
                                 table,
                                 p0,
                               ).charLorebooksRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.lorebookId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'lorebook_id',
                           typedResults: items,
                         ),
                       if (loreEntriesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           LorebookData,
                           $LorebooksTable,
-                          LoreEntryData
+                          LoreEntryData,
+                          $LoreEntriesTable
                         >(
                           currentTable: table,
                           referencedTable: $$LorebooksTableReferences
@@ -5204,10 +5259,8 @@ class $$LorebooksTableTableManager
                                 table,
                                 p0,
                               ).loreEntriesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.lorebookId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'lorebook_id',
                           typedResults: items,
                         ),
                     ];
@@ -6170,18 +6223,19 @@ class $$UserCardsTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (chatsRefs)
-                    await $_getPrefetchedData<
+                    await $_getPrefetchedDataByColumns<
                       UserCardData,
                       $UserCardsTable,
-                      ChatData
+                      ChatData,
+                      $ChatsTable
                     >(
                       currentTable: table,
                       referencedTable: $$UserCardsTableReferences
                           ._chatsRefsTable(db),
                       managerFromTypedResult: (p0) =>
                           $$UserCardsTableReferences(db, table, p0).chatsRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.userCardId == item.id),
+                      currentColumn: 'id',
+                      referencedColumn: 'user_card_id',
                       typedResults: items,
                     ),
                 ];
@@ -6753,10 +6807,11 @@ class $$ChatsTableTableManager
                   getPrefetchedDataCallback: (items) async {
                     return [
                       if (messagesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ChatData,
                           $ChatsTable,
-                          MessageData
+                          MessageData,
+                          $MessagesTable
                         >(
                           currentTable: table,
                           referencedTable: $$ChatsTableReferences
@@ -6767,17 +6822,16 @@ class $$ChatsTableTableManager
                                 table,
                                 p0,
                               ).messagesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.chatId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'chat_id',
                           typedResults: items,
                         ),
                       if (summariesRefs)
-                        await $_getPrefetchedData<
+                        await $_getPrefetchedDataByColumns<
                           ChatData,
                           $ChatsTable,
-                          SummaryData
+                          SummaryData,
+                          $SummariesTable
                         >(
                           currentTable: table,
                           referencedTable: $$ChatsTableReferences
@@ -6788,10 +6842,8 @@ class $$ChatsTableTableManager
                                 table,
                                 p0,
                               ).summariesRefs,
-                          referencedItemsForCurrentItem:
-                              (item, referencedItems) => referencedItems.where(
-                                (e) => e.chatId == item.id,
-                              ),
+                          currentColumn: 'id',
+                          referencedColumn: 'chat_id',
                           typedResults: items,
                         ),
                     ];
@@ -7527,12 +7579,14 @@ typedef $$ProvidersTableCreateCompanionBuilder =
       Value<int> id,
       required String name,
       required String url,
+      Value<String> additionalArgs,
     });
 typedef $$ProvidersTableUpdateCompanionBuilder =
     ProvidersCompanion Function({
       Value<int> id,
       Value<String> name,
       Value<String> url,
+      Value<String> additionalArgs,
     });
 
 final class $$ProvidersTableReferences
@@ -7579,6 +7633,11 @@ class $$ProvidersTableFilterComposer
 
   ColumnFilters<String> get url => $composableBuilder(
     column: $table.url,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get additionalArgs => $composableBuilder(
+    column: $table.additionalArgs,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -7631,6 +7690,11 @@ class $$ProvidersTableOrderingComposer
     column: $table.url,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get additionalArgs => $composableBuilder(
+    column: $table.additionalArgs,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$ProvidersTableAnnotationComposer
@@ -7650,6 +7714,11 @@ class $$ProvidersTableAnnotationComposer
 
   GeneratedColumn<String> get url =>
       $composableBuilder(column: $table.url, builder: (column) => column);
+
+  GeneratedColumn<String> get additionalArgs => $composableBuilder(
+    column: $table.additionalArgs,
+    builder: (column) => column,
+  );
 
   Expression<T> settingsTableRefs<T extends Object>(
     Expression<T> Function($$SettingsTableTableAnnotationComposer a) f,
@@ -7708,13 +7777,25 @@ class $$ProvidersTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> name = const Value.absent(),
                 Value<String> url = const Value.absent(),
-              }) => ProvidersCompanion(id: id, name: name, url: url),
+                Value<String> additionalArgs = const Value.absent(),
+              }) => ProvidersCompanion(
+                id: id,
+                name: name,
+                url: url,
+                additionalArgs: additionalArgs,
+              ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String name,
                 required String url,
-              }) => ProvidersCompanion.insert(id: id, name: name, url: url),
+                Value<String> additionalArgs = const Value.absent(),
+              }) => ProvidersCompanion.insert(
+                id: id,
+                name: name,
+                url: url,
+                additionalArgs: additionalArgs,
+              ),
           withReferenceMapper: (p0) => p0
               .map(
                 (e) => (
@@ -7733,10 +7814,11 @@ class $$ProvidersTableTableManager
               getPrefetchedDataCallback: (items) async {
                 return [
                   if (settingsTableRefs)
-                    await $_getPrefetchedData<
+                    await $_getPrefetchedDataByColumns<
                       ProviderData,
                       $ProvidersTable,
-                      SettingsData
+                      SettingsData,
+                      $SettingsTableTable
                     >(
                       currentTable: table,
                       referencedTable: $$ProvidersTableReferences
@@ -7747,8 +7829,8 @@ class $$ProvidersTableTableManager
                             table,
                             p0,
                           ).settingsTableRefs,
-                      referencedItemsForCurrentItem: (item, referencedItems) =>
-                          referencedItems.where((e) => e.providerId == item.id),
+                      currentColumn: 'id',
+                      referencedColumn: 'provider_id',
                       typedResults: items,
                     ),
                 ];
