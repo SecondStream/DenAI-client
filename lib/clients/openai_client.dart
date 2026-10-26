@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'package:den_ai/common/exceptions.dart';
 import 'package:den_ai/models/model_info.dart';
 import 'package:den_ai/models/settings_base.dart';
 import 'package:dio/dio.dart';
@@ -68,12 +69,19 @@ class OpenAIClient {
             .transform(const LineSplitter());
 
         await for (final line in lineStream) {
-          if (line.isNotEmpty && line.startsWith("data: ")) {
-            final String lineContent = line.substring(6).trim();
-            if (lineContent == "[DONE]") break;
+          try {
+            if (line.isNotEmpty && line.startsWith("data: ")) {
+              final String lineContent = line.substring(6).trim();
+              if (lineContent == "[DONE]") break;
 
-            try {
               final chunk = jsonDecode(lineContent) as Map<String, dynamic>;
+
+              if (chunk.containsKey("error")) {
+                final errorObj = chunk["error"] as Map<String, dynamic>;
+                final String errMsg = errorObj["message"] ?? "Unknown upstream error";
+                throw LLMProviderException("Provider LLM Error: $errMsg");
+              }
+
               final choices = chunk["choices"] as List<dynamic>? ?? const [];
               if (choices.isEmpty) continue;
 
@@ -84,12 +92,24 @@ class OpenAIClient {
                 allTokens += token;
                 yield token;
               }
-            } catch (_) {
-              continue;
+            } else if (line.trim().startsWith("{")) {
+              final errorJson = jsonDecode(line.trim()) as Map<String, dynamic>;
+              final errorData = errorJson["error"] ?? errorJson["data"]?["error"];
+              if (errorData != null) {
+                final message = errorData is Map
+                    ? (errorData["message"] ?? "Unknown LLM error")
+                    : errorData.toString();
+                throw LLMProviderException("Provider LLM Error: $message");
+              }
             }
+          } catch (e) {
+            // rethrow only provider exception
+            if (e is LLMProviderException) {
+              rethrow;
+            }
+            continue;
           }
         }
-
         return;
       } catch (e) {
         if (attempt >= maxRetries) {
@@ -215,6 +235,7 @@ class OpenAIClient {
   }
 
   void clearCache() => cachedModelsList = null;
+
   Future<List<ModelInfo>> fetchModels(SettingsBase settings, {bool vision = false}) async {
     try {
       if (cachedModelsList == null || cachedModelsList!.isEmpty) {

@@ -423,7 +423,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       charId: chat.char.id,
       settings: settings,
       formattedMessages: messages,
-      isNew: true,
+      isNew: false,
       parentId: message.parentId,
       lastActiveMsgId: message.id,
     );
