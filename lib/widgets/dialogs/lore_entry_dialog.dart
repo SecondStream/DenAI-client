@@ -7,13 +7,19 @@ import 'package:den_ai/models/models.dart';
 class LoreEntryDialog extends StatefulWidget {
   final int bookId;
   final LoreEntry? entry;
+  final bool readonly;
 
-  const LoreEntryDialog({super.key, required this.bookId, this.entry});
+  const LoreEntryDialog({super.key, required this.bookId, this.entry, this.readonly = false});
 
-  static Future<LoreEntryIn?> open(BuildContext context, int bookId, {LoreEntry? entry}) {
+  static Future<LoreEntryIn?> open(
+    BuildContext context,
+    int bookId, {
+    LoreEntry? entry,
+    bool readonly = false,
+  }) {
     return showDialog<LoreEntryIn>(
       context: context,
-      builder: (context) => LoreEntryDialog(bookId: bookId, entry: entry),
+      builder: (context) => LoreEntryDialog(bookId: bookId, entry: entry, readonly: readonly),
     );
   }
 
@@ -118,7 +124,7 @@ class _LoreEntryDialogState extends State<LoreEntryDialog> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            if (widget.entry != null)
+            if (widget.entry != null && !widget.readonly)
               TextButton(
                 onPressed: () {
                   context.pop(
@@ -141,28 +147,30 @@ class _LoreEntryDialogState extends State<LoreEntryDialog> {
                     style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
                   ),
                 ),
-                const SizedBox(width: 12),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                if (!widget.readonly) ...[
+                  const SizedBox(width: 12),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    ),
+                    onPressed: () {
+                      if (_formKey.currentState!.validate()) {
+                        context.pop(
+                          LoreEntryIn(
+                            id: widget.entry?.id,
+                            lorebookId: widget.bookId,
+                            title: _titleController.text.trim(),
+                            content: _contentController.text.trim(),
+                          ),
+                        );
+                      }
+                    },
+                    child: Text(loc.save, style: const TextStyle(fontWeight: FontWeight.bold)),
                   ),
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      context.pop(
-                        LoreEntryIn(
-                          id: widget.entry?.id,
-                          lorebookId: widget.bookId,
-                          title: _titleController.text.trim(),
-                          content: _contentController.text.trim(),
-                        ),
-                      );
-                    }
-                  },
-                  child: Text(loc.save, style: const TextStyle(fontWeight: FontWeight.bold)),
-                ),
+                ],
               ],
             ),
           ],

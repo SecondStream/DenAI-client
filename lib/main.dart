@@ -2,6 +2,7 @@ import 'package:den_ai/application/app.dart';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/di_initializer.dart';
 import 'package:den_ai/application/env.dart';
+import 'package:den_ai/widgets/status.dart';
 import 'package:den_ai/widgets/window_observer.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
@@ -46,7 +47,7 @@ void main() async {
   runApp(
     AppConfig(
       baseUrl: AppEnv.supportDir,
-      child: WindowObserver(child: ChatApp()),
+      child: WindowObserver(child: AppStatus(child: ChatApp())),
     ),
   );
 }

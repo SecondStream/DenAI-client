@@ -18,8 +18,9 @@ class CheckOrCreateVirtualChatEvent extends ChatEvent {
 
 class SendUserMessageEvent extends ChatEvent {
   final String text;
+  final bool loreActive;
 
-  SendUserMessageEvent(this.text);
+  SendUserMessageEvent(this.text, this.loreActive);
 }
 
 class ReceivedAiTokenEvent extends ChatEvent {
@@ -55,8 +56,9 @@ class SwitchMessageBranchEvent extends ChatEvent {
 
 class RegenerateLastAiMessageEvent extends ChatEvent {
   final int messageId;
+  final bool loreActive;
 
-  RegenerateLastAiMessageEvent(this.messageId);
+  RegenerateLastAiMessageEvent(this.messageId, this.loreActive);
 }
 
 class EditMessageEvent extends ChatEvent {

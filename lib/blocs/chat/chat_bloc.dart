@@ -162,6 +162,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       currentState.chatId,
       event.messageId,
       await _settingsRepository.getSettings(),
+      event.loreActive,
     );
   }
 
@@ -317,7 +318,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         emit(currentState);
       }
 
-      _sendMessage(currentState.chatId, event.text, settings, imageFile, imagePath: imagePath);
+      _sendMessage(
+        currentState.chatId,
+        event.text,
+        settings,
+        event.loreActive,
+        imageFile,
+        imagePath: imagePath,
+      );
     } catch (e) {
       final chat = await _repository.getChatById(currentState.chatId);
       emit(
@@ -334,6 +342,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     int chatId,
     String text,
     SettingsBase settings,
+    bool loreActive,
     File? imageFile, {
     String? imagePath,
   }) async {
@@ -365,7 +374,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       summary: latestSummaryContent,
     );
 
-    final messages = await _getMessages(chat, systemContent, settings, text);
+    final messages = await _getMessages(chat, systemContent, settings, text, loreActive);
 
     return _generationService.requestAiResponse(
       chatId: chat.id,
@@ -423,7 +432,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     return null;
   }
 
-  Future<void> _regenerateMessage(int chatId, int messageId, SettingsBase settings) async {
+  Future<void> _regenerateMessage(
+    int chatId,
+    int messageId,
+    SettingsBase settings,
+    bool loreActive,
+  ) async {
     await _repository.updateMessageActivity(messageId, false);
     final chat = await _repository.getChatById(chatId);
     final message = chat.messages.firstWhere((e) => e.id == messageId);
@@ -440,7 +454,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     final userMessageText = message.parentId != null
         ? chat.messages.firstWhere((e) => e.id == message.parentId!).content
         : '';
-    final messages = await _getMessages(chat, systemContent, settings, userMessageText);
+    final messages = await _getMessages(chat, systemContent, settings, userMessageText, loreActive);
     return _generationService.requestAiResponse(
       chatId: chat.id,
       charId: chat.char.id,
@@ -457,13 +471,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     String systemContent,
     SettingsBase settings,
     String userText,
+    bool loreActive,
   ) async {
     var accumulatedTokens =
         (await _calculateTokens(systemContent, settings)) +
         TokenLimits.templateTokens * 2 +
         TokenLimits.summaryTokens;
 
-    final loreMessage = await _getLoreMessage(chat, settings, userText);
+    final loreMessage = loreActive ? await _getLoreMessage(chat, settings, userText) : null;
     if (loreMessage != null) {
       accumulatedTokens +=
           await _calculateTokens(loreMessage['content'] ?? '', settings) +

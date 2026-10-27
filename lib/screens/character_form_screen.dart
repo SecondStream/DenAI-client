@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:den_ai/application/config.dart';
+import 'package:den_ai/widgets/status.dart';
 import 'package:den_ai/blocs/character_form/character_form_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:den_ai/screens/persona_form_screen.dart';
@@ -73,7 +74,13 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
   Future<void> _pickCard(BuildContext context) async {
     final card = await FileTool.pickCard();
     if (card != null && context.mounted) {
-      context.read<CharacterFormBloc>().add(SelectedCardEvent(card, AppConfig.of(context).baseUrl));
+      context.read<CharacterFormBloc>().add(
+        SelectedCardEvent(
+          card,
+          AppConfig.of(context).baseUrl,
+          AppStatus.of(context).embeddingsAvailable,
+        ),
+      );
     }
   }
 

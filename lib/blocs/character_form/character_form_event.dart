@@ -73,6 +73,7 @@ class DeleteCharacterEvent extends CharacterFormEvent {
 class SelectedCardEvent extends CharacterFormEvent {
   final File card;
   final String baseUrl;
+  final bool loreActive;
 
-  const SelectedCardEvent(this.card, this.baseUrl);
+  const SelectedCardEvent(this.card, this.baseUrl, this.loreActive);
 }

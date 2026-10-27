@@ -230,11 +230,26 @@ class OpenAIClient {
         throw Exception("Provider error ${response.statusCode}: ${response.data}");
       }
     } catch (e) {
-      throw Exception("Provider error: $e");
+      rethrow;
     }
   }
 
   void clearCache() => cachedModelsList = null;
+
+  Future<Set<String>> fetchAllModelNames(SettingsBase settings) async {
+    if (cachedModelsList == null || cachedModelsList!.isEmpty) {
+      cachedModelsList = await _getRemoteModels(settings);
+    }
+
+    final Set<String> result = {};
+    for (final m in cachedModelsList!) {
+      if (m is! Map<String, dynamic>) continue;
+      final String? name = m["id"] as String?;
+      if (name == null || name.isEmpty) continue;
+      result.add(name);
+    }
+    return result;
+  }
 
   Future<List<ModelInfo>> fetchModels(SettingsBase settings, {bool vision = false}) async {
     try {

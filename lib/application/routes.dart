@@ -61,9 +61,18 @@ class AppRoutes {
   }
 }
 
+class RouteInfo {
+  final String? name;
+  final Object? arguments;
+
+  RouteInfo({this.name, this.arguments});
+}
+
 class AppRouteObserver extends NavigatorObserver {
-  String? currentRouteName;
-  Object? currentArguments;
+  final ValueNotifier<RouteInfo> routeNotifier = ValueNotifier<RouteInfo>(RouteInfo());
+
+  String? get currentRouteName => routeNotifier.value.name;
+  Object? get currentArguments => routeNotifier.value.arguments;
 
   @override
   void didPush(Route<dynamic> route, Route<dynamic>? previousRoute) {
@@ -84,7 +93,6 @@ class AppRouteObserver extends NavigatorObserver {
   }
 
   void _extractRoute(Route<dynamic> route) {
-    currentRouteName = route.settings.name;
-    currentArguments = route.settings.arguments;
+    routeNotifier.value = RouteInfo(name: route.settings.name, arguments: route.settings.arguments);
   }
 }

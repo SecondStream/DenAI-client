@@ -207,6 +207,10 @@ class AppLocalization {
       'provider_add_label': 'Additional parameters',
       'provider_add_hint': 'In JSON format',
       'provider_add_err': 'Invalid JSON',
+
+      'lore_unavailable': 'The embedding model is unavailable. Records are read-only. Please check your settings.',
+      'vision_unavailable': 'The model for viewing images is unavailable',
+      'chat_unavailable': 'The model for chat is unavailable. Check your settings',
     },
     'ru': {
       // --- Базовые сообщения ---
@@ -405,6 +409,10 @@ class AppLocalization {
       'provider_add_label': 'Дополнительные параметры',
       'provider_add_hint': 'В формате JSON',
       'provider_add_err': 'Невалидный JSON',
+
+      'lore_unavailable': 'Embedding-модель недоступна. Записи открыты только для чтения. Проверьте настройки.',
+      'vision_unavailable': 'Модель для просмотра изображений недоступна',
+      'chat_unavailable': 'Модель для чата недоступна. Проверьте настройки',
     },
   };
 
@@ -649,6 +657,9 @@ class AppLocalization {
       _localizedValues[locale.languageCode]?['provider_add_hint'] ?? empty;
   String get providerAddErr => _localizedValues[locale.languageCode]?['provider_add_err'] ?? empty;
   String get exportLabel => _localizedValues[locale.languageCode]?['export_label'] ?? empty;
+  String get loreUnavailable => _localizedValues[locale.languageCode]?['lore_unavailable'] ?? empty;
+  String get visionUnavailable => _localizedValues[locale.languageCode]?['vision_unavailable'] ?? empty;
+  String get chatUnavailable => _localizedValues[locale.languageCode]?['chat_unavailable'] ?? empty;
 
   String getError(ErrType type, Object exception) {
     switch (type) {

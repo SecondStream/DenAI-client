@@ -1,5 +1,7 @@
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/widgets/status.dart';
 import 'package:den_ai/widgets/dialogs/lore_entry_dialog.dart';
+import 'package:den_ai/widgets/lore_unavailable_banner.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -17,6 +19,7 @@ class LorebookEntriesScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
+    final canCreate = AppStatus.of(context).embeddingsAvailable;
 
     return BlocProvider<LorebookEntriesBloc>(
       create: (context) => LorebookEntriesBloc(
@@ -38,7 +41,7 @@ class LorebookEntriesScreen extends StatelessWidget {
           actions: [
             BlocBuilder<LorebookEntriesBloc, LorebookEntriesState>(
               builder: (context, state) {
-                if (state is! LorebookEntriesLoadedState) return const SizedBox();
+                if (state is! LorebookEntriesLoadedState || !canCreate) return const SizedBox();
                 return IconButton(
                   icon: const Icon(Icons.add, size: 28, color: Colors.white),
                   onPressed: () => _openEntryEditor(context, bookId, null),
@@ -70,39 +73,50 @@ class LorebookEntriesScreen extends StatelessWidget {
                 );
               }
 
-              return ListView.builder(
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                itemCount: entries.length,
-                itemBuilder: (context, index) {
-                  final entry = entries[index];
+              return Column(
+                children: [
+                  if (!canCreate) LoreUnavailableBanner(),
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      itemCount: entries.length,
+                      itemBuilder: (context, index) {
+                        final entry = entries[index];
 
-                  return Card(
-                    margin: const EdgeInsets.symmetric(vertical: 6),
-                    color: theme.cardColor,
-                    child: ListTile(
-                      leading: CircleAvatar(
-                        backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.15),
-                        child: Text(
-                          "#${index + 1}",
-                          style: TextStyle(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                            fontSize: 13,
+                        return Card(
+                          margin: const EdgeInsets.symmetric(vertical: 6),
+                          color: theme.cardColor,
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundColor: theme.colorScheme.primary.withValues(alpha: 0.15),
+                              child: Text(
+                                "#${index + 1}",
+                                style: TextStyle(
+                                  color: theme.colorScheme.primary,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ),
+                            title: Text(
+                              entry.title,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            subtitle: Text(
+                              entry.content,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(color: Colors.grey),
+                            ),
+                            trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 18),
+                            onTap: () =>
+                                _openEntryEditor(context, bookId, entry, readonly: !canCreate),
                           ),
-                        ),
-                      ),
-                      title: Text(entry.title, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text(
-                        entry.content,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Colors.grey),
-                      ),
-                      trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 18),
-                      onTap: () => _openEntryEditor(context, bookId, entry),
+                        );
+                      },
                     ),
-                  );
-                },
+                  ),
+                ],
               );
             }
             return const SizedBox();
@@ -112,10 +126,20 @@ class LorebookEntriesScreen extends StatelessWidget {
     );
   }
 
-  Future<void> _openEntryEditor(BuildContext context, int bId, LoreEntry? existingEntry) async {
+  Future<void> _openEntryEditor(
+    BuildContext context,
+    int bId,
+    LoreEntry? existingEntry, {
+    bool readonly = false,
+  }) async {
     final entriesBloc = context.read<LorebookEntriesBloc>();
 
-    final LoreEntryIn? result = await LoreEntryDialog.open(context, bId, entry: existingEntry);
+    final LoreEntryIn? result = await LoreEntryDialog.open(
+      context,
+      bId,
+      entry: existingEntry,
+      readonly: readonly,
+    );
 
     if (result == null) return;
 

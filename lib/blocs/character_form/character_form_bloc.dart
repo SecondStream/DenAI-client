@@ -77,47 +77,51 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
       final (importedData, isPng) = CharacterCardTool.importCard(bytes);
 
       if (importedData == null) {
-        throw Exception('Не удалось распарсить карточку персонажа');
+        throw Exception('Failed to parse the character card');
       }
 
       String? localAvatarPath = isPng ? await FileTool.saveAvatar(event.card) : null;
       final bookIds = <int>[];
 
-      final booksToImport = importedData.lorebooks.take(3);
+      if (event.loreActive) {
+        try {
+          final booksToImport = importedData.lorebooks.take(3);
 
-      for (final book in booksToImport) {
-        final List<String> entryTexts = book.entries
-            .map((e) => '${e.title}\n${e.content}')
-            .where((content) => content.isNotEmpty)
-            .toList();
+          for (final book in booksToImport) {
+            final List<String> entryTexts = book.entries
+                .map((e) => '${e.title}\n${e.content}')
+                .where((content) => content.isNotEmpty)
+                .toList();
 
-        List<List<double>> embeddings = [];
+            List<List<double>> embeddings = [];
 
-        if (entryTexts.isNotEmpty) {
-          final settings = await _settingsRepository.getSettings();
-          embeddings = await _client.getEmbeddings(texts: entryTexts, settings: settings);
-        }
+            if (entryTexts.isNotEmpty) {
+              final settings = await _settingsRepository.getSettings();
+              embeddings = await _client.getEmbeddings(texts: entryTexts, settings: settings);
+            }
 
-        final Lorebook newBook = await _loreRepository.saveLorebook(
-          name: book.name,
-          about: book.description,
-        );
+            final Lorebook newBook = await _loreRepository.saveLorebook(
+              name: book.name,
+              about: book.description,
+            );
 
-        Lorebook? updatedBook;
-        for (final entry in book.entries) {
-          (updatedBook, _) = await _loreRepository.saveLoreEntry(
-            null,
-            newBook.id,
-            entry.title,
-            entry.content,
-          );
-        }
+            Lorebook? updatedBook;
+            for (final entry in book.entries) {
+              (updatedBook, _) = await _loreRepository.saveLoreEntry(
+                null,
+                newBook.id,
+                entry.title,
+                entry.content,
+              );
+            }
 
-        if (updatedBook != null && embeddings.isNotEmpty) {
-          _vectorStorage.saveVectors(updatedBook.id, embeddings);
-        }
+            if (updatedBook != null && embeddings.isNotEmpty) {
+              _vectorStorage.saveVectors(updatedBook.id, embeddings);
+            }
 
-        bookIds.add(newBook.id);
+            bookIds.add(newBook.id);
+          }
+        } catch (_) {}
       }
 
       final Char newChar = await _repository.saveCharacter(

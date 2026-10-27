@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/routes.dart';
+import 'package:den_ai/widgets/status.dart';
 import 'package:den_ai/blocs/chat/chat_bloc.dart';
 import 'package:den_ai/consts/consts.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
@@ -66,6 +67,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
+    final status = AppStatus.of(context);
     return BlocProvider<ChatBloc>(
       create: (context) {
         final bloc = ChatBloc(
@@ -146,14 +148,14 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ],
             ),
-            body: _buildBody(context, loc, theme, state),
+            body: _buildBody(context, loc, theme, state, status),
           );
         },
       ),
     );
   }
 
-  Widget _buildBody(BuildContext context, AppLocalization loc, ThemeData theme, ChatState state) {
+  Widget _buildBody(BuildContext context, AppLocalization loc, ThemeData theme, ChatState state, AppStatus status) {
     if (state is ChatLoadingState ||
         (state is ChatErrorState && state.errType == ErrType.sendMessage)) {
       return const Center(child: CircularProgressIndicator());
@@ -203,6 +205,7 @@ class _ChatScreenState extends State<ChatScreen> {
                         return _buildMessageBubble(
                           context,
                           loc,
+                          status,
                           message,
                           state.char,
                           state.userCard,
@@ -278,6 +281,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _buildMessageBubble(
     BuildContext context,
     AppLocalization loc,
+    AppStatus status,
     MessageView message,
     Char char,
     UserCard? user,
@@ -285,7 +289,7 @@ class _ChatScreenState extends State<ChatScreen> {
     bool isLastMessage,
   ) {
     late Widget messageWidget;
-    final isRegeneratinonActive =
+    final isRegeneratinonActive = status.chatAvailable &&
         !isTyping && isLastMessage && message.parentId != null && message.parentId! > 0;
     if (message.role == MessageRole.user) {
       messageWidget = UserMessage(
@@ -310,7 +314,7 @@ class _ChatScreenState extends State<ChatScreen> {
             : null,
         onRegenerateMessage: isRegeneratinonActive
             ? (messageId) {
-                context.read<ChatBloc>().add(RegenerateLastAiMessageEvent(messageId));
+                context.read<ChatBloc>().add(RegenerateLastAiMessageEvent(messageId, status.embeddingsAvailable));
               }
             : null,
       );
@@ -389,6 +393,9 @@ class _ChatScreenState extends State<ChatScreen> {
   ) {
     final theme = Theme.of(context);
     final hasUserCard = userCard != null;
+    final status = AppStatus.of(context);
+    final imgAv = status.visionAvailable;
+    final chatAv = status.chatAvailable;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -397,10 +404,12 @@ class _ChatScreenState extends State<ChatScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Tooltip(
-            message: isBlocked ? loc.empty : loc.cancel,
+            message: isBlocked
+                ? loc.empty
+                : (imgAv ? loc.attachImage : loc.visionUnavailable),
             child: IconButton(
               icon: const Icon(Icons.attach_file, color: Colors.grey, size: 22),
-              onPressed: isBlocked ? null : () => _pickImage(context),
+              onPressed: isBlocked || !imgAv ? null : () => _pickImage(context),
             ),
           ),
           const SizedBox(width: 4),
@@ -431,7 +440,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 actions: <Type, Action<Intent>>{
                   SendMessageIntent: CallbackAction<SendMessageIntent>(
                     onInvoke: (SendMessageIntent intent) {
-                      if (!isBlocked) _sendMessage(context);
+                      if (!isBlocked) _sendMessage(context, status);
                       return null;
                     },
                   ),
@@ -441,9 +450,13 @@ class _ChatScreenState extends State<ChatScreen> {
                   maxLines: null,
                   controller: _textController,
                   style: const TextStyle(color: Colors.white),
-                  enabled: !isBlocked,
+                  enabled: !isBlocked && chatAv,
                   decoration: InputDecoration(
-                    hintText: isBlocked ? loc.characterTyping : loc.writeSomething,
+                    hintText: isBlocked
+                        ? loc.characterTyping
+                        : (chatAv
+                              ? loc.writeSomething
+                              : loc.chatUnavailable),
                     hintStyle: const TextStyle(color: Colors.grey),
                     fillColor: theme.cardColor,
                     filled: true,
@@ -453,7 +466,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     ),
                     contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   ),
-                  onSubmitted: (text) => isBlocked ? null : _sendMessage(context),
+                  onSubmitted: (text) => isBlocked ? null : _sendMessage(context, status),
                 ),
               ),
             ),
@@ -461,8 +474,11 @@ class _ChatScreenState extends State<ChatScreen> {
           const SizedBox(width: 8),
 
           IconButton(
-            icon: Icon(Icons.send, color: isBlocked ? Colors.grey : theme.colorScheme.primary),
-            onPressed: isBlocked ? null : () => _sendMessage(context),
+            icon: Icon(
+              Icons.send,
+              color: isBlocked || !chatAv ? Colors.grey : theme.colorScheme.primary,
+            ),
+            onPressed: isBlocked || !chatAv ? null : () => _sendMessage(context, status),
           ),
         ],
       ),
@@ -554,9 +570,9 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _sendMessage(BuildContext context) {
+  void _sendMessage(BuildContext context, AppStatus status) {
     if (_textController.text.trim().isEmpty) return;
-    context.read<ChatBloc>().add(SendUserMessageEvent(_textController.text));
+    context.read<ChatBloc>().add(SendUserMessageEvent(_textController.text, status.embeddingsAvailable));
     _textController.clear();
   }
 }

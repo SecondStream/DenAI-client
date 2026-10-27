@@ -80,14 +80,20 @@ class MessageView extends Message {
     super.isActive = true,
   });
 
-  factory MessageView.fromMessage(Message message, int totalVariants, int currentIndex) {
+  factory MessageView.fromMessage(
+    Message message,
+    String charName,
+    String userName,
+    int totalVariants,
+    int currentIndex,
+  ) {
     final content = message.imagePath != null
         ? PromptRenderer.replaceImageDescToMarkdown(message.content, message.imagePath!)
         : message.content;
     return MessageView(
       id: message.id,
       role: message.role,
-      content: content,
+      content: PromptRenderer.renderMessage(content, charName: charName, userName: userName),
       createdAt: message.createdAt,
       imagePath: message.imagePath,
       modelName: message.modelName,

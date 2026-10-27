@@ -146,7 +146,7 @@ abstract class CharacterCardTool {
 
           importedLorebooks.add(
             ImportedLorebookData(
-              name: charBook['name'] ?? 'Локальный лорбук',
+              name: charBook['name'] ?? 'Lorebook',
               description: charBook['description'] ?? '',
               entries: importedEntries,
             ),
