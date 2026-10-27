@@ -90,7 +90,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         ChatLoadedState(
           chatId: event.chatId,
           char: chat.char,
-          messages: _getChatActiveMV(chat.messages),
+          messages: _getChatActiveMV(chat.messages, chat.char, chat.userCard),
           background: chat.background ?? chat.char.background,
           userCard: chat.userCard,
           summary: chat.summaries.lastOrNull?.content ?? '',
@@ -107,7 +107,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     try {
       final updatedChat = await _repository.editMessage(event.messageId, event.newContent);
-      emit(currentState.copyWith(messages: _getChatActiveMV(updatedChat.messages)));
+      emit(
+        currentState.copyWith(
+          messages: _getChatActiveMV(updatedChat.messages, updatedChat.char, updatedChat.userCard),
+        ),
+      );
     } catch (e) {
       emit(ChatErrorState(ErrType.editMessage, e));
     }
@@ -120,7 +124,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     try {
       final Chat updatedChat = await _repository.deleteMessage(event.messageId);
 
-      emit(currentState.copyWith(messages: _getChatActiveMV(updatedChat.messages)));
+      emit(
+        currentState.copyWith(
+          messages: _getChatActiveMV(
+            updatedChat.messages,
+            currentState.char,
+            currentState.userCard,
+          ),
+        ),
+      );
     } catch (e) {
       emit(ChatErrorState(ErrType.removeMessage, e));
     }
@@ -139,7 +151,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       Message(id: -2, role: MessageRole.assistant, content: "", createdAt: DateTime.now()),
     );
 
-    emit(currentState.copyWith(messages: _getChatActiveMV(updatedMessages), isAiTyping: true));
+    emit(
+      currentState.copyWith(
+        messages: _getChatActiveMV(updatedMessages, currentState.char, currentState.userCard),
+        isAiTyping: true,
+      ),
+    );
 
     _regenerateMessage(
       currentState.chatId,
@@ -157,7 +174,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         event.direction,
       );
 
-      emit(currentState.copyWith(messages: _getChatActiveMV(updatedChat.messages)));
+      emit(
+        currentState.copyWith(
+          messages: _getChatActiveMV(updatedChat.messages, updatedChat.char, updatedChat.userCard),
+        ),
+      );
     } catch (e) {
       emit(ChatErrorState(ErrType.switchMessage, e));
     }
@@ -178,7 +199,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
             chatId: existingChat.id,
             char: existingChat.char,
             background: existingChat.background ?? existingChat.char.background,
-            messages: _getChatActiveMV(existingChat.messages),
+            messages: _getChatActiveMV(
+              existingChat.messages,
+              existingChat.char,
+              existingChat.userCard,
+            ),
             userCard: existingChat.userCard,
             summary: existingChat.summaries.lastOrNull?.content ?? '',
           ),
@@ -208,13 +233,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
                   Message(
                     id: -99,
                     role: MessageRole.assistant,
-                    content: _replacePlaceholders(
-                      char.greeting,
-                      char.name,
-                      defaultUserCard?.name ?? defUser,
-                    ),
+                    content: char.greeting,
                     createdAt: DateTime.now(),
                   ),
+                  char.name,
+                  defaultUserCard?.name ?? defUser,
                   1,
                   1,
                 ),
@@ -276,7 +299,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     );
 
     currentState = currentState.copyWith(
-      messages: _getChatActiveMV(updatedMessages),
+      messages: _getChatActiveMV(updatedMessages, currentState.char, currentState.userCard),
       isAiTyping: true,
       selectedImageFile: null,
       isResetImage: true,
@@ -299,7 +322,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       final chat = await _repository.getChatById(currentState.chatId);
       emit(
         currentState.copyWith(
-          messages: _getChatActiveMV(chat.messages),
+          messages: _getChatActiveMV(chat.messages, chat.char, chat.userCard),
           isAiTyping: false,
           selectedImageFile: imageFile,
         ),
@@ -454,7 +477,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       for (var i = chat.messages.length - 1; i >= 0; --i) {
         var msg = chat.messages[i];
         if (msg.isActive) {
-          final content = PromptRenderer.removeComments(msg.content);
+          final content = PromptRenderer.renderMessage(
+            msg.content,
+            charName: chat.char.name,
+            userName: chat.userCard?.name ?? 'User',
+          );
           accumulatedTokens +=
               (await _calculateTokens(content, settings)) + TokenLimits.templateTokens;
           if (accumulatedTokens < settings.maxContextTokens) {
@@ -482,7 +509,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     return tokens;
   }
 
-  List<MessageView> _getChatActiveMV(List<Message> messages) {
+  List<MessageView> _getChatActiveMV(List<Message> messages, Char char, UserCard? user) {
     final Map<int, List<Message>> byParent = {};
     for (final msg in messages) {
       var list = byParent[msg.parentId ?? -1];
@@ -496,6 +523,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         messageViews.add(
           MessageView.fromMessage(
             msg,
+            char.name,
+            user?.name ?? 'User',
             msg.parentId != null ? byParent[msg.parentId]?.length ?? 1 : 1,
             msg.parentId != null ? (byParent[msg.parentId]?.indexOf(msg) ?? 0) + 1 : 1,
           ),
@@ -514,7 +543,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     if (message.status == MessageStatus.completed) {
       final chat = await _repository.getChatById(currentState.chatId);
-      emit(currentState.copyWith(messages: _getChatActiveMV(chat.messages), isAiTyping: false));
+      emit(
+        currentState.copyWith(
+          messages: _getChatActiveMV(chat.messages, chat.char, chat.userCard),
+          isAiTyping: false,
+        ),
+      );
     } else {
       final updatedMessages = List<Message>.from(currentState.messages);
       final lastIndex = updatedMessages.length - 1;
@@ -535,7 +569,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           ),
         );
       }
-      emit(currentState.copyWith(messages: _getChatActiveMV(updatedMessages), isAiTyping: true));
+      emit(
+        currentState.copyWith(
+          messages: _getChatActiveMV(updatedMessages, currentState.char, currentState.userCard),
+          isAiTyping: true,
+        ),
+      );
     }
   }
 
@@ -549,7 +588,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     final chat = await _repository.getChatById(currentState.chatId);
     emit(
       currentState.copyWith(
-        messages: _getChatActiveMV(chat.messages),
+        messages: _getChatActiveMV(chat.messages, chat.char, chat.userCard),
         isAiTyping: false,
         selectedImageFile: error.imageFile,
       ),
@@ -599,13 +638,11 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
               Message(
                 id: -99,
                 role: MessageRole.assistant,
-                content: _replacePlaceholders(
-                  char.greeting,
-                  char.name,
-                  currentState.userCard?.name ?? defUser,
-                ),
+                content: char.greeting,
                 createdAt: DateTime.now(),
               ),
+              char.name,
+              currentState.userCard?.name ?? defUser,
               1,
               1,
             ),
@@ -644,10 +681,5 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
     emit(currentState.copyWith(selectedImageFile: event.fileImage, isResetImage: true));
-  }
-
-  String _replacePlaceholders(String text, String charName, String userName) {
-    final res = PromptRenderer.renderNames(text, charName: charName, userName: userName);
-    return PromptRenderer.removeComments(res);
   }
 }
