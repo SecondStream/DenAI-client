@@ -4,8 +4,8 @@ abstract class AppStatusState {}
 
 class AppStatusInitialState extends AppStatusState {}
 
-class AppStatusErrorState extends AppStatusState {
-  AppStatusErrorState();
+class AppStatusLoadingState extends AppStatusState {
+  AppStatusLoadingState();
 }
 
 class AppStatusSuccessState extends AppStatusState {

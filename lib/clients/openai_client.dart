@@ -211,7 +211,8 @@ class OpenAIClient {
   }
 
   Future<List<dynamic>> _getRemoteModels(SettingsBase settings) async {
-    final String openrouterUrl = '${settings.provider.url.replaceAll(RegExp(r'/$'), '')}$urlModels';
+    final String openrouterUrl =
+        '${settings.provider.url.replaceAll(RegExp(r'/$'), '')}$urlModels?output_modalities=all';
 
     try {
       final response = await dio.get(
@@ -251,26 +252,33 @@ class OpenAIClient {
     return result;
   }
 
-  Future<List<ModelInfo>> fetchModels(SettingsBase settings, {bool vision = false}) async {
+  Future<(List<ModelInfo>, bool)> fetchModels(SettingsBase settings, {bool vision = false}) async {
     try {
       if (cachedModelsList == null || cachedModelsList!.isEmpty) {
         cachedModelsList = await _getRemoteModels(settings);
       }
 
       final List<ModelInfo> result = <ModelInfo>[];
+      final List<ModelInfo> fallbackResult = <ModelInfo>[];
 
       for (final m in cachedModelsList!) {
         if (m is! Map<String, dynamic>) continue;
 
         final String? name = m["id"] as String?;
         if (name == null || name.isEmpty) continue;
+        fallbackResult.add(ModelInfo(name: name, info: ''));
 
         if (vision) {
           final Map<String, dynamic>? architecture = m["architecture"] as Map<String, dynamic>?;
           if (architecture != null) {
-            final String modality = architecture["modality"] as String? ?? "";
-            final String inputModality = modality.split("->").first;
-            if (!inputModality.contains("image")) {
+            String modality = architecture["modality"] as String? ?? "";
+            modality = modality.toLowerCase();
+            final dynamic inModality = architecture['input_modalities'] ?? [];
+            final isImage =
+                (inModality is Iterable &&
+                    (inModality.contains('image') || inModality.contains('images'))) ||
+                modality.contains("image");
+            if (!isImage) {
               continue;
             }
           }
@@ -309,37 +317,46 @@ class OpenAIClient {
 
       result.sort((a, b) => a.name.compareTo(b.name));
 
-      return result;
+      if (result.isEmpty && fallbackResult.isNotEmpty) return (fallbackResult, true);
+      return (result, true);
       // ignore: empty_catches
     } catch (e) {}
 
-    return [ModelInfo(name: !vision ? defaultModel : defaultVisionModel, info: "???")];
+    return ([ModelInfo(name: !vision ? defaultModel : defaultVisionModel, info: "???")], false);
   }
 
-  Future<List<ModelInfo>> fetchVisionModels(SettingsBase settings) async {
+  Future<(List<ModelInfo>, bool)> fetchVisionModels(SettingsBase settings) async {
     return await fetchModels(settings, vision: true);
   }
 
-  Future<List<ModelInfo>> fetchEmbeddingModels(SettingsBase settings) async {
+  Future<(List<ModelInfo>, bool)> fetchEmbeddingModels(SettingsBase settings) async {
     try {
       if (cachedModelsList == null || cachedModelsList!.isEmpty) {
         cachedModelsList = await _getRemoteModels(settings);
       }
 
       final List<ModelInfo> result = <ModelInfo>[];
+      final List<ModelInfo> fallbackResult = <ModelInfo>[];
 
       for (final m in cachedModelsList!) {
         if (m is! Map<String, dynamic>) continue;
 
         final String? name = m["id"] as String?;
         if (name == null || name.isEmpty) continue;
+        fallbackResult.add(ModelInfo(name: name, info: ''));
 
         bool isEmbedding = false;
 
         final Map<String, dynamic>? architecture = m["architecture"] as Map<String, dynamic>?;
         if (architecture != null) {
-          final String modality = architecture["modality"] as String? ?? "";
-          if (modality.endsWith("->embedding") || modality.contains("embedding")) {
+          String modality = architecture["modality"] as String? ?? "";
+          modality = modality.toLowerCase();
+          final dynamic outModality = architecture['output_modalities'] ?? [];
+          final isEmbed =
+              (outModality is Iterable &&
+                  (outModality.contains('embedding') || outModality.contains('embeddings'))) ||
+              modality.contains("embedding");
+          if (isEmbed) {
             isEmbedding = true;
           }
         } else {
@@ -384,12 +401,13 @@ class OpenAIClient {
         return a.name.compareTo(b.name);
       });
 
-      return result;
+      if (result.isEmpty && fallbackResult.isNotEmpty) return (fallbackResult, true);
+      return (result, true);
 
       // ignore: empty_catches
     } catch (e) {}
 
-    return [ModelInfo(name: defaultEmbeddingModel, info: "? ctx")];
+    return ([ModelInfo(name: defaultEmbeddingModel, info: "? ctx")], false);
   }
 
   Map<String, dynamic> _getPayload(SettingsBase settings, List<Map<String, String>> messages) {

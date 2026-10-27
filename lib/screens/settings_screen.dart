@@ -1,6 +1,8 @@
+import 'package:den_ai/blocs/app_status/app_status_bloc.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/widgets/app_drawer.dart';
 import 'package:den_ai/widgets/dialogs/edit_provider_dialog.dart';
+import 'package:den_ai/widgets/status_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:den_ai/blocs/settings/settings_bloc.dart';
@@ -68,7 +70,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
     return BlocProvider<SettingsBloc>(
       create: (context) =>
-          SettingsBloc(GetIt.instance.get(), GetIt.instance.get())..add(LoadAllSettingsEvent()),
+          SettingsBloc(GetIt.instance.get(), GetIt.instance.get(), context.read<AppStatusBloc>())..add(LoadAllSettingsEvent()),
       child: Scaffold(
         appBar: AppBar(title: Text(loc.globalSettingsTitle)),
         drawer: AppDrawer(),
@@ -93,6 +95,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             _initializeFields(state.settings);
 
+            if (state.models.indexWhere((m) => m.name == _selectedModel) == -1) {
+              _selectedModel = state.models.first.name;
+            }
+            if (state.visionModels.indexWhere((m) => m.name == _selectedVisionModel) == -1) {
+              _selectedVisionModel = state.visionModels.first.name;
+            }
+            if (state.embeddingModels.indexWhere((m) => m.name == _selectedEmbeddingModel) == -1) {
+              _selectedEmbeddingModel = state.embeddingModels.first.name;
+            }
+
             return Padding(
               padding: const EdgeInsets.all(24.0),
               child: Form(
@@ -106,18 +118,26 @@ class _SettingsScreenState extends State<SettingsScreen> {
                         children: [
                           _buildSectionTitle(theme, loc.apiProvider),
                           const SizedBox(height: 16),
-                          _buildDropdownProviders(
-                            label: loc.labelProvider,
-                            value: state.settings.provider.id,
-                            items: state.providers,
-                            onChanged: (v) {
-                              if (v != null && v != state.settings.provider.id) {
-                                _isInitialized = false;
-                                context.read<SettingsBloc>().add(
-                                  UpdateProviderEvent(providerId: v),
-                                );
-                              }
-                            },
+                          Row(
+                            children: [
+                              Expanded(
+                                child: _buildDropdownProviders(
+                                  label: loc.labelProvider,
+                                  value: state.settings.provider.id,
+                                  items: state.providers,
+                                  onChanged: (v) {
+                                    if (v != null && v != state.settings.provider.id) {
+                                      _isInitialized = false;
+                                      context.read<SettingsBloc>().add(
+                                        UpdateProviderEvent(providerId: v),
+                                      );
+                                    }
+                                  },
+                                ),
+                              ),
+                              SizedBox(width: 10),
+                              StatusButton(),
+                            ],
                           ),
                           Row(
                             mainAxisSize: MainAxisSize.max,

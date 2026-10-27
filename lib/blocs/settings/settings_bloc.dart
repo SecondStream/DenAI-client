@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/blocs/app_status/app_status_bloc.dart';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
@@ -17,8 +18,9 @@ part 'settings_state.dart';
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final SettingsRepository _repository;
   final OpenAIClient _client;
+  final AppStatusBloc statusBloc;
 
-  SettingsBloc(this._repository, this._client) : super(SettingsInitialState()) {
+  SettingsBloc(this._repository, this._client, this.statusBloc) : super(SettingsInitialState()) {
     on<LoadAllSettingsEvent>(_onLoadAllSettings);
     on<UpdateProviderEvent>(_onUpdateProvider);
     on<SaveProviderEvent>(_onSaveProvider);
@@ -31,9 +33,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     try {
       final settings = await _repository.getSettings();
       final providers = await _repository.getAllProviders();
-      final models = await _client.fetchModels(settings);
-      final visionModels = await _client.fetchVisionModels(settings);
-      final embeddingModels = await _client.fetchEmbeddingModels(settings);
+      final (models, visionModels, embeddingModels, success) = await _getModels(settings);
       final tokenizers = await getAvailableTokenizers();
       emit(
         SettingsLoadedState(
@@ -57,6 +57,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     emit(SettingsLoadingState());
     try {
       final updated = await _repository.saveSettings(event.settings);
+      statusBloc.add(StatusCheckedEvent());
       emit(
         SettingsLoadedState(
           models: currentState.models,
@@ -125,9 +126,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     try {
       final settings = await _repository.updateActiveProviderId(event.providerId);
       _client.clearCache();
-      final models = await _client.fetchModels(settings);
-      final visionModels = await _client.fetchVisionModels(settings);
-      final embeddingModels = await _client.fetchEmbeddingModels(settings);
+      final (models, visionModels, embeddingModels, success) = await _getModels(settings);
+      statusBloc.add(ProviderChangedEvent(success));
       emit(
         currentState.copyWith(
           models: models,
@@ -155,9 +155,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     if (event.id == null) {
       final settings = await _repository.updateActiveProviderId(provider.id);
       _client.clearCache();
-      final models = await _client.fetchModels(settings);
-      final visionModels = await _client.fetchVisionModels(settings);
-      final embeddingModels = await _client.fetchEmbeddingModels(settings);
+      final (models, visionModels, embeddingModels, success) = await _getModels(settings);
+      statusBloc.add(ProviderChangedEvent(success));
       emit(
         currentState.copyWith(
           models: models,
@@ -179,9 +178,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     await _repository.deleteProvider(event.providerId);
     final settings = await _repository.getSettings();
     _client.clearCache();
-    final models = await _client.fetchModels(settings);
-    final visionModels = await _client.fetchVisionModels(settings);
-    final embeddingModels = await _client.fetchEmbeddingModels(settings);
+    final (models, visionModels, embeddingModels, success) = await _getModels(settings);
+    statusBloc.add(ProviderChangedEvent(success));
     emit(
       currentState.copyWith(
         models: models,
@@ -191,5 +189,18 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         providers: await _repository.getAllProviders(),
       ),
     );
+  }
+
+  Future<(List<ModelInfo>, List<ModelInfo>, List<ModelInfo>, bool)> _getModels(
+    SettingsBase settings,
+  ) async {
+    final (models, success) = await _client.fetchModels(settings);
+    final (visionModels, _) = success
+        ? await _client.fetchVisionModels(settings)
+        : ([ModelInfo(name: _client.defaultVisionModel, info: "???")], false);
+    final (embeddingModels, _) = success
+        ? await _client.fetchEmbeddingModels(settings)
+        : ([ModelInfo(name: _client.defaultEmbeddingModel, info: "???")], false);
+    return (models, visionModels, embeddingModels, success);
   }
 }
