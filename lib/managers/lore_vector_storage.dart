@@ -6,6 +6,22 @@ import 'package:path/path.dart' as p;
 class LoreVectorStorage {
   static const String _subDir = 'lore_vectors';
 
+  static Future<bool> hasVectorFiles() async {
+    final Directory targetDir = Directory(p.join(AppEnv.supportDir, _subDir));
+    if (!await targetDir.exists()) {
+      return false;
+    }
+
+    try {
+      await for (final entity in targetDir.list()) {
+        if (entity is File && p.extension(entity.path) == '.bin') {
+          return true;
+        }
+      }
+    } catch (_) {}
+    return false;
+  }
+
   Future<File> _getVectorFile(int lorebookId) async {
     final Directory targetDir = Directory(p.join(AppEnv.supportDir, _subDir));
 

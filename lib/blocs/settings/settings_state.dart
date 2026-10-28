@@ -48,3 +48,5 @@ class SettingsLoadedState extends SettingsState {
     );
   }
 }
+
+class SettingsSaveSuccess extends SettingsState {}

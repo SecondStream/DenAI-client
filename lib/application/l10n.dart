@@ -148,10 +148,12 @@ class AppLocalization {
       'label_min_p': 'Min P',
       'label_top_p': 'Top P',
       'label_repeat_penalty': 'Repetition Penalty',
-      'hint_system_prompt': 'Enter instructions that will be mixed into all chats.',
+      'hint_system_prompt': 'Enter instructions that will be added into all chats.',
       'hint_system_template': 'A template for AI indicating its role and instructions.',
       'button_save_settings': 'Save Settings',
       'message_settings_saved': 'Settings saved successfully!',
+      'confirm_message_title': 'Confirm model change',
+      'confirm_message_text': 'If you change the model, your lorebooks will be completely rebuilt.\nThis will take some time—approximately 1 second per lorebook—though this duration may increase if the provider returns an error.\nAdditionally, if you are using a paid API, this process may incur costs. Continue?',
       // --- Экраны книг ---
       'lorebooks': 'Lorebooks',
       'lorebooks_title': 'Lorebooks',
@@ -350,10 +352,12 @@ class AppLocalization {
       'label_min_p': 'Min P',
       'label_top_p': 'Top P',
       'label_repeat_penalty': 'Repetition Penalty',
-      'hint_system_prompt': 'Введите инструкции, которые будут подмешиваться ко всем чатам.',
+      'hint_system_prompt': 'Введите инструкции, которые будут добавляться ко всем чатам.',
       'hint_system_template': 'Шаблон для ИИ с указанием его роли и инструкций.',
       'button_save_settings': 'Сохранить настройки',
       'message_settings_saved': 'Настройки успешно сохранены!',
+      'confirm_message_title': 'Подтвердите смену модели',
+      'confirm_message_text': 'Если вы измените модель, ваши лорбуки будут полностью перестроены.\n Это займет некоторое время: ~1c на лорбук, но может быть увеличено, если провайдер выдаст ошибку.\n А также может потратить средства, если вы используете платное API. Продолжить?',
 
       // --- Экраны книг ---
       'lorebooks': 'Книги знаний',
@@ -579,6 +583,11 @@ class AppLocalization {
       _localizedValues[locale.languageCode]?['button_save_settings'] ?? empty;
   String get messageSettingsSaved =>
       _localizedValues[locale.languageCode]?['message_settings_saved'] ?? empty;
+  String get confirmMessageTitle =>
+      _localizedValues[locale.languageCode]?['confirm_message_title'] ?? empty;
+  String get confirmMessageText =>
+      _localizedValues[locale.languageCode]?['confirm_message_text'] ?? empty;
+
   String get cropAvatarTitle =>
       _localizedValues[locale.languageCode]?['crop_avatar_title'] ?? empty;
   String get replaceAvatarHint =>
@@ -661,7 +670,7 @@ class AppLocalization {
   String get visionUnavailable => _localizedValues[locale.languageCode]?['vision_unavailable'] ?? empty;
   String get chatUnavailable => _localizedValues[locale.languageCode]?['chat_unavailable'] ?? empty;
 
-  String getError(ErrType type, Object exception) {
+  String getError(ErrType type, [Object? exception]) {
     switch (type) {
       case ErrType.loadChats:
         return _localizedValues[locale.languageCode]?['err_load_chats'] ?? type.name;

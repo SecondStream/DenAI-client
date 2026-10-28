@@ -1,6 +1,10 @@
+import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/blocs/app_status/app_status_bloc.dart';
+import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/widgets/app_drawer.dart';
+import 'package:den_ai/widgets/dialogs/confirmation_dialog.dart';
 import 'package:den_ai/widgets/dialogs/edit_provider_dialog.dart';
 import 'package:den_ai/widgets/status_button.dart';
 import 'package:flutter/material.dart';
@@ -18,6 +22,7 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _formKey = GlobalKey<FormState>();
+  UniqueKey _dropdownKey = UniqueKey();
   String? _selectedModel;
   String? _selectedVisionModel;
   String? _selectedEmbeddingModel;
@@ -69,12 +74,22 @@ class _SettingsScreenState extends State<SettingsScreen> {
     final loc = AppLocalization.of(context);
 
     return BlocProvider<SettingsBloc>(
-      create: (context) =>
-          SettingsBloc(GetIt.instance.get(), GetIt.instance.get(), context.read<AppStatusBloc>())..add(LoadAllSettingsEvent()),
+      create: (context) => SettingsBloc(
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        context.read<AppStatusBloc>(),
+      )..add(LoadAllSettingsEvent()),
       child: Scaffold(
         appBar: AppBar(title: Text(loc.globalSettingsTitle)),
         drawer: AppDrawer(),
-        body: BlocBuilder<SettingsBloc, SettingsState>(
+        body: BlocConsumer<SettingsBloc, SettingsState>(
+          listener: (context, state) {
+            if (state is SettingsSaveSuccess) {
+              context.replace(AppRoutes.home);
+            }
+          },
           builder: (context, state) {
             if (state is SettingsLoadingState) {
               return const Center(child: CircularProgressIndicator());
@@ -204,6 +219,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
 
                           _buildDropdownModels(
+                            key: _dropdownKey,
                             label: loc.labelEmbeddingModel,
                             value: _selectedEmbeddingModel,
                             items: state.embeddingModels,
@@ -346,30 +362,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                               loc.buttonSettingsSaved,
                               style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
                             ),
-                            onPressed: () {
-                              if (_formKey.currentState!.validate()) {
-                                final updatedSettings = SettingsBase(
-                                  modelName: _selectedModel!,
-                                  visionModelName: _selectedVisionModel!,
-                                  embeddingModelName: _selectedEmbeddingModel!,
-                                  tokenizerPath: _selectedTokenizer!,
-                                  maxContextTokens: _maxContext.toInt(),
-                                  temperature: _temperature,
-                                  minP: _minP,
-                                  topP: _topP,
-                                  repeatPenalty: _repeatPenalty,
-                                  globalSystemPrompt: _systemPromptController.text.trim(),
-                                  template: _templateController.text.trim(),
-                                  provider: state.settings.provider,
-                                );
-                                context.read<SettingsBloc>().add(
-                                  SaveSettingsEvent(updatedSettings),
-                                );
-                                ScaffoldMessenger.of(
-                                  context,
-                                ).showResponse(loc.messageSettingsSaved);
-                              }
-                            },
+                            onPressed: () => _saveSettings(context, loc, state),
                           ),
                         ],
                       ),
@@ -455,21 +448,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Widget _buildDropdownModels({
+    UniqueKey? key,
     required String label,
     required String? value,
     required List<ModelInfo> items,
     required ValueChanged<String?> onChanged,
   }) {
     final theme = Theme.of(context);
-
     final List<String> itemNames = items.map((e) => e.name).toList();
+
+    final String? currentValue = itemNames.contains(value)
+        ? value
+        : (itemNames.isNotEmpty ? itemNames.first : null);
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: DropdownButtonFormField<String>(
-        initialValue: itemNames.contains(value)
-            ? value
-            : (itemNames.isNotEmpty ? itemNames.first : null),
+        key: key,
+        initialValue: currentValue,
         onChanged: onChanged,
         style: const TextStyle(color: Colors.white, fontSize: 14),
         decoration: InputDecoration(
@@ -577,16 +573,55 @@ class _SettingsScreenState extends State<SettingsScreen> {
       }
     }
   }
-}
 
-extension on ScaffoldMessengerState {
-  void showResponse(String message) {
-    showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.green.shade700,
-        duration: const Duration(seconds: 2),
-      ),
-    );
+  Future<void> _saveSettings(BuildContext context, AppLocalization loc, SettingsLoadedState state) async {
+    if (_formKey.currentState!.validate()) {
+      if (state.settings.embeddingModelName != _selectedEmbeddingModel) {
+        final bool hasFiles = await LoreVectorStorage.hasVectorFiles();
+        if (!context.mounted) return;
+
+        if (hasFiles) {
+          final bool? confirm = await ConfirmationDialog.open(
+            context,
+            loc.confirmMessageTitle,
+            loc.confirmMessageText,
+          );
+
+          if (confirm != true) {
+            final index = state.embeddingModels.indexWhere(
+                  (m) => m.name == state.settings.embeddingModelName,
+            );
+            if (index >= 0) {
+              setState(() {
+                _selectedEmbeddingModel =
+                    state.embeddingModels[index].name;
+                _dropdownKey = UniqueKey();
+              });
+            }
+            return;
+          }
+        }
+      }
+
+      final updatedSettings = SettingsBase(
+        modelName: _selectedModel!,
+        visionModelName: _selectedVisionModel!,
+        embeddingModelName: _selectedEmbeddingModel!,
+        tokenizerPath: _selectedTokenizer!,
+        maxContextTokens: _maxContext.toInt(),
+        temperature: _temperature,
+        minP: _minP,
+        topP: _topP,
+        repeatPenalty: _repeatPenalty,
+        globalSystemPrompt: _systemPromptController.text.trim(),
+        template: _templateController.text.trim(),
+        provider: state.settings.provider,
+      );
+      if (context.mounted) {
+        context.read<SettingsBloc>().add(
+          SaveSettingsEvent(updatedSettings),
+        );
+      }
+    }
   }
 }

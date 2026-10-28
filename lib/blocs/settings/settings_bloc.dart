@@ -5,7 +5,9 @@ import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/blocs/app_status/app_status_bloc.dart';
 import 'package:den_ai/clients/openai_client.dart';
+import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/models/models.dart';
+import 'package:den_ai/repositories/lorebooks_repository.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,10 +19,18 @@ part 'settings_state.dart';
 
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final SettingsRepository _repository;
+  final LorebooksRepository _lorebooksRepository;
+  final LoreVectorStorage _storage;
   final OpenAIClient _client;
   final AppStatusBloc statusBloc;
 
-  SettingsBloc(this._repository, this._client, this.statusBloc) : super(SettingsInitialState()) {
+  SettingsBloc(
+    this._repository,
+    this._lorebooksRepository,
+    this._client,
+    this._storage,
+    this.statusBloc,
+  ) : super(SettingsInitialState()) {
     on<LoadAllSettingsEvent>(_onLoadAllSettings);
     on<UpdateProviderEvent>(_onUpdateProvider);
     on<SaveProviderEvent>(_onSaveProvider);
@@ -52,22 +62,15 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
   void _onSaveSettings(SaveSettingsEvent event, Emitter<SettingsState> emit) async {
     if (state is! SettingsLoadedState) return;
-    final currentState = state as SettingsLoadedState;
-
     emit(SettingsLoadingState());
     try {
-      final updated = await _repository.saveSettings(event.settings);
+      final settings = await _repository.getSettings();
+      if (settings.embeddingModelName != event.settings.embeddingModelName) {
+        await _rebuildAllEmbeddings(event.settings);
+      }
+      await _repository.saveSettings(event.settings);
       statusBloc.add(StatusCheckedEvent());
-      emit(
-        SettingsLoadedState(
-          models: currentState.models,
-          visionModels: currentState.visionModels,
-          embeddingModels: currentState.embeddingModels,
-          tokenizers: currentState.tokenizers,
-          settings: updated,
-          providers: currentState.providers,
-        ),
-      );
+      emit(SettingsSaveSuccess());
     } catch (e) {
       emit(SettingsErrorState(ErrType.saveSettings, e.toString()));
     }
@@ -203,4 +206,69 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         : ([ModelInfo(name: _client.defaultEmbeddingModel, info: "???")], false);
     return (models, visionModels, embeddingModels, success);
   }
+
+  Future<void> _rebuildAllEmbeddings(SettingsBase settings) async {
+    var delay = 2;
+    final retryDelay = 15;
+
+    final List<Lorebook> lorebooks = await _lorebooksRepository.getAllFullLorebooks();
+    if (lorebooks.isEmpty) return;
+
+    final Map<int, List<List<double>>> memoryCache = {};
+
+    for (int i = 0; i < lorebooks.length; i += 2) {
+      final int endIndex = (i + 2 > lorebooks.length) ? lorebooks.length : i + 2;
+      final List<Lorebook> batch = lorebooks.sublist(i, endIndex);
+      int retryCount = 0;
+      const int maxRetries = 3;
+      bool isBatchSuccess = false;
+
+      while (!isBatchSuccess) {
+        try {
+          final results = await Future.wait(
+            batch.map((lorebook) async {
+              final List<String> texts = lorebook.getEntriesTexts();
+              if (texts.isEmpty) return null;
+
+              final List<List<double>> embeddings = await _client.getEmbeddings(
+                texts: texts,
+                settings: settings,
+              );
+
+              return _BatchResult(lorebook.id, embeddings);
+            }),
+          );
+
+          for (final res in results) {
+            if (res != null) {
+              memoryCache[res.lorebookId] = res.embeddings;
+            }
+          }
+
+          isBatchSuccess = true;
+        } catch (e) {
+          retryCount++;
+          if (retryCount >= maxRetries) {
+            rethrow;
+          }
+
+          delay += 3;
+          await Future.delayed(Duration(seconds: retryDelay));
+        }
+      }
+      if (endIndex < lorebooks.length) {
+        await Future.delayed(Duration(seconds: delay));
+      }
+    }
+
+    for (final entry in memoryCache.entries) {
+      await _storage.saveVectors(entry.key, entry.value);
+    }
+  }
+}
+
+class _BatchResult {
+  final int lorebookId;
+  final List<List<double>> embeddings;
+  _BatchResult(this.lorebookId, this.embeddings);
 }

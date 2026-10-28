@@ -56,7 +56,7 @@ class AppDrawer extends StatelessWidget {
               selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.15),
               titleAlignment: ListTileTitleAlignment.center,
               onTap: () {
-                context.pop(context);
+                context.pop();
                 context.replace(AppRoutes.characters);
               },
             ),
