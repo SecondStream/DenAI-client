@@ -43,7 +43,7 @@ class ConfirmationDialog extends StatelessWidget {
           style: TextButton.styleFrom(minimumSize: Size(100, 40)),
           child: Text(
             loc.no,
-            style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+            style: TextStyle(color: theme.hintColor, fontWeight: FontWeight.bold),
           ),
         ),
         ElevatedButton(

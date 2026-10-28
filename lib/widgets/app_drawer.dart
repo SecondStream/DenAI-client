@@ -114,7 +114,7 @@ class AppDrawer extends StatelessWidget {
           clipBehavior: Clip.antiAlias,
           child: avatarUrl != null
               ? CroppedAvatar(imageUrl: avatarUrl, cropData: card!.getCropData(), size: 120)
-              : const Icon(Icons.add_a_photo, size: 40, color: Colors.grey),
+              : Icon(Icons.add_a_photo, size: 40, color: theme.hintColor),
         );
       },
     );

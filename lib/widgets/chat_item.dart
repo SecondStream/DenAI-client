@@ -28,7 +28,7 @@ class ChatItem extends StatelessWidget {
           chat.messages.isNotEmpty ? chat.messages.last.content : loc.noLastMessage,
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(color: Colors.grey),
+          style: TextStyle(color: theme.hintColor),
         ),
         trailing: Tooltip(
           message: loc.deleteChatTooltip,

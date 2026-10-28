@@ -83,7 +83,6 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                 decoration: InputDecoration(
                   labelText: loc.providerNameLabel,
                   hintText: loc.providerNameHint,
-                  hintStyle: TextStyle(color: Colors.grey.shade600),
                   fillColor: theme.cardColor,
                   filled: true,
                   border: OutlineInputBorder(
@@ -105,7 +104,6 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                 decoration: InputDecoration(
                   labelText: loc.providerUrlLabel,
                   hintText: loc.providerUrlHint,
-                  hintStyle: TextStyle(color: Colors.grey.shade600),
                   fillColor: theme.cardColor,
                   filled: true,
                   border: OutlineInputBorder(
@@ -127,7 +125,6 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                 decoration: InputDecoration(
                   labelText: loc.providerKeyLabel,
                   hintText: loc.providerKeyHint,
-                  hintStyle: TextStyle(color: Colors.grey.shade600),
                   fillColor: theme.cardColor,
                   filled: true,
                   border: OutlineInputBorder(
@@ -151,7 +148,6 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                 decoration: InputDecoration(
                   labelText: loc.providerAddLabel,
                   hintText: loc.providerAddHint,
-                  hintStyle: TextStyle(color: Colors.grey.shade600),
                   fillColor: theme.cardColor,
                   filled: true,
                   border: OutlineInputBorder(
@@ -198,7 +194,7 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                   onPressed: () => context.pop(),
                   child: Text(
                     loc.cancel,
-                    style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: theme.hintColor, fontWeight: FontWeight.bold),
                   ),
                 ),
                 const SizedBox(width: 12),

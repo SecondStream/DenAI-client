@@ -48,7 +48,7 @@ class _LorebooksSelectDialogState extends State<LorebooksSelectDialog> {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
-          Icon(Icons.library_books, color: Colors.grey, size: 22),
+          Icon(Icons.library_books, color: theme.hintColor, size: 22),
           SizedBox(width: 10),
           Text(
             loc.lorebookSelectionTitle,
@@ -64,7 +64,7 @@ class _LorebooksSelectDialogState extends State<LorebooksSelectDialog> {
                 child: Text(
                   loc.noLorebooksWarning,
                   textAlign: TextAlign.center,
-                  style: TextStyle(color: Colors.grey, fontSize: 13, height: 1.4),
+                  style: TextStyle(color: theme.hintColor, fontSize: 13, height: 1.4),
                 ),
               )
             : ListView.builder(
@@ -85,7 +85,7 @@ class _LorebooksSelectDialogState extends State<LorebooksSelectDialog> {
                         book.about,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Colors.grey, fontSize: 12),
+                        style: TextStyle(color: theme.hintColor, fontSize: 12),
                       ),
                       value: isChecked,
                       activeColor: theme.colorScheme.primary,
@@ -110,7 +110,7 @@ class _LorebooksSelectDialogState extends State<LorebooksSelectDialog> {
           onPressed: () => context.pop(),
           child: Text(
             loc.cancel,
-            style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+            style: TextStyle(color: theme.hintColor, fontWeight: FontWeight.bold),
           ),
         ),
         ElevatedButton(

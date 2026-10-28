@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:den_ai/application/config.dart';
+import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/widgets/status.dart';
 import 'package:den_ai/blocs/character_form/character_form_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
@@ -114,6 +115,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
         GetIt.instance.get(),
         GetIt.instance.get(),
         GetIt.instance.get(),
+        context.notifyBloc,
       )..add(InitCharacterFormEvent(_characterId)),
       child: Scaffold(
         appBar: AppBar(
@@ -153,7 +155,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                             children: [
                               Text(
                                 loc.avatarLabel,
-                                style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                                style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
                               ),
                               const SizedBox(height: 8),
                               _buildAvatarPicker(context, theme, state.character),
@@ -166,7 +168,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                               children: [
                                 Text(
                                   loc.backgroundLabel,
-                                  style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey),
+                                  style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
                                 ),
                                 const SizedBox(height: 8),
                                 InkWell(
@@ -316,7 +318,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(loc.import, style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+        Text(loc.import, style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor)),
         const SizedBox(height: 8),
         InkWell(
           onTap: () => _pickCard(context),
@@ -334,9 +336,9 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.person_pin_rounded, size: 32, color: Colors.grey),
+                  Icon(Icons.person_pin_rounded, size: 32, color: theme.hintColor),
                   const SizedBox(height: 4),
-                  Text(loc.imortExt, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                  Text(loc.imortExt, style: TextStyle(color: theme.hintColor, fontSize: 12)),
                 ],
               ),
             ),
@@ -350,7 +352,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(loc.export, style: theme.textTheme.bodySmall?.copyWith(color: Colors.grey)),
+        Text(loc.export, style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor)),
         const SizedBox(height: 8),
         InkWell(
           onTap: () => _exportCard(context, loc),
@@ -368,9 +370,9 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.output, size: 32, color: Colors.grey),
+                  Icon(Icons.output, size: 32, color: theme.hintColor),
                   const SizedBox(height: 4),
-                  Text(loc.exportExt, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                  Text(loc.exportExt, style: TextStyle(color: theme.hintColor, fontSize: 12)),
                 ],
               ),
             ),
@@ -422,13 +424,13 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                       _selectedLorebookIds.isEmpty
                           ? loc.charNoLorebooks
                           : loc.charLorebookCount(_selectedLorebookIds.length),
-                      style: const TextStyle(color: Colors.grey, fontSize: 12),
+                      style: TextStyle(color: theme.hintColor, fontSize: 12),
                     ),
                   ],
                 ),
               ],
             ),
-            const Icon(Icons.arrow_forward_ios, size: 14, color: Colors.grey),
+            Icon(Icons.arrow_forward_ios, size: 14, color: theme.hintColor),
           ],
         ),
       ),
@@ -441,7 +443,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     return InkWell(
       onTap: () => handleAvatarClick(context, character),
       borderRadius: BorderRadius.circular(60),
-      child: PersonaAvatar.form(avatarUrl, currentCropData ?? char?.getCropData()),
+      child: PersonaAvatar.form(avatarUrl, currentCropData ?? char?.getCropData(), theme.hintColor),
     );
   }
 
@@ -464,9 +466,9 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.wallpaper, size: 32, color: Colors.grey),
+          Icon(Icons.wallpaper, size: 32, color: theme.hintColor),
           const SizedBox(height: 4),
-          Text(loc.selectBackground, style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+          Text(loc.selectBackground, style: TextStyle(color: theme.hintColor, fontSize: 12)),
         ],
       ),
     );

@@ -17,6 +17,7 @@ class LocalRoundedImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SizedBox(
       width: width,
       height: height,
@@ -31,8 +32,8 @@ class LocalRoundedImage extends StatelessWidget {
           },
           errorBuilder: (context, error, stackTrace) {
             return Container(
-              color: Colors.grey[300],
-              child: const Icon(Icons.broken_image, color: Colors.grey),
+              color: theme.hintColor,
+              child: Icon(Icons.broken_image, color: theme.hintColor),
             );
           },
         ),

@@ -121,7 +121,7 @@ class _CroppedAvatarState extends State<CroppedAvatar> {
               fit: BoxFit.fill,
               filterQuality: FilterQuality.high,
               errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.broken_image, color: Colors.grey),
+                  Icon(Icons.broken_image, color: theme.hintColor),
             ),
           ),
         ],

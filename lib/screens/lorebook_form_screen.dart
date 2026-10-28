@@ -161,7 +161,7 @@ class _LorebookFormScreenState extends PersonaFormScreenState<LorebookFormScreen
     return InkWell(
       onTap: () => handleAvatarClick(context, lorebook),
       borderRadius: BorderRadius.circular(60),
-      child: PersonaAvatar.form(avatarUrl, currentCropData ?? lorebook?.getCropData()),
+      child: PersonaAvatar.form(avatarUrl, currentCropData ?? lorebook?.getCropData(), theme.hintColor),
     );
   }
 

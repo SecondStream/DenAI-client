@@ -34,12 +34,12 @@ class PersonaAvatar extends StatelessWidget {
          getCropData: persona?.getCropData,
        );
 
-  factory PersonaAvatar.form(String? avatarUrl, CropData? cropData) {
+  factory PersonaAvatar.form(String? avatarUrl, CropData? cropData, Color iconColor) {
     return PersonaAvatar._internal(
       size: 120,
       iconSize: 40,
       icon: Icons.add_a_photo,
-      iconColor: Colors.grey,
+      iconColor: iconColor,
       avatarUrl: avatarUrl,
       cropData: cropData,
     );

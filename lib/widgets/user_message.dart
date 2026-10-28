@@ -19,6 +19,7 @@ class UserMessage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -39,7 +40,7 @@ class UserMessage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.edit, size: 14, color: Colors.grey),
+                      icon: Icon(Icons.edit, size: 14, color: theme.hintColor),
                       constraints: const BoxConstraints(),
                       padding: const EdgeInsets.all(2),
                       onPressed: onEditMessage != null ? () => onEditMessage?.call(message) : null,

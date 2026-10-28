@@ -89,7 +89,7 @@ class _UserCardFormScreenState extends PersonaFormScreenState<UserCardFormScreen
                       title: Text(loc.defaultSwitchTitle),
                       subtitle: Text(
                         loc.defaultSwitchSubtitle,
-                        style: TextStyle(color: Colors.grey, fontSize: 12),
+                        style: TextStyle(color: theme.hintColor, fontSize: 12),
                       ),
                       value: _isDefault,
                       activeThumbColor: theme.colorScheme.primary,
@@ -176,7 +176,7 @@ class _UserCardFormScreenState extends PersonaFormScreenState<UserCardFormScreen
     return InkWell(
       onTap: () => handleAvatarClick(context, card),
       borderRadius: BorderRadius.circular(60),
-      child: PersonaAvatar.form(avatarUrl, currentCropData ?? card?.getCropData()),
+      child: PersonaAvatar.form(avatarUrl, currentCropData ?? card?.getCropData(), theme.hintColor),
     );
   }
 

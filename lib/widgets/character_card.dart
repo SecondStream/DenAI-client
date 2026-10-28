@@ -42,7 +42,7 @@ class CharacterCard extends StatelessWidget {
                             width: cardWidth,
                             height: cardWidth,
                             color: theme.colorScheme.primary.withValues(alpha: 0.1),
-                            child: const Icon(Icons.person, size: 54, color: Colors.grey),
+                            child: Icon(Icons.person, size: 54, color: theme.hintColor),
                           )
                         : CroppedAvatar(
                             imageUrl: avatarUrl,

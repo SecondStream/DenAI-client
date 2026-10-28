@@ -408,7 +408,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ? loc.empty
                 : (imgAv ? loc.attachImage : loc.visionUnavailable),
             child: IconButton(
-              icon: const Icon(Icons.attach_file, color: Colors.grey, size: 22),
+              icon: Icon(Icons.attach_file, color: theme.hintColor, size: 22),
               onPressed: isBlocked || !imgAv ? null : () => _pickImage(context),
             ),
           ),
@@ -457,7 +457,6 @@ class _ChatScreenState extends State<ChatScreen> {
                         : (chatAv
                               ? loc.writeSomething
                               : loc.chatUnavailable),
-                    hintStyle: const TextStyle(color: Colors.grey),
                     fillColor: theme.cardColor,
                     filled: true,
                     border: const OutlineInputBorder(

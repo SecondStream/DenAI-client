@@ -81,7 +81,6 @@ class _LoreEntryDialogState extends State<LoreEntryDialog> {
                 ),
                 decoration: InputDecoration(
                   hintText: loc.loreHintTitle,
-                  hintStyle: TextStyle(color: Colors.grey.shade600),
                   fillColor: theme.cardColor,
                   filled: true,
                   border: OutlineInputBorder(
@@ -102,7 +101,6 @@ class _LoreEntryDialogState extends State<LoreEntryDialog> {
                   style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
                   decoration: InputDecoration(
                     hintText: loc.loreHintContent,
-                    hintStyle: TextStyle(color: Colors.grey.shade600),
                     fillColor: theme.cardColor,
                     filled: true,
                     border: OutlineInputBorder(
@@ -144,7 +142,7 @@ class _LoreEntryDialogState extends State<LoreEntryDialog> {
                   onPressed: () => context.pop(),
                   child: Text(
                     loc.cancel,
-                    style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+                    style: TextStyle(color: theme.hintColor, fontWeight: FontWeight.bold),
                   ),
                 ),
                 if (!widget.readonly) ...[

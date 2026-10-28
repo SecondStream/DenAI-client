@@ -13,33 +13,82 @@ class ChatApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Chat with AI',
+      title: 'DenAI',
       debugShowCheckedModeBanner: false,
       themeMode: ThemeMode.dark,
       darkTheme: ThemeData(
         useMaterial3: true,
         brightness: Brightness.dark,
-        scaffoldBackgroundColor: const Color(0xFF1E1E24),
-        cardColor: const Color(0xFF2A2A32),
+        scaffoldBackgroundColor: const Color(0xFF161622),
+        cardColor: const Color(0xFF252538),
+        dividerColor: Color(0xFF5C62A3),
+        hintColor: const Color(0xFF6B729C),
 
         appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF18181C),
+          backgroundColor: Color(0xFF12121A),
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           centerTitle: true,
-          titleTextStyle: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          titleTextStyle: TextStyle(
+            color: Colors.white,
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+          shape: Border(
+            bottom: BorderSide(
+              color: Color(0xFF5C62A3),
+              width: 1,
+            ),
+          ),
         ),
 
         colorScheme: ColorScheme.dark(
           primary: Colors.indigo.shade400,
           secondary: Colors.purple.shade300,
-          surface: const Color(0xFF2A2A32),
+          surface: const Color(0xFF212132),
+          outlineVariant: const Color(0xFF5C62A3),
+
+          onSurface: Colors.white.withValues(alpha: 0.95),
+        ),
+
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFF1B1B29),
+          hintStyle: TextStyle(color: const Color(0xFF6B729C)),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: Colors.indigo.shade400, width: 1),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: const Color(0xFF2A2A40)),
+          ),
         ),
 
         dialogTheme: DialogThemeData(
+          backgroundColor: const Color(0xFF212132),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         ),
+        switchTheme: SwitchThemeData(
+          thumbColor: WidgetStateProperty.resolveWith<Color?>((states) {
+            return Colors.indigo.shade400;
+
+          }),
+          trackColor: WidgetStateProperty.resolveWith<Color?>((states) {
+            if (states.contains(WidgetState.selected)) {
+              return Colors.indigo.shade400.withValues(alpha: 0.5);
+            }
+            return const Color(0xFF1B1B29);
+          }),
+          trackOutlineColor: WidgetStateProperty.resolveWith<Color?>((states) {
+            if (states.contains(WidgetState.selected)) {
+              return Colors.transparent;
+            }
+            return Colors.indigo.shade400.withAlpha(150);
+          }),
+        ),
       ),
+
       supportedLocales: const [Locale('en'), Locale('ru')],
       localizationsDelegates: const [
         AppLocalizationDelegate(),

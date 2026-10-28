@@ -75,7 +75,7 @@ class _TextEditDialogState extends State<TextEditDialog> {
             if (widget.description != null) ...[
               Text(
                 widget.description!,
-                style: TextStyle(color: Colors.grey, fontSize: 13, height: 1.3),
+                style: TextStyle(color: theme.hintColor, fontSize: 13, height: 1.3),
               ),
               const SizedBox(height: 16),
             ],
@@ -89,7 +89,6 @@ class _TextEditDialogState extends State<TextEditDialog> {
                 style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
                 decoration: InputDecoration(
                   hintText: widget.hint,
-                  hintStyle: TextStyle(color: Colors.grey.shade600),
                   fillColor: theme.cardColor,
                   filled: true,
                   border: OutlineInputBorder(
@@ -109,7 +108,7 @@ class _TextEditDialogState extends State<TextEditDialog> {
           onPressed: () => context.pop(),
           child: Text(
             loc.cancel,
-            style: TextStyle(color: Colors.grey, fontWeight: FontWeight.bold),
+            style: TextStyle(color: theme.hintColor, fontWeight: FontWeight.bold),
           ),
         ),
         ElevatedButton(

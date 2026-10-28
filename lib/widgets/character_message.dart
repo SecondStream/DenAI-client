@@ -64,7 +64,7 @@ class CharacterMessage extends StatelessWidget {
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           IconButton(
-                            icon: const Icon(Icons.arrow_left, size: 20, color: Colors.grey),
+                            icon: Icon(Icons.arrow_left, size: 20, color: theme.hintColor),
                             constraints: const BoxConstraints(),
                             padding: EdgeInsets.zero,
                             onPressed: onSwitchMessage != null
@@ -82,7 +82,7 @@ class CharacterMessage extends StatelessWidget {
                           ),
                           const SizedBox(width: 4),
                           IconButton(
-                            icon: const Icon(Icons.arrow_right, size: 20, color: Colors.grey),
+                            icon: Icon(Icons.arrow_right, size: 20, color: theme.hintColor),
                             constraints: const BoxConstraints(),
                             padding: EdgeInsets.zero,
                             onPressed: onSwitchMessage != null
@@ -117,7 +117,7 @@ class CharacterMessage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.edit, size: 14, color: Colors.grey),
+                      icon: Icon(Icons.edit, size: 14, color: theme.hintColor),
                       constraints: const BoxConstraints(),
                       padding: const EdgeInsets.all(2),
                       onPressed: onEditMessage != null ? () => onEditMessage?.call(message) : null,

@@ -68,7 +68,7 @@ class LorebookEntriesScreen extends StatelessWidget {
                   child: Text(
                     loc.noLorebookEntries,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey, height: 1.4),
+                    style: TextStyle(color: theme.hintColor, height: 1.4),
                   ),
                 );
               }
@@ -106,9 +106,9 @@ class LorebookEntriesScreen extends StatelessWidget {
                               entry.content,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(color: Colors.grey),
+                              style: TextStyle(color: theme.hintColor),
                             ),
-                            trailing: const Icon(Icons.chevron_right, color: Colors.grey, size: 18),
+                            trailing: Icon(Icons.chevron_right, color: theme.hintColor, size: 18),
                             onTap: () =>
                                 _openEntryEditor(context, bookId, entry, readonly: !canCreate),
                           ),

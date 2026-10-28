@@ -186,7 +186,7 @@ class _AvatarClipperDialogState extends State<AvatarClipperDialog> {
       actions: [
         TextButton(
           onPressed: () => context.pop(),
-          child: Text(loc.cancel, style: TextStyle(color: Colors.grey)),
+          child: Text(loc.cancel, style: TextStyle(color: theme.hintColor)),
         ),
         ElevatedButton(
           style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.primary),

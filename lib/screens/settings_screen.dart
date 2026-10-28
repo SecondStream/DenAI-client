@@ -237,6 +237,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           _buildSectionTitle(theme, loc.sectionContextWindow),
 
                           _buildSliderRow(
+                            theme,
                             label: loc.labelContextLimit,
                             value: _maxContext,
                             min: 2048,
@@ -285,6 +286,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           _buildSectionTitle(theme, loc.sectionSamplingParams),
                           const SizedBox(height: 12),
                           _buildSliderRow(
+                            theme,
                             label: loc.labelTemperature,
                             value: _temperature,
                             min: 0.1,
@@ -294,6 +296,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             onChanged: (v) => setState(() => _temperature = v),
                           ),
                           _buildSliderRow(
+                            theme,
                             label: loc.labelMinP,
                             value: _minP,
                             min: 0.01,
@@ -303,6 +306,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             onChanged: (v) => setState(() => _minP = v),
                           ),
                           _buildSliderRow(
+                            theme,
                             label: loc.labelTopP,
                             value: _topP,
                             min: 0.1,
@@ -312,6 +316,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             onChanged: (v) => setState(() => _topP = v),
                           ),
                           _buildSliderRow(
+                            theme,
                             label: loc.labelRepeatPenalty,
                             value: _repeatPenalty,
                             min: 1.0,
@@ -503,7 +508,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSliderRow({
+  Widget _buildSliderRow(ThemeData theme, {
     required String label,
     required double value,
     required double min,
@@ -520,7 +525,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(label, style: const TextStyle(color: Colors.grey, fontSize: 13)),
+              Text(label, style: TextStyle(color: theme.hintColor, fontSize: 13)),
               Text(
                 displayValue,
                 style: TextStyle(
