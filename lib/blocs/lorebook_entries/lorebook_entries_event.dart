@@ -8,8 +8,9 @@ class LoadEntriesEvent extends LorebookEntriesEvent {
 }
 
 class DeleteEntryEvent extends LorebookEntriesEvent {
+  final int bookId;
   final int entryId;
-  const DeleteEntryEvent(this.entryId);
+  const DeleteEntryEvent(this.entryId, this.bookId);
 }
 
 class SaveEntryEvent extends LorebookEntriesEvent {

@@ -35,7 +35,6 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
   late final TextEditingController _greetingController;
   late final TextEditingController _promptController;
   late List<int> _selectedLorebookIds;
-  late int? _characterId;
 
   File? _selectedBackgroundFile;
   bool _isFieldsInitialized = false;
@@ -43,7 +42,6 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
   @override
   void initState() {
     super.initState();
-    _characterId = widget.characterId;
     _nameController = TextEditingController();
     _appearanceController = TextEditingController();
     _personalityController = TextEditingController();
@@ -87,7 +85,6 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
 
   void _initializeControllersOnce(Char? char, List<int> initialBookIds, {File? avatarFile}) {
     if (char != null) {
-      _characterId = char.id;
       _nameController.text = char.name;
       _appearanceController.text = char.appearance;
       _personalityController.text = char.personality;
@@ -106,7 +103,6 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
-    var isEditing = _characterId != null;
 
     return BlocProvider<CharacterFormBloc>(
       create: (context) => CharacterFormBloc(
@@ -116,10 +112,10 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
         GetIt.instance.get(),
         GetIt.instance.get(),
         context.notifyBloc,
-      )..add(InitCharacterFormEvent(_characterId)),
+      )..add(InitCharacterFormEvent(widget.characterId)),
       child: Scaffold(
         appBar: AppBar(
-          title: Text(isEditing ? loc.characterFormTitleEdit : loc.characterFormTitleCreate),
+          title: Text(widget.characterId != null ? loc.characterFormTitleEdit : loc.characterFormTitleCreate),
         ),
         body: BlocConsumer<CharacterFormBloc, CharacterFormState>(
           listener: (context, state) {
@@ -139,8 +135,8 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                   state.selectedLorebookIds,
                   avatarFile: cardState?.avatar,
                 );
-                isEditing = _characterId != null;
               }
+              final isEditing = state.character != null;
               return SingleChildScrollView(
                 padding: const EdgeInsets.all(24.0),
                 child: Form(
@@ -195,7 +191,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                           const SizedBox(width: 24),
                           _buildImportButton(context, loc, theme),
                           const SizedBox(width: 24),
-                          _buildExportButton(context, loc, theme),
+                          _buildExportButton(context, loc, theme, state.character?.id),
                         ],
                       ),
                       const SizedBox(height: 24),
@@ -264,7 +260,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                                 ),
                                 onPressed: () {
                                   context.read<CharacterFormBloc>().add(
-                                    DeleteCharacterEvent(_characterId!),
+                                    DeleteCharacterEvent(state.character!.id),
                                   );
                                 },
                               ),
@@ -282,7 +278,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                               ),
-                              onPressed: () => _submitForm(context),
+                              onPressed: () => _submitForm(context, state.character?.id),
                               child: Text(
                                 isEditing ? loc.saveButton : loc.charCreateButton,
                                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
@@ -348,14 +344,14 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     );
   }
 
-  Widget _buildExportButton(BuildContext context, AppLocalization loc, ThemeData theme) {
+  Widget _buildExportButton(BuildContext context, AppLocalization loc, ThemeData theme, int? id) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(loc.export, style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor)),
         const SizedBox(height: 8),
         InkWell(
-          onTap: () => _exportCard(context, loc),
+          onTap: () => _exportCard(context, loc, id),
           borderRadius: BorderRadius.circular(16),
           child: Container(
             height: 120,
@@ -506,12 +502,12 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     );
   }
 
-  Future<void> _exportCard(BuildContext context, AppLocalization loc) async {
+  Future<void> _exportCard(BuildContext context, AppLocalization loc, int? id) async {
     if (!_formKey.currentState!.validate()) return;
     context.read<CharacterFormBloc>().add(
       ExportCardEvent(
         baseUrl: AppConfig.of(context).baseUrl,
-        id: _characterId,
+        id: id,
         name: _nameController.text.trim(),
         appearance: _appearanceController.text.trim(),
         personality: _personalityController.text.trim(),
@@ -524,11 +520,11 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     );
   }
 
-  void _submitForm(BuildContext context) {
+  void _submitForm(BuildContext context, int? charId) {
     if (!_formKey.currentState!.validate()) return;
     context.read<CharacterFormBloc>().add(
       SubmitCharacterFormEvent(
-        id: _characterId,
+        id: charId,
         name: _nameController.text.trim(),
         appearance: _appearanceController.text.trim(),
         personality: _personalityController.text.trim(),

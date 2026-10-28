@@ -5,9 +5,9 @@ abstract class NotifyState {}
 class NotifyInitialState extends NotifyState {}
 
 class NotifyShowErrorState extends NotifyState {
-  final String error;
+  final ErrType type;
 
-  NotifyShowErrorState({required this.error});
+  NotifyShowErrorState({required this.type});
 }
 
 class NotifyShowChatState extends NotifyState {

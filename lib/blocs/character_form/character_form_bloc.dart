@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:den_ai/application/env.dart';
+import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/repositories/lorebooks_repository.dart';
@@ -23,6 +24,7 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
   final SettingsRepository _settingsRepository;
   final OpenAIClient _client;
   final LoreVectorStorage _vectorStorage;
+  final NotifyBloc _notification;
 
   CharacterFormBloc(
     this._repository,
@@ -30,6 +32,7 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
     this._settingsRepository,
     this._client,
     this._vectorStorage,
+    this._notification,
   ) : super(CharacterFormInitialState()) {
     on<SubmitCharacterFormEvent>(_onSubmitForm);
     on<DeleteCharacterEvent>(_onDeleteCharacter);
@@ -62,7 +65,8 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
         ),
       );
     } catch (e) {
-      emit(CharacterFormErrorState(ErrType.loadCharacter, e));
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacter));
+      emit(CharacterFormLoadedState(allLorebooks: [], selectedLorebookIds: []));
     }
   }
 
@@ -139,22 +143,25 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
 
       emit(CharacterFormSuccessState(newChar));
     } catch (e) {
-      emit(CharacterFormErrorState(ErrType.loadCharacter, e));
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacter));
       emit(currentState.copy());
     }
   }
 
   void _onSubmitForm(SubmitCharacterFormEvent event, Emitter<CharacterFormState> emit) async {
+    final currentState = state;
+    if (currentState is! CharacterFormLoadedState) return;
     emit(CharacterFormLoadingState());
-    String? avatarPath;
-    String? backgroundPath;
-    if (event.avatarFile != null) {
-      avatarPath = await FileTool.saveAvatar(event.avatarFile!);
-    }
-    if (event.backgroundFile != null) {
-      backgroundPath = await FileTool.saveBackground(event.backgroundFile!);
-    }
     try {
+      String? avatarPath;
+      String? backgroundPath;
+      if (event.avatarFile != null) {
+        avatarPath = await FileTool.saveAvatar(event.avatarFile!);
+      }
+      if (event.backgroundFile != null) {
+        backgroundPath = await FileTool.saveBackground(event.backgroundFile!);
+      }
+
       final savedChar = await _repository.saveCharacter(
         id: event.id,
         name: event.name,
@@ -170,17 +177,21 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
       );
       emit(CharacterFormSuccessState(savedChar));
     } catch (e) {
-      emit(CharacterFormErrorState(ErrType.saveCharacter, e));
+      _notification.add(ErrorOccurredEvent(type: ErrType.saveCharacter));
+      emit(currentState.copy());
     }
   }
 
   void _onDeleteCharacter(DeleteCharacterEvent event, Emitter<CharacterFormState> emit) async {
+    final currentState = state;
+    if (currentState is! CharacterFormLoadedState) return;
     emit(CharacterFormLoadingState());
     try {
       await _repository.deleteCharacter(event.id);
       emit(CharacterDeleteSuccessState());
     } catch (e) {
-      emit(CharacterFormErrorState(ErrType.saveCharacter, e));
+      _notification.add(ErrorOccurredEvent(type: ErrType.removeCharacter));
+      emit(currentState.copy());
     }
   }
 
@@ -227,7 +238,8 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
 
       emit(currentState.copy());
     } catch (e) {
-      emit(CharacterFormErrorState(ErrType.saveCharacter, e));
+      _notification.add(ErrorOccurredEvent(type: ErrType.exportCharacter));
+      emit(currentState.copy());
     }
   }
 }

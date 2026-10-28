@@ -44,11 +44,11 @@ class ChatLoadedState extends ChatState {
     return ChatLoadedState(
       chatId: chatId ?? this.chatId,
       char: char ?? this.char,
-      messages: messages ?? this.messages,
+      messages: messages ?? this.messages.toList(),
       background: background ?? this.background,
       summary: summary ?? this.summary,
       userCard: userCard ?? this.userCard,
-      availableCards: availableCards ?? this.availableCards,
+      availableCards: availableCards ?? this.availableCards?.toList(),
       selectedImageFile: selectedImageFile ?? (!isResetImage ? this.selectedImageFile : null),
       isAiTyping: isAiTyping ?? this.isAiTyping,
     );

@@ -3,10 +3,12 @@ import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/blocs/chat_list/chat_list_bloc.dart';
 import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/screens/chat_screen.dart';
 import 'package:den_ai/widgets/app_drawer.dart';
 import 'package:den_ai/widgets/chat_item.dart';
 import 'package:den_ai/widgets/dialogs/confirmation_dialog.dart';
+import 'package:den_ai/widgets/placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -20,8 +22,7 @@ class ChatsListScreen extends StatelessWidget {
 
     return BlocProvider<ChatsListBloc>(
       create: (context) =>
-      ChatsListBloc(GetIt.instance.get())
-        ..add(LoadAllChatsEvent()),
+          ChatsListBloc(GetIt.instance.get(), context.notifyBloc)..add(LoadAllChatsEvent()),
       child: Builder(
         builder: (context) {
           return BlocListener<NotifyBloc, NotifyState>(
@@ -51,9 +52,7 @@ class ChatsListScreen extends StatelessWidget {
                   if (state is ChatsListErrorState) {
                     return Center(
                       child: Text(
-                        AppLocalization.of(
-                          context,
-                        ).getError(state.errType, state.error),
+                        AppLocalization.of(context).getError(state.errType, state.error),
                         style: const TextStyle(color: Colors.red),
                       ),
                     );
@@ -61,8 +60,9 @@ class ChatsListScreen extends StatelessWidget {
 
                   if (state is ChatsListLoadedState) {
                     if (state.chats.isEmpty) {
-                      return Center(
-                        child: Text(loc.noChats, textAlign: TextAlign.center),
+                      return EmptyPlaceholder(
+                        icon: Icons.comments_disabled_outlined,
+                        label: loc.noChats,
                       );
                     }
 
@@ -76,15 +76,13 @@ class ChatsListScreen extends StatelessWidget {
                           chat: chat,
                           onPressed: (_) async {
                             final bloc = context.read<ChatsListBloc>();
-                            await context
-                                .push(
+                            await context.push(
                               AppRoutes.chat,
-                              arguments: ChatScreenArgs(chatId: chat.id),
+                              arguments: ChatScreenArgs(chatId: chat.id, charId: chat.char.id),
                             );
                             bloc.add(LoadAllChatsEvent());
                           },
-                          onRemovePressed: (_) =>
-                              _onDeleteChat(context, loc, chat.id),
+                          onRemovePressed: (_) => _onDeleteChat(context, loc, chat.id),
                         );
                       },
                     );
@@ -99,9 +97,7 @@ class ChatsListScreen extends StatelessWidget {
     );
   }
 
-  void _onDeleteChat(BuildContext context,
-      AppLocalization loc,
-      int chatId,) async {
+  void _onDeleteChat(BuildContext context, AppLocalization loc, int chatId) async {
     final chatsListBloc = context.read<ChatsListBloc>();
     final res = await ConfirmationDialog.open(
       context,

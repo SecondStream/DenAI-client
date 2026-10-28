@@ -2,12 +2,15 @@ import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/blocs/lorebook_list/lorebook_list_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/widgets/lorebook_card.dart';
+import 'package:den_ai/widgets/placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import '../widgets/app_drawer.dart';
+import 'lorebook_entries_screen.dart';
 
 class LorebooksScreen extends StatelessWidget {
   const LorebooksScreen({super.key});
@@ -17,7 +20,8 @@ class LorebooksScreen extends StatelessWidget {
     final loc = AppLocalization.of(context);
 
     return BlocProvider<LorebookListBloc>(
-      create: (context) => LorebookListBloc(GetIt.instance.get())..add(LoadAllLorebooksEvent()),
+      create: (context) =>
+          LorebookListBloc(GetIt.instance.get(), context.notifyBloc)..add(LoadAllLorebooksEvent()),
       child: Builder(
         builder: (context) {
           return Scaffold(
@@ -55,7 +59,10 @@ class LorebooksScreen extends StatelessWidget {
 
                 if (state is LorebookListLoadedState) {
                   if (state.lorebooks.isEmpty) {
-                    return Center(child: Text(loc.noLorebooksMessage, textAlign: TextAlign.center));
+                    return EmptyPlaceholder(
+                      icon: Icons.font_download_off_outlined,
+                      label: loc.noLorebooksMessage,
+                    );
                   }
 
                   return GridView.builder(
@@ -71,8 +78,10 @@ class LorebooksScreen extends StatelessWidget {
                       final lorebook = state.lorebooks[index];
                       return LorebookCard(
                         lorebook: lorebook,
-                        onPressed: (_) =>
-                            context.push(AppRoutes.loreEntries, arguments: lorebook.id),
+                        onPressed: (_) => context.push(
+                          AppRoutes.loreEntries,
+                          arguments: LorebookEntriesScreenArgs(lorebook.id, lorebook.name),
+                        ),
                         onEditPressed: (_) => _onEditPressed(context, lorebook),
                       );
                     },
@@ -91,7 +100,7 @@ class LorebooksScreen extends StatelessWidget {
   void _onEditPressed(BuildContext context, Lorebook lorebook) async {
     final lorebookBloc = context.read<LorebookListBloc>();
 
-    final hasChanges = await context.push(AppRoutes.lorebookEdit, arguments: lorebook);
+    final hasChanges = await context.push(AppRoutes.lorebookEdit, arguments: lorebook.id);
     if (hasChanges == true) {
       lorebookBloc.add(LoadAllLorebooksEvent());
     }

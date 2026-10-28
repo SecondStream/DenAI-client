@@ -17,6 +17,14 @@ class UserCardsRepository extends BaseRepository {
     return rows.map((row) => UserCard.fromDb(row)).toList();
   }
 
+  Future<UserCard?> getUserCard(int id) async {
+    final row = await (db.select(
+      db.userCards,
+    )..where((tbl) => tbl.id.equals(id))).getSingleOrNull();
+    if (row == null) return null;
+    return UserCard.fromDb(row);
+  }
+
   Future<UserCard?> getDefaultUserCard() async {
     // SELECT * FROM user_cards WHERE is_default = true AND is_removed = false LIMIT 1
     final row =

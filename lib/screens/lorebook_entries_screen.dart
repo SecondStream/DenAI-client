@@ -1,4 +1,6 @@
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/extensions/snackbar_ext.dart';
+import 'package:den_ai/widgets/placeholder.dart';
 import 'package:den_ai/widgets/status.dart';
 import 'package:den_ai/widgets/dialogs/lore_entry_dialog.dart';
 import 'package:den_ai/widgets/lore_unavailable_banner.dart';
@@ -10,10 +12,20 @@ import 'package:den_ai/blocs/lorebook_entries/lorebook_entries_event.dart';
 import 'package:den_ai/blocs/lorebook_entries/lorebook_entries_state.dart';
 import 'package:den_ai/models/models.dart';
 
+class LorebookEntriesScreenArgs {
+  final int bookId;
+  final String bookName;
+
+  LorebookEntriesScreenArgs(this.bookId, this.bookName);
+}
+
 class LorebookEntriesScreen extends StatelessWidget {
   final int bookId;
+  final String bookName;
 
-  const LorebookEntriesScreen({super.key, required this.bookId});
+  LorebookEntriesScreen({super.key, required LorebookEntriesScreenArgs args})
+    : bookId = args.bookId,
+      bookName = args.bookName;
 
   @override
   Widget build(BuildContext context) {
@@ -27,21 +39,21 @@ class LorebookEntriesScreen extends StatelessWidget {
         GetIt.instance.get(),
         GetIt.instance.get(),
         GetIt.instance.get(),
+        context.notifyBloc,
       )..add(LoadEntriesEvent(bookId)),
       child: Scaffold(
         appBar: AppBar(
           title: BlocBuilder<LorebookEntriesBloc, LorebookEntriesState>(
             builder: (context, state) {
-              if (state is LorebookEntriesLoadedState) {
-                return Text(state.lorebook.name);
-              }
-              return Text(loc.loadingChronicles);
+              return Text(bookName);
             },
           ),
           actions: [
             BlocBuilder<LorebookEntriesBloc, LorebookEntriesState>(
               builder: (context, state) {
-                if (state is! LorebookEntriesLoadedState || !canCreate) return const SizedBox();
+                if (state is! LorebookEntriesLoadedState || !canCreate) {
+                  return const SizedBox();
+                }
                 return IconButton(
                   icon: const Icon(Icons.add, size: 28, color: Colors.white),
                   onPressed: () => _openEntryEditor(context, bookId, null),
@@ -61,15 +73,12 @@ class LorebookEntriesScreen extends StatelessWidget {
               );
             }
             if (state is LorebookEntriesLoadedState) {
-              final entries = state.lorebook.entries;
+              final entries = state.entries;
 
               if (entries.isEmpty) {
-                return Center(
-                  child: Text(
-                    loc.noLorebookEntries,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: theme.hintColor, height: 1.4),
-                  ),
+                return EmptyPlaceholder(
+                  icon: Icons.developer_board_off_outlined,
+                  label: loc.noLorebookEntries,
                 );
               }
 
@@ -144,7 +153,7 @@ class LorebookEntriesScreen extends StatelessWidget {
     if (result == null) return;
 
     if (result.id == -1 && existingEntry != null) {
-      entriesBloc.add(DeleteEntryEvent(existingEntry.id));
+      entriesBloc.add(DeleteEntryEvent(existingEntry.id, bookId));
     } else {
       entriesBloc.add(
         SaveEntryEvent(

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/routes.dart';
+import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/widgets/status.dart';
 import 'package:den_ai/blocs/chat/chat_bloc.dart';
 import 'package:den_ai/consts/consts.dart';
@@ -25,14 +26,14 @@ import 'package:path/path.dart' as p;
 
 class ChatScreenArgs {
   final int? chatId;
-  final int? charId;
+  final int charId;
 
-  ChatScreenArgs({this.chatId, this.charId});
+  ChatScreenArgs({this.chatId, required this.charId});
 }
 
 class ChatScreen extends StatefulWidget {
   final int? chatId;
-  final int? charId;
+  final int charId;
 
   ChatScreen({super.key, required ChatScreenArgs args})
     : charId = args.charId,
@@ -69,25 +70,18 @@ class _ChatScreenState extends State<ChatScreen> {
     final loc = AppLocalization.of(context);
     final status = AppStatus.of(context);
     return BlocProvider<ChatBloc>(
-      create: (context) {
-        final bloc = ChatBloc(
-          GetIt.instance.get(),
-          GetIt.instance.get(),
-          GetIt.instance.get(),
-          GetIt.instance.get(),
-          GetIt.instance.get(),
-          GetIt.instance.get(),
-          GetIt.instance.get(),
-          GetIt.instance.get(),
-          GetIt.instance.get(),
-        );
-        if (widget.chatId != null) {
-          bloc.add(LoadChatHistoryEvent(widget.chatId!));
-        } else {
-          bloc.add(CheckOrCreateVirtualChatEvent(widget.charId!));
-        }
-        return bloc;
-      },
+      create: (context) => ChatBloc(
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        context.notifyBloc,
+      )..add(ShownChatEvent(chatId: widget.chatId, charId: widget.charId)),
       child: BlocConsumer<ChatBloc, ChatState>(
         listenWhen: (prev, current) {
           return current is ChatErrorState ||
@@ -98,8 +92,13 @@ class _ChatScreenState extends State<ChatScreen> {
         listener: (context, state) {
           if (state is ChatLoadedState) {
             WidgetsBinding.instance.addPostFrameCallback((_) => _scrollToBottom());
-          } else if (state is ChatErrorState && state.lastUserMessage != null) {
-            _textController.text = state.lastUserMessage!;
+          } else if (state is ChatErrorState) {
+            if (state.errType == ErrType.loadChat) {
+              context.pop();
+            }
+            if (state.lastUserMessage != null) {
+              _textController.text = state.lastUserMessage!;
+            }
           }
         },
         builder: (context, state) {
@@ -115,10 +114,10 @@ class _ChatScreenState extends State<ChatScreen> {
                     onPressed: isActionsBlocked
                         ? null
                         : () async {
-                            final hasChanges = await Navigator.of(
+                            await Navigator.of(
                               context,
                             ).pushNamed(AppRoutes.characterEdit, arguments: state.char.id);
-                            if (hasChanges == true && context.mounted) {
+                            if (context.mounted) {
                               context.read<ChatBloc>().add(UpdateCharacterEvent());
                             }
                           },
@@ -155,7 +154,13 @@ class _ChatScreenState extends State<ChatScreen> {
     );
   }
 
-  Widget _buildBody(BuildContext context, AppLocalization loc, ThemeData theme, ChatState state, AppStatus status) {
+  Widget _buildBody(
+    BuildContext context,
+    AppLocalization loc,
+    ThemeData theme,
+    ChatState state,
+    AppStatus status,
+  ) {
     if (state is ChatLoadingState ||
         (state is ChatErrorState && state.errType == ErrType.sendMessage)) {
       return const Center(child: CircularProgressIndicator());
@@ -289,8 +294,12 @@ class _ChatScreenState extends State<ChatScreen> {
     bool isLastMessage,
   ) {
     late Widget messageWidget;
-    final isRegeneratinonActive = status.chatAvailable &&
-        !isTyping && isLastMessage && message.parentId != null && message.parentId! > 0;
+    final isRegeneratinonActive =
+        status.chatAvailable &&
+        !isTyping &&
+        isLastMessage &&
+        message.parentId != null &&
+        message.parentId! > 0;
     if (message.role == MessageRole.user) {
       messageWidget = UserMessage(
         message: message,
@@ -314,7 +323,9 @@ class _ChatScreenState extends State<ChatScreen> {
             : null,
         onRegenerateMessage: isRegeneratinonActive
             ? (messageId) {
-                context.read<ChatBloc>().add(RegenerateLastAiMessageEvent(messageId, status.embeddingsAvailable));
+                context.read<ChatBloc>().add(
+                  RegenerateLastAiMessageEvent(messageId, status.embeddingsAvailable),
+                );
               }
             : null,
       );
@@ -404,9 +415,7 @@ class _ChatScreenState extends State<ChatScreen> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Tooltip(
-            message: isBlocked
-                ? loc.empty
-                : (imgAv ? loc.attachImage : loc.visionUnavailable),
+            message: isBlocked ? loc.empty : (imgAv ? loc.attachImage : loc.visionUnavailable),
             child: IconButton(
               icon: Icon(Icons.attach_file, color: theme.hintColor, size: 22),
               onPressed: isBlocked || !imgAv ? null : () => _pickImage(context),
@@ -454,9 +463,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   decoration: InputDecoration(
                     hintText: isBlocked
                         ? loc.characterTyping
-                        : (chatAv
-                              ? loc.writeSomething
-                              : loc.chatUnavailable),
+                        : (chatAv ? loc.writeSomething : loc.chatUnavailable),
                     fillColor: theme.cardColor,
                     filled: true,
                     border: const OutlineInputBorder(
@@ -475,7 +482,7 @@ class _ChatScreenState extends State<ChatScreen> {
           IconButton(
             icon: Icon(
               Icons.send,
-              color: isBlocked || !chatAv ? Colors.grey : theme.colorScheme.primary,
+              color: isBlocked || !chatAv ? theme.hintColor : theme.colorScheme.primary,
             ),
             onPressed: isBlocked || !chatAv ? null : () => _sendMessage(context, status),
           ),
@@ -571,7 +578,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void _sendMessage(BuildContext context, AppStatus status) {
     if (_textController.text.trim().isEmpty) return;
-    context.read<ChatBloc>().add(SendUserMessageEvent(_textController.text, status.embeddingsAvailable));
+    context.read<ChatBloc>().add(
+      SendUserMessageEvent(_textController.text, status.embeddingsAvailable),
+    );
     _textController.clear();
   }
 }
@@ -583,7 +592,7 @@ class SendMessageIntent extends Intent {
 class CustomItalicComponent extends ItalicMd {
   final Color italicColor;
 
-  CustomItalicComponent({this.italicColor = Colors.grey});
+  CustomItalicComponent({required this.italicColor});
 
   @override
   RegExp get exp => RegExp(r"(?:(?<!\*)\*(?<!\s)(.+?)(?:(?<!\s)\*(?!\*)|$))", dotAll: true);

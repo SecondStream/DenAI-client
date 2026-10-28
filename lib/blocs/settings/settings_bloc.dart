@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/blocs/app_status/app_status_bloc.dart';
+import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/models/models.dart';
@@ -23,6 +24,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final LoreVectorStorage _storage;
   final OpenAIClient _client;
   final AppStatusBloc statusBloc;
+  final NotifyBloc _notification;
 
   SettingsBloc(
     this._repository,
@@ -30,6 +32,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     this._client,
     this._storage,
     this.statusBloc,
+      this._notification,
   ) : super(SettingsInitialState()) {
     on<LoadAllSettingsEvent>(_onLoadAllSettings);
     on<UpdateProviderEvent>(_onUpdateProvider);
@@ -61,7 +64,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   }
 
   void _onSaveSettings(SaveSettingsEvent event, Emitter<SettingsState> emit) async {
-    if (state is! SettingsLoadedState) return;
+    final currentState = state;
+    if (currentState is! SettingsLoadedState) return;
     emit(SettingsLoadingState());
     try {
       final settings = await _repository.getSettings();
@@ -72,7 +76,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       statusBloc.add(StatusCheckedEvent());
       emit(SettingsSaveSuccess());
     } catch (e) {
-      emit(SettingsErrorState(ErrType.saveSettings, e.toString()));
+      _notification.add(ErrorOccurredEvent(type: ErrType.saveSettings));
+      emit(currentState.copyWith());
     }
   }
 
@@ -130,6 +135,14 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       final settings = await _repository.updateActiveProviderId(event.providerId);
       _client.clearCache();
       final (models, visionModels, embeddingModels, success) = await _getModels(settings);
+      emit(
+        SettingsProviderSaveSuccess(
+          models: models,
+          visionModels: visionModels,
+          embeddingModels: embeddingModels,
+          settings: settings,
+        ),
+      );
       statusBloc.add(ProviderChangedEvent(success));
       emit(
         currentState.copyWith(
@@ -140,7 +153,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         ),
       );
     } catch (e) {
-      emit(SettingsErrorState(ErrType.loadSettings, e.toString()));
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadSettings));
+      emit(currentState.copyWith());
     }
   }
 
@@ -148,17 +162,64 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     if (state is! SettingsLoadedState) return;
     final currentState = state as SettingsLoadedState;
     emit(SettingsLoadingState());
-    final provider = await _repository.saveProvider(
-      id: event.id,
-      name: event.name,
-      url: event.url,
-      key: event.key,
-      additionalArgs: event.additionalArgs,
-    );
-    if (event.id == null) {
-      final settings = await _repository.updateActiveProviderId(provider.id);
+
+    try {
+      final provider = await _repository.saveProvider(
+        id: event.id,
+        name: event.name,
+        url: event.url,
+        key: event.key,
+        additionalArgs: event.additionalArgs,
+      );
+      if (event.id == null) {
+        final settings = await _repository.updateActiveProviderId(provider.id);
+        _client.clearCache();
+        final (models, visionModels, embeddingModels, success) = await _getModels(settings);
+        emit(
+          SettingsProviderSaveSuccess(
+            models: models,
+            visionModels: visionModels,
+            embeddingModels: embeddingModels,
+            settings: settings,
+          ),
+        );
+        statusBloc.add(ProviderChangedEvent(success));
+        emit(
+          currentState.copyWith(
+            models: models,
+            visionModels: visionModels,
+            embeddingModels: embeddingModels,
+            settings: settings,
+            providers: await _repository.getAllProviders(),
+          ),
+        );
+      } else {
+        emit(currentState.copyWith(providers: await _repository.getAllProviders()));
+      }
+    } catch (e) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.save));
+      emit(currentState.copyWith());
+    }
+  }
+
+  FutureOr<void> _onDeleteProvider(DeleteProviderEvent event, Emitter<SettingsState> emit) async {
+    if (state is! SettingsLoadedState) return;
+    final currentState = state as SettingsLoadedState;
+    emit(SettingsLoadingState());
+
+    try {
+      await _repository.deleteProvider(event.providerId);
+      final settings = await _repository.getSettings();
       _client.clearCache();
       final (models, visionModels, embeddingModels, success) = await _getModels(settings);
+      emit(
+        SettingsProviderSaveSuccess(
+          models: models,
+          visionModels: visionModels,
+          embeddingModels: embeddingModels,
+          settings: settings,
+        ),
+      );
       statusBloc.add(ProviderChangedEvent(success));
       emit(
         currentState.copyWith(
@@ -169,29 +230,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           providers: await _repository.getAllProviders(),
         ),
       );
-    } else {
-      emit(currentState.copyWith(providers: await _repository.getAllProviders()));
+    } catch (e) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.remove));
+      emit(currentState.copyWith());
     }
-  }
-
-  FutureOr<void> _onDeleteProvider(DeleteProviderEvent event, Emitter<SettingsState> emit) async {
-    if (state is! SettingsLoadedState) return;
-    final currentState = state as SettingsLoadedState;
-    emit(SettingsLoadingState());
-    await _repository.deleteProvider(event.providerId);
-    final settings = await _repository.getSettings();
-    _client.clearCache();
-    final (models, visionModels, embeddingModels, success) = await _getModels(settings);
-    statusBloc.add(ProviderChangedEvent(success));
-    emit(
-      currentState.copyWith(
-        models: models,
-        visionModels: visionModels,
-        embeddingModels: embeddingModels,
-        settings: settings,
-        providers: await _repository.getAllProviders(),
-      ),
-    );
   }
 
   Future<(List<ModelInfo>, List<ModelInfo>, List<ModelInfo>, bool)> _getModels(

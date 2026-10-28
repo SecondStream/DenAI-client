@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/repositories/characters_repository.dart';
 import 'package:den_ai/services/chat_generation_service.dart';
@@ -15,10 +16,10 @@ class NotifyBloc extends Bloc<NotifyEvent, NotifyState> {
   StreamSubscription<StreamMessage>? _subscription;
 
   NotifyBloc(this._generationService, this._charactersRepository) : super(NotifyInitialState()) {
-    on<ErrorReceivedNotifyEvent>(_onErrorReceived);
+    on<ErrorOccurredEvent>(_onErrorReceived);
     on<ChatReceivedNotifyEvent>(_onChatReceived);
     _subscription = _generationService.allMessagesStream.listen(
-      (message) => _onMessageReceived,
+      (message) => _onMessageReceived(message),
       cancelOnError: false,
     );
   }
@@ -41,19 +42,13 @@ class NotifyBloc extends Bloc<NotifyEvent, NotifyState> {
             ),
           );
         }
-      } else if (message.status == MessageStatus.error) {
-        add(
-          ErrorReceivedNotifyEvent(
-            message: WSMessageError(status: MessageStatus.error.name, message: message.token),
-          ),
-        );
       }
       // ignore: empty_catches
     } catch (e) {}
   }
 
-  void _onErrorReceived(ErrorReceivedNotifyEvent event, Emitter<NotifyState> emit) {
-    emit(NotifyShowErrorState(error: event.message.message));
+  void _onErrorReceived(ErrorOccurredEvent event, Emitter<NotifyState> emit) {
+    emit(NotifyShowErrorState(type: event.type));
   }
 
   FutureOr<void> _onChatReceived(ChatReceivedNotifyEvent event, Emitter<NotifyState> emit) {

@@ -149,7 +149,6 @@ class ChatGenerationService {
       },
       cancelOnError: false,
     );
-
     _activeGenerations[chatId] = subscription;
   }
 

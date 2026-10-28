@@ -73,7 +73,7 @@ class PersonaAvatar extends StatelessWidget {
             child: Icon(
               icon ?? Icons.person,
               size: iconSize ?? size * .7,
-              color: iconColor ?? Colors.grey,
+              color: iconColor ?? theme.hintColor,
             ),
           )
         : CroppedAvatar(imageUrl: avatarUrl, cropData: cropData, size: size);

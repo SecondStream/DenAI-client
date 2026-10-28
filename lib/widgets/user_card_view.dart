@@ -74,7 +74,7 @@ class UserCardView extends StatelessWidget {
                       Text(
                         card.isDefault ? loc.defaultStatus : loc.additionalStatus,
                         style: TextStyle(
-                          color: card.isDefault ? theme.colorScheme.primary : Colors.grey,
+                          color: card.isDefault ? theme.colorScheme.primary : theme.hintColor,
                           fontWeight: card.isDefault ? FontWeight.bold : FontWeight.normal,
                           fontSize: 12,
                         ),

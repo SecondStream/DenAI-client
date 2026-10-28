@@ -1,6 +1,8 @@
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/models/user_card.dart';
+import 'package:den_ai/widgets/placeholder.dart';
 import 'package:den_ai/widgets/user_card_view.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,7 +19,8 @@ class UserCardsScreen extends StatelessWidget {
     final loc = AppLocalization.of(context);
 
     return BlocProvider<UserCardsListBloc>(
-      create: (context) => UserCardsListBloc(GetIt.instance.get())..add(LoadAllUserCardsEvent()),
+      create: (context) =>
+          UserCardsListBloc(GetIt.instance.get(), context.notifyBloc)..add(LoadAllUserCardsEvent()),
       child: Builder(
         builder: (childContext) {
           return Scaffold(
@@ -54,7 +57,10 @@ class UserCardsScreen extends StatelessWidget {
 
                 if (state is UserCardsListLoadedState) {
                   if (state.cards.isEmpty) {
-                    return Center(child: Text(loc.noUserCardsMessage, textAlign: TextAlign.center));
+                    return EmptyPlaceholder(
+                      icon: Icons.person_off_outlined,
+                      label: loc.noUserCardsMessage,
+                    );
                   }
                   return GridView.builder(
                     padding: const EdgeInsets.all(16),
@@ -86,7 +92,7 @@ class UserCardsScreen extends StatelessWidget {
 
   void _onUserCardPressed(BuildContext context, UserCard card) async {
     final userCardsListBloc = context.read<UserCardsListBloc>();
-    final hasChanges = await context.push<bool>(AppRoutes.userCardEdit, arguments: card);
+    final hasChanges = await context.push<bool>(AppRoutes.userCardEdit, arguments: card.id);
     if (hasChanges == true) {
       userCardsListBloc.add(LoadAllUserCardsEvent());
     }

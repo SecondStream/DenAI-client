@@ -2,6 +2,11 @@ part of 'lorebook_form_bloc.dart';
 
 abstract class LorebookFormEvent {}
 
+class LorebookFormShownEvent extends LorebookFormEvent {
+  final int? id;
+  LorebookFormShownEvent(this.id);
+}
+
 class SubmitLorebookFormEvent extends LorebookFormEvent {
   final int? id;
   final String name;

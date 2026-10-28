@@ -7,8 +7,12 @@ class UserCardFormInitialState extends UserCardFormState {}
 class UserCardFormLoadingState extends UserCardFormState {}
 
 class UserCardFormSuccessState extends UserCardFormState {
-  final UserCard card;
+  final UserCard? card;
   UserCardFormSuccessState(this.card);
+
+  UserCardFormSuccessState copy() {
+    return UserCardFormSuccessState(card);
+  }
 }
 
 class UserCardFormErrorState extends UserCardFormState {
@@ -18,4 +22,5 @@ class UserCardFormErrorState extends UserCardFormState {
   UserCardFormErrorState(this.errType, this.error);
 }
 
+class UserCardFormSaveSuccessState extends UserCardFormState {}
 class UserCardFormDeleteSuccessState extends UserCardFormState {}

@@ -1,6 +1,7 @@
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/blocs/app_status/app_status_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/widgets/app_drawer.dart';
@@ -54,9 +55,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   void _initializeFields(SettingsBase settings) {
     if (_isInitialized) return;
-    _selectedModel = settings.modelName;
-    _selectedVisionModel = settings.visionModelName;
-    _selectedEmbeddingModel = settings.embeddingModelName;
     _selectedTokenizer = settings.tokenizerPath;
     _maxContext = settings.maxContextTokens.toDouble();
     _temperature = settings.temperature;
@@ -65,7 +63,30 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _repeatPenalty = settings.repeatPenalty;
     _systemPromptController.text = settings.globalSystemPrompt;
     _templateController.text = settings.template;
+    _reInitializeModels(settings);
     _isInitialized = true;
+  }
+
+  void _reInitializeModels(SettingsBase settings) {
+    _selectedModel = settings.modelName;
+    _selectedVisionModel = settings.visionModelName;
+    _selectedEmbeddingModel = settings.embeddingModelName;
+  }
+
+  void _providerChanged(SettingsProviderSaveSuccess state) {
+    _reInitializeModels(state.settings);
+  }
+
+  void _checkModels(SettingsLoadedState state) {
+    if (state.models.indexWhere((m) => m.name == _selectedModel) == -1) {
+      _selectedModel = state.models.first.name;
+    }
+    if (state.visionModels.indexWhere((m) => m.name == _selectedVisionModel) == -1) {
+      _selectedVisionModel = state.visionModels.first.name;
+    }
+    if (state.embeddingModels.indexWhere((m) => m.name == _selectedEmbeddingModel) == -1) {
+      _selectedEmbeddingModel = state.embeddingModels.first.name;
+    }
   }
 
   @override
@@ -80,16 +101,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
         GetIt.instance.get(),
         GetIt.instance.get(),
         context.read<AppStatusBloc>(),
+        context.notifyBloc
       )..add(LoadAllSettingsEvent()),
       child: Scaffold(
         appBar: AppBar(title: Text(loc.globalSettingsTitle)),
         drawer: AppDrawer(),
         body: BlocConsumer<SettingsBloc, SettingsState>(
           listener: (context, state) {
-            if (state is SettingsSaveSuccess) {
+            if (state is SettingsProviderSaveSuccess) {
+              _providerChanged(state);
+            } else if (state is SettingsSaveSuccess) {
               context.replace(AppRoutes.home);
             }
           },
+          buildWhen: (prev, current) => current is! SettingsProviderSaveSuccess,
           builder: (context, state) {
             if (state is SettingsLoadingState) {
               return const Center(child: CircularProgressIndicator());
@@ -109,16 +134,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             final provider = state.providers.firstWhere((e) => e.id == state.settings.provider.id);
 
             _initializeFields(state.settings);
-
-            if (state.models.indexWhere((m) => m.name == _selectedModel) == -1) {
-              _selectedModel = state.models.first.name;
-            }
-            if (state.visionModels.indexWhere((m) => m.name == _selectedVisionModel) == -1) {
-              _selectedVisionModel = state.visionModels.first.name;
-            }
-            if (state.embeddingModels.indexWhere((m) => m.name == _selectedEmbeddingModel) == -1) {
-              _selectedEmbeddingModel = state.embeddingModels.first.name;
-            }
+            _checkModels(state);
 
             return Padding(
               padding: const EdgeInsets.all(24.0),
@@ -137,12 +153,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             children: [
                               Expanded(
                                 child: _buildDropdownProviders(
+                                  theme,
                                   label: loc.labelProvider,
                                   value: state.settings.provider.id,
                                   items: state.providers,
                                   onChanged: (v) {
                                     if (v != null && v != state.settings.provider.id) {
-                                      _isInitialized = false;
                                       context.read<SettingsBloc>().add(
                                         UpdateProviderEvent(providerId: v),
                                       );
@@ -205,6 +221,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           const SizedBox(height: 16),
 
                           _buildDropdownModels(
+                            theme,
                             label: loc.labelMainModel,
                             value: _selectedModel,
                             items: state.models,
@@ -212,6 +229,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
 
                           _buildDropdownModels(
+                            theme,
                             label: loc.labelVisionModel,
                             value: _selectedVisionModel,
                             items: state.visionModels,
@@ -219,6 +237,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
 
                           _buildDropdownModels(
+                            theme,
                             key: _dropdownKey,
                             label: loc.labelEmbeddingModel,
                             value: _selectedEmbeddingModel,
@@ -227,6 +246,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
 
                           _buildDropdownTokenizers(
+                            theme,
                             label: loc.labelTokenizer,
                             value: _selectedTokenizer,
                             items: state.tokenizers,
@@ -392,13 +412,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildDropdownProviders({
+  Widget _buildDropdownProviders(
+    ThemeData theme, {
     required String label,
     required int? value,
     required List<Provider> items,
     required ValueChanged<int?> onChanged,
   }) {
-    final theme = Theme.of(context);
     final List<int> itemIds = items.map((e) => e.id).toList();
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -421,13 +441,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildDropdownTokenizers({
+  Widget _buildDropdownTokenizers(
+    ThemeData theme, {
     required String label,
     required String? value,
     required List<TokenizerInfo> items,
     required ValueChanged<String?> onChanged,
   }) {
-    final theme = Theme.of(context);
     final List<String> itemIds = items.map((e) => e.id).toList();
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
@@ -452,14 +472,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildDropdownModels({
+  Widget _buildDropdownModels(
+    ThemeData theme, {
     UniqueKey? key,
     required String label,
     required String? value,
     required List<ModelInfo> items,
     required ValueChanged<String?> onChanged,
   }) {
-    final theme = Theme.of(context);
     final List<String> itemNames = items.map((e) => e.name).toList();
 
     final String? currentValue = itemNames.contains(value)
@@ -472,6 +492,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         key: key,
         initialValue: currentValue,
         onChanged: onChanged,
+        isExpanded: true,
         style: const TextStyle(color: Colors.white, fontSize: 14),
         decoration: InputDecoration(
           labelText: label,
@@ -489,17 +510,25 @@ class _SettingsScreenState extends State<SettingsScreen> {
             value: m.name,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              mainAxisSize: MainAxisSize.max,
               children: [
-                Text(m.name, style: const TextStyle(fontWeight: FontWeight.w500)),
-                const SizedBox(width: 12),
-                Text(
-                  m.info,
-                  style: TextStyle(
-                    color: theme.colorScheme.primary.withValues(alpha: 0.7),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
+                Expanded(
+                  child: Text(
+                    m.name,
+                    style: const TextStyle(fontWeight: FontWeight.w500),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
+                // const SizedBox(width: 12),
+                // Text(
+                //   m.info,
+                //   style: TextStyle(
+                //     color: theme.colorScheme.primary.withValues(alpha: 0.7),
+                //     fontSize: 12,
+                //     fontWeight: FontWeight.bold,
+                //   ),
+                //   overflow: TextOverflow.ellipsis,
+                // ),
               ],
             ),
           );
@@ -508,7 +537,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildSliderRow(ThemeData theme, {
+  Widget _buildSliderRow(
+    ThemeData theme, {
     required String label,
     required double value,
     required double min,
@@ -529,7 +559,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               Text(
                 displayValue,
                 style: TextStyle(
-                  color: Theme.of(context).colorScheme.primary,
+                  color: theme.colorScheme.primary,
                   fontWeight: FontWeight.bold,
                   fontSize: 13,
                 ),
@@ -579,7 +609,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
     }
   }
 
-  Future<void> _saveSettings(BuildContext context, AppLocalization loc, SettingsLoadedState state) async {
+  Future<void> _saveSettings(
+    BuildContext context,
+    AppLocalization loc,
+    SettingsLoadedState state,
+  ) async {
     if (_formKey.currentState!.validate()) {
       if (state.settings.embeddingModelName != _selectedEmbeddingModel) {
         final bool hasFiles = await LoreVectorStorage.hasVectorFiles();
@@ -594,12 +628,11 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
           if (confirm != true) {
             final index = state.embeddingModels.indexWhere(
-                  (m) => m.name == state.settings.embeddingModelName,
+              (m) => m.name == state.settings.embeddingModelName,
             );
             if (index >= 0) {
               setState(() {
-                _selectedEmbeddingModel =
-                    state.embeddingModels[index].name;
+                _selectedEmbeddingModel = state.embeddingModels[index].name;
                 _dropdownKey = UniqueKey();
               });
             }
@@ -623,9 +656,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
         provider: state.settings.provider,
       );
       if (context.mounted) {
-        context.read<SettingsBloc>().add(
-          SaveSettingsEvent(updatedSettings),
-        );
+        context.read<SettingsBloc>().add(SaveSettingsEvent(updatedSettings));
       }
     }
   }

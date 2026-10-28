@@ -7,8 +7,12 @@ class LorebookFormInitialState extends LorebookFormState {}
 class LorebookFormLoadingState extends LorebookFormState {}
 
 class LorebookFormSuccessState extends LorebookFormState {
-  final Lorebook lorebook;
-  LorebookFormSuccessState(this.lorebook);
+  final Lorebook? lorebook;
+  LorebookFormSuccessState({this.lorebook});
+
+  LorebookFormSuccessState copy() {
+    return LorebookFormSuccessState(lorebook: lorebook);
+  }
 }
 
 class LorebookFormErrorState extends LorebookFormState {
@@ -17,5 +21,7 @@ class LorebookFormErrorState extends LorebookFormState {
 
   LorebookFormErrorState(this.errType, this.error);
 }
+
+class LorebookFormSaveSuccessState extends LorebookFormState {}
 
 class LorebookFormDeleteSuccessState extends LorebookFormState {}

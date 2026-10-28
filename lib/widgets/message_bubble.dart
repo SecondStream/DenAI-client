@@ -56,7 +56,7 @@ enum MessagePosition { left, right }
 class CustomItalicComponent extends ItalicMd {
   final Color italicColor;
 
-  CustomItalicComponent({this.italicColor = Colors.grey});
+  CustomItalicComponent({required this.italicColor});
 
   @override
   RegExp get exp => RegExp(r"(?:(?<!\*)\*(?<!\s)(.+?)(?:(?<!\s)\*(?!\*)|$))", dotAll: true);

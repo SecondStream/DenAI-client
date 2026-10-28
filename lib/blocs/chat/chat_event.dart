@@ -2,18 +2,15 @@ part of 'chat_bloc.dart';
 
 abstract class ChatEvent {}
 
-class LoadChatHistoryEvent extends ChatEvent {
-  final int chatId;
-  LoadChatHistoryEvent(this.chatId);
+class ShownChatEvent extends ChatEvent {
+  final int? chatId;
+  final int charId;
+
+  ShownChatEvent({required this.chatId, required this.charId});
 }
 
 class UpdateCharacterEvent extends ChatEvent {
   UpdateCharacterEvent();
-}
-
-class CheckOrCreateVirtualChatEvent extends ChatEvent {
-  final int charId;
-  CheckOrCreateVirtualChatEvent(this.charId);
 }
 
 class SendUserMessageEvent extends ChatEvent {

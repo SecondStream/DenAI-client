@@ -13,6 +13,20 @@ class SettingsErrorState extends SettingsState {
   SettingsErrorState(this.errType, this.error);
 }
 
+class SettingsProviderSaveSuccess extends SettingsState {
+  final List<ModelInfo> models;
+  final List<ModelInfo> visionModels;
+  final List<ModelInfo> embeddingModels;
+  final SettingsBase settings;
+
+  SettingsProviderSaveSuccess({
+    required this.models,
+    required this.visionModels,
+    required this.embeddingModels,
+    required this.settings,
+  });
+}
+
 class SettingsLoadedState extends SettingsState {
   final List<ModelInfo> models;
   final List<ModelInfo> visionModels;
@@ -39,12 +53,12 @@ class SettingsLoadedState extends SettingsState {
     List<Provider>? providers,
   }) {
     return SettingsLoadedState(
-      models: models ?? this.models,
-      visionModels: models ?? this.visionModels,
-      embeddingModels: embeddingModels ?? this.embeddingModels,
-      tokenizers: tokenizers ?? this.tokenizers,
+      models: models ?? this.models.toList(),
+      visionModels: models ?? this.visionModels.toList(),
+      embeddingModels: embeddingModels ?? this.embeddingModels.toList(),
+      tokenizers: tokenizers ?? this.tokenizers.toList(),
       settings: settings ?? this.settings,
-      providers: providers ?? this.providers,
+      providers: providers ?? this.providers.toList(),
     );
   }
 }

@@ -1,4 +1,3 @@
-import 'package:den_ai/models/models.dart';
 import 'package:den_ai/screens/character_form_screen.dart';
 import 'package:den_ai/screens/characters_screen.dart';
 import 'package:den_ai/screens/chat_lists_screen.dart';
@@ -40,15 +39,15 @@ class AppRoutes {
       case chat:
         return ChatScreen(args: args as ChatScreenArgs);
       case userCardEdit:
-        return UserCardFormScreen(card: args as UserCard?);
+        return UserCardFormScreen(cardId: args as int?);
       case settings:
         return SettingsScreen();
       case lorebooks:
         return LorebooksScreen();
       case lorebookEdit:
-        return LorebookFormScreen(lorebook: args as Lorebook?);
+        return LorebookFormScreen(lorebookId: args as int?);
       case loreEntries:
-        return LorebookEntriesScreen(bookId: args as int);
+        return LorebookEntriesScreen(args: args as LorebookEntriesScreenArgs);
     }
     throw Exception('Unknown route: $route');
   }

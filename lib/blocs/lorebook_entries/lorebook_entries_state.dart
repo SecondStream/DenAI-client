@@ -9,8 +9,12 @@ class LorebookEntriesInitialState extends LorebookEntriesState {}
 class LorebookEntriesLoadingState extends LorebookEntriesState {}
 
 class LorebookEntriesLoadedState extends LorebookEntriesState {
-  final Lorebook lorebook;
-  const LorebookEntriesLoadedState(this.lorebook);
+  final List<LoreEntry> entries;
+  const LorebookEntriesLoadedState(this.entries);
+
+  LorebookEntriesLoadedState copy() {
+    return LorebookEntriesLoadedState(entries.toList());
+  }
 }
 
 class LorebookEntriesErrorState extends LorebookEntriesState {

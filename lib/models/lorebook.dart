@@ -35,6 +35,22 @@ class Lorebook extends Persona {
     );
   }
 
+  Lorebook copyWith({
+    int? id,
+    String? name,
+    String? about,
+    String? cover,
+    String? crop,
+    List<LoreEntry>? entries,
+  }) {
+    return Lorebook(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      cover: cover ?? this.cover,
+      entries: entries ?? this.entries.toList(),
+    );
+  }
+
   @override
   String? getAvatar(String baseUrl) =>
       cover.isNotEmpty && !cover.contains('default') ? p.join(baseUrl, cover) : null;

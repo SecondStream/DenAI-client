@@ -2,6 +2,11 @@ part of 'user_card_form_bloc.dart';
 
 abstract class UserCardFormEvent {}
 
+class ShownUserCardEvent extends UserCardFormEvent {
+  final int? id;
+  ShownUserCardEvent(this.id);
+}
+
 class SubmitUserCardFormEvent extends UserCardFormEvent {
   final int? id;
   final String name;

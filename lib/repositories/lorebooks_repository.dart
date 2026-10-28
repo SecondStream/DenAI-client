@@ -134,6 +134,14 @@ class LorebooksRepository extends BaseRepository {
     return await getLorebook(finalId);
   }
 
+  Future<List<LoreEntry>> getLoreEntries(int lorebookId) async {
+    final List<LoreEntryData> rows = await (db.select(
+      db.loreEntries,
+    )..where((tbl) => tbl.lorebookId.equals(lorebookId))).get();
+
+    return rows.map((row) => LoreEntry.fromDb(row)).toList();
+  }
+
   Future<(Lorebook, int?)> saveLoreEntry(
     int? id,
     int lorebookId,

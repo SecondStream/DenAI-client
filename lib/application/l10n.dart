@@ -14,10 +14,13 @@ class AppLocalization {
       // --- Базовые сообщения ---
       'err_load_chats': 'Failed to load chat list.',
       'err_load_chat': 'Failed to load chat.',
+      'err_load_chat_history':
+          'Failed to load history. The most recent chat with the selected character has been loaded instead.',
       'err_load_characters': 'Failed to load character list.',
       'err_load_character': 'Failed to load character.',
       'err_export_character': 'Error exporting character.',
       'err_save_character': 'Error saving character.',
+      'err_remove_character': 'Error deleting character.',
       'err_send_message': 'Error sending message.',
       'err_load_user_cards': 'Failed to load user cards list.',
       'err_save_user_card': 'Error saving user card.',
@@ -33,7 +36,12 @@ class AppLocalization {
       'err_save_lorebook': 'Error saving lorebook.',
       'err_delete_lorebook': 'Error deleting lorebook.',
       'err_load_lore_entries': 'Failed to load entries list.',
+      'err_regenerate': 'An error occurred while regenerating the message',
       'error_network': 'Network error. Check your connection.',
+      'err_image' : 'Could not recognize the image; the character will only respond to text.',
+      'err_load': 'An error occurred during loading',
+      'err_save': 'An error occurred while saving',
+      'err_remove': 'An error occurred during removal',
       'error_unknown': 'An unknown error occurred.',
       'edit_text': 'Edit text',
       'cancel': 'Cancel',
@@ -58,7 +66,7 @@ class AppLocalization {
       'change_role_button': 'Change Role',
       'select_role_button': 'Select Role',
       'write_something': 'Write something...',
-      'select_role_text': 'Select a role for roleplay',
+      'select_role_text': 'Select a role',
       'no_roles_text': 'You have no created roles yet.',
       'start_new_chat': 'Start a new chat?',
       'confirm_new_chat': 'Do you really want to start a new chat with the character?',
@@ -75,23 +83,24 @@ class AppLocalization {
       'chats_list_title': 'List of chats',
       'add_chat_button': '+',
       'no_chats':
-          'You don\'t have any active chats yet.\nPress \'+\' at the top to select a character!',
+          'You don’t have any active chats yet.\nTap the \'+\' in the top-right corner to select a character.',
       'no_last_message': 'No messages',
       'delete_chat_tooltip': 'Delete chat',
       'delete_chat_dialog_title': 'Deleting the chat',
       'delete_chat_dialog_message':
-          'Are you sure you want to permanently delete the chat?\nAll chat history will be permanently deleted.',
+          'Are you sure you want to permanently delete the chat?\nThe entire conversation history will be erased.',
       // --- Экран персонажей ---
       'characters_title': 'Choose Character',
       'add_character_button': '+',
-      'no_characters_message': 'The tavern is empty.\nClick \'+\' above to create a character.',
+      'no_characters_message':
+          'You don’t have any characters yet.\nTap the ‘+’ in the top-right corner to create a new one.',
       'edit_prompts': 'Edit character prompts',
       'chat': 'Chat',
       // --- Экран создания персонажа ---
       'character_form_title_create': 'Create Character',
       'character_form_title_edit': 'Edit Character',
       'char_name_label': 'Character Name',
-      'char_name_hint': 'For example: Felicity',
+      'char_name_hint': '',
       'greeting_label': 'Starting Greeting',
       'greeting_hint': 'A line the character will start the chat with',
       'appearance_label': 'Description',
@@ -100,8 +109,8 @@ class AppLocalization {
       'personality_hint': 'Character traits, speech style, fears',
       'scenario_label': 'Scenario',
       'scenario_hint': 'Global plot: what is happening and what the characters are striving for',
-      'prompt_label': 'System Prompt / Instructions',
-      'prompt_hint': 'Rules for LLM. For example: Always reply in English',
+      'prompt_label': 'System Instructions',
+      'prompt_hint': 'Rules for AI',
       'delete_button': 'Delete',
       'save_button': 'Save Changes',
       'change': 'Change',
@@ -115,17 +124,17 @@ class AppLocalization {
       'user_cards_title': 'My Roles (Profiles)',
       'add_user_card_button': '+',
       'no_user_cards_message':
-          'You don\'t have any roles created yet...\nPress \'+\' at the top to create your profile!',
+          'You don’t have any profiles created yet.\nTap the \'+\' in the top right corner to create a new one.',
       'default_status': 'Default',
       'additional_status': 'Additional',
 
       // --- Форма профиля игрока ---
-      'user_card_form_title_create': 'Create Player Profile',
-      'user_card_form_title_edit': 'Edit Role',
+      'user_card_form_title_create': 'Create Profile',
+      'user_card_form_title_edit': 'Edit Profile',
       'card_name_label': 'Your Name/Nickname in this Role',
-      'card_name_hint': 'For example: John, Mage Arthur',
-      'description_label': 'Character Description (Appearance, Lore, Race)',
-      'description_hint': 'Describe yourself: Summoned familiar, wears a ring, human',
+      'card_name_hint': '',
+      'description_label': 'Description of your character',
+      'description_hint': 'Describe yourself (appearance, lore, race)',
       'default_switch_title': 'Use as Default',
       'default_switch_subtitle': 'This role will be automatically selected for new chats',
       'card_create_button': 'Create Profile',
@@ -153,25 +162,26 @@ class AppLocalization {
       'button_save_settings': 'Save Settings',
       'message_settings_saved': 'Settings saved successfully!',
       'confirm_message_title': 'Confirm model change',
-      'confirm_message_text': 'If you change the model, your lorebooks will be completely rebuilt.\nThis will take some time—approximately 1 second per lorebook—though this duration may increase if the provider returns an error.\nAdditionally, if you are using a paid API, this process may incur costs. Continue?',
+      'confirm_message_text':
+          'If you change the model, your lorebooks will be completely rebuilt.\nThis will take some time—approximately 1 second per lorebook—though this duration may increase if the provider returns an error.\nAdditionally, if you are using a paid API, this process may incur costs. Continue?',
       // --- Экраны книг ---
       'lorebooks': 'Lorebooks',
       'lorebooks_title': 'Lorebooks',
       'no_lorebooks_message':
-          'You don\'t have any books...\nClick the \'+\' button above to create a new one.',
+          'You don\'t have any lorebooks yet.\nTap the \'+\' in the top-right corner to create a new one.',
       'lorebook_form_title_create': 'Creation of a lorebook',
       'lorebook_form_title_edit': 'Editing the lorebook',
       'lorebook_name_label': 'The name of the lorebook',
-      'lorebook_name_hint': 'For example: The World of Magic',
+      'lorebook_name_hint': '',
       'lorebook_about_label': 'Lorebook Description',
       'lorebook_about_hint': 'Describe the book',
       'loading_chronicles': 'Loading knowledge books...',
       'no_lorebook_entries':
-          'There are no entries in this book yet.\nClick the "+" above to add content!',
+          'This lorebook doesn\'t have any entries yet.\nTap the \'+\' in the top-right corner to create a new one.',
       'lorebook_entry_number': '#',
       'title_add_lorebook_entry': 'Registering Knowledge Book Entry',
       'title_edit_lorebook_entry': 'Editing Knowledge Book Entry',
-      'lore_hint_title': 'Knowledge block title (e.g., Water Magic)',
+      'lore_hint_title': '',
       'lore_hint_content': 'Description, facts, historical data, and information...',
       'lore_error_title_empty': 'Enter the knowledge book entry title',
       'lore_error_content_empty': 'Fill in the knowledge content',
@@ -210,7 +220,8 @@ class AppLocalization {
       'provider_add_hint': 'In JSON format',
       'provider_add_err': 'Invalid JSON',
 
-      'lore_unavailable': 'The embedding model is unavailable. Records are read-only. Please check your settings.',
+      'lore_unavailable':
+          'The embedding model is unavailable. Records are read-only. Please check your settings.',
       'vision_unavailable': 'The model for viewing images is unavailable',
       'chat_unavailable': 'The model for chat is unavailable. Check your settings',
     },
@@ -218,10 +229,13 @@ class AppLocalization {
       // --- Базовые сообщения ---
       'err_load_chats': 'Не удалось загрузить список чатов.',
       'err_load_chat': 'Не удалось загрузить чат.',
+      'err_load_chat_history':
+          'Не удалось загрузить историю. Был загружен последний чат с выбранным персонажем.',
       'err_load_characters': 'Не удалось загрузить список персонажей.',
       'err_load_character': 'Не удалось загрузить персонажа.',
       'err_export_character': 'При экспорте персонажа возникла ошибка.',
       'err_save_character': 'При сохранении персонажа возникла ошибка.',
+      'err_remove_character': 'При удалении персонажа возникла ошибка.',
       'err_send_message': 'При отправке сообщения возникла ошибка.',
       'err_load_user_cards': 'При загрузке списка профилей возникла ошибка.',
       'err_save_user_card': 'Ошибка сохранения профиля.',
@@ -238,8 +252,13 @@ class AppLocalization {
       'err_delete_lorebook': 'Ошибка удаления книги знаний.',
       'err_load_lore_entries': 'Ошибка при загрузке записей.',
       'error_network': 'Ошибка сети. Проверьте подключение.',
+      'err_regenerate': 'При перегенерации сообщения возникла ошибка',
+      'err_load': 'При загрузке произошла ошибка',
+      'err_save': 'При сохранении произошла ошибка',
+      'err_remove': 'При удалении произошла ошибка',
       'error_unknown': 'Произошла неизвестная ошибка.',
       'edit_text': 'Редактировать текст',
+      'err_image' : 'Не удалось распознать изображение, персонаж ответит только на текст.',
       'cancel': 'Отмена',
       'save': 'Сохранить',
       'delete': 'Удалить',
@@ -263,7 +282,7 @@ class AppLocalization {
       'change_role_button': 'Сменить роль',
       'select_role_button': 'Выбрать роль',
       'write_something': 'Напишите что-нибудь...',
-      'select_role_text': 'Выберите роль для отыгрыша',
+      'select_role_text': 'Выберите роль',
       'no_roles_text': 'У вас еще нет созданных ролей.',
       'start_new_chat': 'Начать новый чат?',
       'confirm_new_chat': 'Вы действительно хотите начать новый чат с персонажем?',
@@ -279,34 +298,35 @@ class AppLocalization {
       //  --- Экран списка чатов ---
       'chats_list_title': 'Список чатов',
       'add_chat_button': '+',
-      'no_chats': 'У вас еще нет активных чатов.\nНажмите \'+\' сверху, чтобы выбрать персонажа.',
+      'no_chats':
+          'У вас еще нет активных чатов.\nНажмите на \'+\' в верхнем правом углу, чтобы выбрать персонажа.',
       'no_last_message': 'Нет сообщений',
       'delete_chat_tooltip': 'Удалить чат.',
       'delete_chat_dialog_title': 'Удаление чата',
       'delete_chat_dialog_message':
-          'Вы уверены, что хотите навсегда удалить чат?\nВся история переписки будут безвозвратно стёрты.',
+          'Вы уверены, что хотите навсегда удалить чат?\nВся история переписки будет стёрта.',
       // --- Экран персонажей ---
       'characters_title': 'Выбор персонажа',
       'add_character_button': '+',
       'no_characters_message':
-          'В таверне пока пусто.\nНажмите \'+\' сверху, чтобы создать персонажа.',
+          'У вас пока нет персонажей.\nНажмите на \'+\'  в верхнем правом углу, чтобы создать нового.',
       'edit_prompts': 'Редактировать промпты персонажа',
       'chat': 'Общаться',
       // --- Экран создания персонажа ---
       'character_form_title_create': 'Создать Персонажа',
       'character_form_title_edit': 'Редактировать персонажа',
       'char_name_label': 'Имя персонажа',
-      'char_name_hint': 'Например: Фелисити',
+      'char_name_hint': '',
       'greeting_label': 'Стартовое приветствие (Greeting)',
-      'greeting_hint': 'Реплика, с которой персонаж сам начнет чат',
+      'greeting_hint': 'Реплика, с которой персонаж начнет чат',
       'appearance_label': 'Описание (Description)',
       'appearance_hint': 'Общее описание персонажа',
       'personality_label': 'Характер (Personality)',
       'personality_hint': 'Черты характера, манера речи, страхи',
       'scenario_label': 'Сценарий (Scenario)',
       'scenario_hint': 'Глобальный сюжет: что происходит и к чему стремятся персонажи',
-      'prompt_label': 'Системный Промпт / Инструкция',
-      'prompt_hint': 'Правила для LLM. Например: Always reply in English',
+      'prompt_label': 'Системные инструкции',
+      'prompt_hint': 'Правила для ИИ',
       'delete_button': 'Удалить',
       'save_button': 'Сохранить изменения',
       'char_create_button': 'Создать персонажа',
@@ -319,17 +339,17 @@ class AppLocalization {
       'user_cards_title': 'Мои Роли (Профили)',
       'add_user_card_button': '+',
       'no_user_cards_message':
-          'У вас пока нет созданных ролей...\nНажмите \'+\' сверху, чтобы создать свой профиль.',
+          'У вас пока нет созданных профилей.\nНажмите \'+\' в верхнем правом углу, чтобы создать новый.',
       'default_status': 'По умолчанию',
       'additional_status': 'Дополнительная',
 
       // --- Форма профиля игрока ---
-      'user_card_form_title_create': 'Создать Профиль Игрока',
-      'user_card_form_title_edit': 'Редактировать Роль',
+      'user_card_form_title_create': 'Создать Профиль',
+      'user_card_form_title_edit': 'Редактировать Профиль',
       'card_name_label': 'Ваше Имя/Ник в этой роли',
-      'card_name_hint': 'Например: Иван, Маг Артур',
-      'description_label': 'Описание твоего персонажа (Внешность, лор, раса)',
-      'description_hint': 'Опишите себя: Призванный фамильяр, носит кольцо, человек',
+      'card_name_hint': '',
+      'description_label': 'Описание вашего персонажа',
+      'description_hint': 'Опишите себя (Внешность, лор, раса)',
       'default_switch_title': 'Использовать по умолчанию',
       'default_switch_subtitle': 'Эта роль будет автоматически выбираться для новых чатов',
       'card_create_button': 'Создать профиль',
@@ -357,32 +377,34 @@ class AppLocalization {
       'button_save_settings': 'Сохранить настройки',
       'message_settings_saved': 'Настройки успешно сохранены!',
       'confirm_message_title': 'Подтвердите смену модели',
-      'confirm_message_text': 'Если вы измените модель, ваши лорбуки будут полностью перестроены.\n Это займет некоторое время: ~1c на лорбук, но может быть увеличено, если провайдер выдаст ошибку.\n А также может потратить средства, если вы используете платное API. Продолжить?',
+      'confirm_message_text':
+          'Если вы измените модель, ваши лорбуки будут полностью перестроены.\n Это займет некоторое время: ~1c на лорбук, но может быть увеличено, если провайдер выдаст ошибку.\n А также может потратить средства, если вы используете платное API. Продолжить?',
 
       // --- Экраны книг ---
       'lorebooks': 'Книги знаний',
       'lorebooks_title': 'Книги знаний',
-      'no_lorebooks_message': 'У вас нет книг...\nНажмите \'+\' сверху, чтобы создать новую.',
+      'no_lorebooks_message':
+          'У вас пока нет книг знаний.\nНажмите \'+\' в верхнем правом углу, чтобы создать новую.',
       'lorebook_form_title_create': 'Создание книги знаний',
       'lorebook_form_title_edit': 'Редактирование книги знаний',
       'lorebook_name_label': 'Название книги знаний',
-      'lorebook_name_hint': 'Например: Мир магии',
+      'lorebook_name_hint': '',
       'lorebook_about_label': 'Описание книги',
       'lorebook_about_hint': 'Опишите книгу',
       'loading_chronicles': 'Загрузка книг знаний...',
       'no_lorebook_entries':
-          'В этой книге еще нет записей.\nНажмите на «+» сверху, чтобы добавить контент!',
+          'В этой книге еще нет записей.\nНажмите \'+\' в верхнем правом углу, чтобы создать новую.',
       'lorebook_entry_number': '#',
       'title_add_lorebook_entry': 'Регистрация записи в книге знаний',
       'title_edit_lorebook_entry': 'Редактирование записи в книге знаний',
-      'lore_hint_title': 'Название информационного блока (например: Магия воды)',
+      'lore_hint_title': '',
       'lore_hint_content': 'Описание, факты, исторические справки и информация...',
       'lore_error_title_empty': 'Введите название записи',
       'lore_error_content_empty': 'Заполните контент записи',
       'lore_action_delete_entry': 'Удалить запись',
       'lorebook_selection_title': 'Подключение баз знаний',
       'no_lorebooks_warning':
-          'В системе еще не создано ни одной книги знаний.\nСначала создайте книгу в Менеджере книг знаний.',
+          'В системе еще не создано ни одной книги знаний.\nСначала создайте книгу в разделе книг знаний.',
       'char_lorebooks': 'Книги знаний',
       'char_lorebooks_count': 'Подключено: {num} шт.',
       'char_no_lorebooks_count': 'Нет подключенных книг',
@@ -414,7 +436,8 @@ class AppLocalization {
       'provider_add_hint': 'В формате JSON',
       'provider_add_err': 'Невалидный JSON',
 
-      'lore_unavailable': 'Embedding-модель недоступна. Записи открыты только для чтения. Проверьте настройки.',
+      'lore_unavailable':
+          'Embedding-модель недоступна. Записи открыты только для чтения. Проверьте настройки.',
       'vision_unavailable': 'Модель для просмотра изображений недоступна',
       'chat_unavailable': 'Модель для чата недоступна. Проверьте настройки',
     },
@@ -667,7 +690,8 @@ class AppLocalization {
   String get providerAddErr => _localizedValues[locale.languageCode]?['provider_add_err'] ?? empty;
   String get exportLabel => _localizedValues[locale.languageCode]?['export_label'] ?? empty;
   String get loreUnavailable => _localizedValues[locale.languageCode]?['lore_unavailable'] ?? empty;
-  String get visionUnavailable => _localizedValues[locale.languageCode]?['vision_unavailable'] ?? empty;
+  String get visionUnavailable =>
+      _localizedValues[locale.languageCode]?['vision_unavailable'] ?? empty;
   String get chatUnavailable => _localizedValues[locale.languageCode]?['chat_unavailable'] ?? empty;
 
   String getError(ErrType type, [Object? exception]) {
@@ -676,6 +700,8 @@ class AppLocalization {
         return _localizedValues[locale.languageCode]?['err_load_chats'] ?? type.name;
       case ErrType.loadChat:
         return _localizedValues[locale.languageCode]?['err_load_chat'] ?? type.name;
+      case ErrType.loadChatHistory:
+        return _localizedValues[locale.languageCode]?['err_load_chat_history'] ?? type.name;
       case ErrType.loadCharacters:
         return _localizedValues[locale.languageCode]?['err_load_characters'] ?? type.name;
       case ErrType.loadCharacter:
@@ -684,6 +710,8 @@ class AppLocalization {
         return _localizedValues[locale.languageCode]?['err_export_character'] ?? type.name;
       case ErrType.saveCharacter:
         return _localizedValues[locale.languageCode]?['err_save_character'] ?? type.name;
+      case ErrType.removeCharacter:
+        return _localizedValues[locale.languageCode]?['err_remove_character'] ?? type.name;
       case ErrType.sendMessage:
         return _localizedValues[locale.languageCode]?['err_send_message'] ?? type.name;
       case ErrType.loadUserCards:
@@ -712,6 +740,16 @@ class AppLocalization {
         return _localizedValues[locale.languageCode]?['err_delete_lorebook'] ?? type.name;
       case ErrType.loadLoreEntries:
         return _localizedValues[locale.languageCode]?['err_load_lore_entries'] ?? type.name;
+      case ErrType.image:
+        return _localizedValues[locale.languageCode]?['err_image'] ?? type.name;
+      case ErrType.remove:
+        return _localizedValues[locale.languageCode]?['err_remove'] ?? type.name;
+      case ErrType.save:
+        return _localizedValues[locale.languageCode]?['err_save'] ?? type.name;
+      case ErrType.load:
+        return _localizedValues[locale.languageCode]?['err_load'] ?? type.name;
+      case ErrType.regenerate:
+        return _localizedValues[locale.languageCode]?['err_regenerate'] ?? type.name;
     }
   }
 }
@@ -721,9 +759,11 @@ typedef GetLocalizedErrorMessage = String Function(ErrType err, Object exception
 enum ErrType {
   loadChats,
   loadChat,
+  loadChatHistory,
   loadCharacters,
   loadCharacter,
   saveCharacter,
+  removeCharacter,
   exportCharacter,
   sendMessage,
   loadUserCards,
@@ -739,6 +779,11 @@ enum ErrType {
   saveLorebook,
   deleteLorebook,
   loadLoreEntries,
+  image,
+  load,
+  remove,
+  save,
+  regenerate,
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalization> {

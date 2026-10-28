@@ -1,3 +1,4 @@
+import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:den_ai/models/models.dart';
@@ -15,6 +16,7 @@ class NotifyWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalization.of(context);
     return BlocProvider<NotifyBloc>(
       create: (context) => NotifyBloc(GetIt.instance.get(), GetIt.instance.get()),
       child: BlocListener<NotifyBloc, NotifyState>(
@@ -22,7 +24,7 @@ class NotifyWidget extends StatelessWidget {
           final context = navKey.currentState?.context;
           if (context != null) {
             if (state is NotifyShowErrorState) {
-              _showError(context, state.error);
+              _showError(context, loc, state.type);
             } else if (state is NotifyShowChatState) {
               final currentRoute = GetIt.instance.get<AppRouteObserver>().currentRouteName;
               if (currentRoute != AppRoutes.chat) {
@@ -36,15 +38,15 @@ class NotifyWidget extends StatelessWidget {
     );
   }
 
-  void _showError(BuildContext context, String message) {
-    showTopNotification(context, Icon(Icons.error, color: Colors.redAccent, size: 30), message);
+  void _showError(BuildContext context, AppLocalization loc, ErrType type) {
+    showTopNotification(context, Icon(Icons.error, color: Colors.redAccent, size: 44), loc.getError(type), isError: true);
   }
 
   void _showChatMessage(BuildContext context, Char char, String message) {
     showTopNotification(context, PersonaAvatar(char), message);
   }
 
-  void showTopNotification(BuildContext context, Widget icon, String message) {
+  void showTopNotification(BuildContext context, Widget icon, String message, {bool isError = false}) {
     final theme = Theme.of(context);
     final overlayState = navKey.currentState?.overlay;
     if (overlayState == null) return;
@@ -66,28 +68,52 @@ class NotifyWidget extends StatelessWidget {
               color: Colors.transparent,
               child: IntrinsicHeight(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding: const EdgeInsets.all(0),
+                  clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surface,
                     borderRadius: BorderRadius.circular(12),
-                    boxShadow: const [
-                      BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 4)),
+                    border: Border.all(color: isError ? Colors.redAccent.shade700 : theme.dividerColor, width: 1),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
+                      ),
                     ],
                   ),
                   child: Row(
                     children: [
-                      icon,
-                      const SizedBox(width: 12),
+                      Container(
+                        width: 6,
+                        color: isError ? Colors.redAccent.shade700 : theme.dividerColor,
+                      ),
+                      // Возвращаем внутренние отступы для контента
                       Expanded(
-                        child: Text(
-                          message,
-                          style: const TextStyle(color: Colors.white),
-                          maxLines: 3,
-                          overflow: TextOverflow.ellipsis,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          child: Row(
+                            children: [
+                              icon,
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: Text(
+                                  message,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ],
                   ),
+
                 ),
               ),
             ),

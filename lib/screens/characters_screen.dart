@@ -2,9 +2,11 @@ import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/blocs/characters/characters_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/screens/chat_screen.dart';
 import 'package:den_ai/widgets/character_card.dart';
+import 'package:den_ai/widgets/placeholder.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
@@ -18,7 +20,8 @@ class CharactersScreen extends StatelessWidget {
     final loc = AppLocalization.of(context);
 
     return BlocProvider<CharactersBloc>(
-      create: (context) => CharactersBloc(GetIt.instance.get())..add(LoadAllCharactersEvent()),
+      create: (context) =>
+          CharactersBloc(GetIt.instance.get(), context.notifyBloc)..add(LoadAllCharactersEvent()),
       child: Builder(
         builder: (context) {
           return Scaffold(
@@ -56,8 +59,9 @@ class CharactersScreen extends StatelessWidget {
 
                 if (state is CharactersLoadedState) {
                   if (state.characters.isEmpty) {
-                    return Center(
-                      child: Text(loc.noCharactersMessage, textAlign: TextAlign.center),
+                    return EmptyPlaceholder(
+                      icon: Icons.no_accounts_outlined,
+                      label: loc.noCharactersMessage,
                     );
                   }
 
@@ -74,10 +78,7 @@ class CharactersScreen extends StatelessWidget {
                       final character = state.characters[index];
                       return CharacterCard(
                         character: character,
-                        onPressed: (_) => context.push(
-                          AppRoutes.chat,
-                          arguments: ChatScreenArgs(charId: character.id),
-                        ),
+                        onPressed: (_) => _onChat(context, character),
                         onEditPressed: (_) => _onEditCharacterPressed(context, character),
                       );
                     },
@@ -93,12 +94,16 @@ class CharactersScreen extends StatelessWidget {
     );
   }
 
+  void _onChat(BuildContext context, Char character) async {
+    final charactersBloc = context.read<CharactersBloc>();
+    await context.push(AppRoutes.chat, arguments: ChatScreenArgs(charId: character.id));
+    charactersBloc.add(LoadAllCharactersEvent());
+  }
+
   void _onEditCharacterPressed(BuildContext context, Char character) async {
     final charactersBloc = context.read<CharactersBloc>();
 
-    final hasChanges = await context.push(AppRoutes.characterEdit, arguments: character.id);
-    if (hasChanges == true) {
-      charactersBloc.add(LoadAllCharactersEvent());
-    }
+    await context.push(AppRoutes.characterEdit, arguments: character.id);
+    charactersBloc.add(LoadAllCharactersEvent());
   }
 }

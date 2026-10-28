@@ -306,10 +306,10 @@ class OpenAIClient {
           infoStr = "FREE | ${contextLength ~/ 1024}k ctx";
         } else if (contextLength > 0) {
           infoStr =
-              "\$${promptCostPerMillion.toStringAsFixed(1)}/\$${completionCostPerMillion.toStringAsFixed(1)} M | ${contextLength ~/ 1024}k ctx";
+              "${completionCostPerMillion.toStringAsFixed(1)}/M | ${contextLength ~/ 1024}k ctx";
         } else {
           infoStr =
-              "\$${promptCostPerMillion.toStringAsFixed(1)}/\$${completionCostPerMillion.toStringAsFixed(1)} M";
+              "${completionCostPerMillion.toStringAsFixed(1)}/M";
         }
 
         result.add(ModelInfo(name: name, info: infoStr));
@@ -318,7 +318,7 @@ class OpenAIClient {
       result.sort((a, b) => a.name.compareTo(b.name));
 
       if (result.isEmpty && fallbackResult.isNotEmpty) return (fallbackResult, true);
-      return (result, true);
+      if (result.isNotEmpty) (result, true);
       // ignore: empty_catches
     } catch (e) {}
 
@@ -387,9 +387,9 @@ class OpenAIClient {
           infoStr = "FREE | ${contextLength ~/ 1024}k ctx";
         } else if (contextLength > 0) {
           infoStr =
-              "\$${promptCostPerMillion.toStringAsFixed(1)} M | ${contextLength ~/ 1024}k ctx";
+              "${promptCostPerMillion.toStringAsFixed(1)}/M | ${contextLength ~/ 1024}k ctx";
         } else {
-          infoStr = "\$${promptCostPerMillion.toStringAsFixed(1)} M";
+          infoStr = "${promptCostPerMillion.toStringAsFixed(1)}/M";
         }
 
         result.add(ModelInfo(name: name, info: infoStr));
@@ -402,7 +402,7 @@ class OpenAIClient {
       });
 
       if (result.isEmpty && fallbackResult.isNotEmpty) return (fallbackResult, true);
-      return (result, true);
+      if (result.isNotEmpty) return (result, true);
 
       // ignore: empty_catches
     } catch (e) {}

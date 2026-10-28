@@ -1,4 +1,5 @@
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/repositories/chats_repository.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,8 +8,9 @@ part 'chat_list_state.dart';
 
 class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
   final ChatsRepository _repository;
+  final NotifyBloc _notification;
 
-  ChatsListBloc(this._repository) : super(ChatsListInitialState()) {
+  ChatsListBloc(this._repository, this._notification) : super(ChatsListInitialState()) {
     on<LoadAllChatsEvent>(_onLoadAllChats);
     on<DeleteChatEvent>(_onDeleteChat);
   }
@@ -19,7 +21,8 @@ class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
       final chats = await _repository.getChats();
       emit(ChatsListLoadedState(chats));
     } catch (e) {
-      emit(ChatsListErrorState(ErrType.loadChats, e));
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadChats));
+      emit(ChatsListLoadedState([]));
     }
   }
 
@@ -34,7 +37,8 @@ class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
 
       emit(currentState.copyWith(chats: updatedChats));
     } catch (e) {
-      emit(ChatsListErrorState(ErrType.deleteChat, e));
+      _notification.add(ErrorOccurredEvent(type: ErrType.deleteChat));
+      emit(currentState.copyWith());
     }
   }
 }

@@ -1,3 +1,5 @@
+import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/models/models.dart';
@@ -12,8 +14,9 @@ class LorebookEntriesBloc extends Bloc<LorebookEntriesEvent, LorebookEntriesStat
   final LoreVectorStorage vectorStorage;
   final OpenAIClient client;
   final SettingsRepository settingsRepository;
+  final NotifyBloc _notification;
 
-  LorebookEntriesBloc(this._repository, this.vectorStorage, this.client, this.settingsRepository)
+  LorebookEntriesBloc(this._repository, this.vectorStorage, this.client, this.settingsRepository, this._notification)
     : super(LorebookEntriesInitialState()) {
     on<LoadEntriesEvent>(_onLoadEntries);
     on<DeleteEntryEvent>(_onDeleteEntry);
@@ -23,10 +26,11 @@ class LorebookEntriesBloc extends Bloc<LorebookEntriesEvent, LorebookEntriesStat
   Future<void> _onLoadEntries(LoadEntriesEvent event, Emitter<LorebookEntriesState> emit) async {
     emit(LorebookEntriesLoadingState());
     try {
-      final book = await _repository.getLorebook(event.bookId);
-      emit(LorebookEntriesLoadedState(book));
+      final entries = await _repository.getLoreEntries(event.bookId);
+      emit(LorebookEntriesLoadedState(entries));
     } catch (e) {
-      emit(LorebookEntriesErrorState(e.toString()));
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadLoreEntries));
+      emit(LorebookEntriesLoadedState([]));
     }
   }
 
@@ -35,17 +39,11 @@ class LorebookEntriesBloc extends Bloc<LorebookEntriesEvent, LorebookEntriesStat
     if (currentState is! LorebookEntriesLoadedState) return;
 
     try {
-      final updatedEntries = List<LoreEntry>.from(currentState.lorebook.entries)
+      final lorebook = await _repository.getLorebook(event.bookId);
+      final updatedEntries = List<LoreEntry>.from(currentState.entries)
         ..removeWhere((e) => e.id == event.entryId);
 
-      final updatedBook = Lorebook(
-        id: currentState.lorebook.id,
-        name: currentState.lorebook.name,
-        about: currentState.lorebook.about,
-        cover: currentState.lorebook.cover,
-        crop: currentState.lorebook.crop,
-        entries: updatedEntries,
-      );
+      final updatedBook = lorebook.copyWith(entries: updatedEntries);
 
       final texts = updatedBook.getEntriesTexts();
       if (texts.isNotEmpty) {
@@ -57,14 +55,16 @@ class LorebookEntriesBloc extends Bloc<LorebookEntriesEvent, LorebookEntriesStat
       }
       await _repository.deleteLoreEntry(event.entryId);
 
-      emit(LorebookEntriesLoadedState(updatedBook));
+      emit(LorebookEntriesLoadedState(updatedBook.entries));
     } catch (e) {
-      emit(LorebookEntriesErrorState(e.toString()));
+      _notification.add(ErrorOccurredEvent(type: ErrType.remove));
+      emit(currentState.copy());
     }
   }
 
   Future<void> _onSaveEntry(SaveEntryEvent event, Emitter<LorebookEntriesState> emit) async {
-    if (state is! LorebookEntriesLoadedState) return;
+    final currentState = state;
+    if (currentState is! LorebookEntriesLoadedState) return;
     try {
       final (updatedBook, id) = await _repository.saveLoreEntry(
         event.id,
@@ -85,9 +85,10 @@ class LorebookEntriesBloc extends Bloc<LorebookEntriesEvent, LorebookEntriesStat
       } catch (e) {
         if (id != null) await _repository.deleteLoreEntry(id);
       }
-      emit(LorebookEntriesLoadedState(updatedBook));
+      emit(LorebookEntriesLoadedState(updatedBook.entries));
     } catch (e) {
-      emit(LorebookEntriesErrorState(e.toString()));
+      _notification.add(ErrorOccurredEvent(type: ErrType.save));
+      emit(currentState.copy());
     }
   }
 }

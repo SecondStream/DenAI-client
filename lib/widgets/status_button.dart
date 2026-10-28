@@ -7,6 +7,7 @@ class StatusButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return SizedBox(
       width: 55,
       height: 70,
@@ -19,7 +20,7 @@ class StatusButton extends StatelessWidget {
               child: IconButton(
                 icon: Icon(
                   available ? Icons.check_circle : Icons.error,
-                  color: available ? Colors.green : Color(0xFFCC5555),
+                  color: available ? theme.colorScheme.primary : Color(0xFFCC5555),
                   size: 35,
                 ),
                 onPressed: () {

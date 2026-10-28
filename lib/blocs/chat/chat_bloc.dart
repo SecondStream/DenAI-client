@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/consts/consts.dart';
 import 'package:den_ai/managers/lore_vector_storage.dart';
@@ -35,6 +36,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final SettingsRepository _settingsRepository;
   final CharactersRepository _charactersRepository;
   final UserCardsRepository _userCardsRepository;
+  final NotifyBloc _notification;
   StreamSubscription<StreamMessage>? _messageSubscription;
 
   final Map<int, List<List<double>>> _loreVectors = {};
@@ -49,12 +51,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     this._settingsRepository,
     this._charactersRepository,
     this._userCardsRepository,
+    this._notification,
   ) : super(ChatInitialState()) {
-    on<LoadChatHistoryEvent>(_onLoadChatHistory);
+    on<ShownChatEvent>(_onShown);
     on<SendUserMessageEvent>(_onSendUserMessage);
     on<ReceivedAiTokenEvent>(_onReceivedAiToken);
     on<ReceivedAiTokenErrorEvent>(_onReceivedAiTokenError);
-    on<CheckOrCreateVirtualChatEvent>(_onCheckOrCreateVirtualChat);
     on<RequestUserCardsForDialogEvent>(_onRequestUserCardsForDialog);
     on<ChangeUserCardEvent>(_onChangeUserCard);
     on<StartNewChatSessionEvent>(_onStartNewChatSession);
@@ -82,21 +84,107 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     return super.close();
   }
 
-  void _onLoadChatHistory(LoadChatHistoryEvent event, Emitter<ChatState> emit) async {
+  void _onShown(ShownChatEvent event, Emitter<ChatState> emit) async {
     emit(ChatLoadingState());
+    bool error = false;
+    if (event.chatId != null) {
+      try {
+        final chat = await _repository.getChatById(event.chatId!);
+        emit(
+          ChatLoadedState(
+            chatId: chat.id,
+            char: chat.char,
+            messages: _getChatActiveMV(chat.messages, chat.char, chat.userCard),
+            background: chat.background ?? chat.char.background,
+            userCard: chat.userCard,
+            summary: chat.summaries.lastOrNull?.content ?? '',
+          ),
+        );
+
+        return;
+      } catch (e) {
+        error = true;
+      }
+    }
+    await _onCheckOrCreateVirtualChat(event.charId, emit, error);
+  }
+
+  Future<void> _onCheckOrCreateVirtualChat(
+    int charId,
+    Emitter<ChatState> emit,
+    bool onFallback,
+  ) async {
     try {
-      final chat = await _repository.getChatById(event.chatId);
+      final Chat? existingChat = await _repository.getActiveChatByCharId(charId);
+
+      if (existingChat != null) {
+        emit(
+          ChatLoadedState(
+            chatId: existingChat.id,
+            char: existingChat.char,
+            background: existingChat.background ?? existingChat.char.background,
+            messages: _getChatActiveMV(
+              existingChat.messages,
+              existingChat.char,
+              existingChat.userCard,
+            ),
+            userCard: existingChat.userCard,
+            summary: existingChat.summaries.lastOrNull?.content ?? '',
+          ),
+        );
+
+        if (onFallback) {
+          _notification.add(ErrorOccurredEvent(type: ErrType.loadChatHistory));
+        }
+
+        return;
+      }
+    } catch (_) {
+      onFallback = true;
+    }
+
+    try {
+      final char = await _charactersRepository.getCharacterById(charId);
+      if (char == null) {
+        emit(ChatErrorState(ErrType.loadChat, 'Character not found'));
+        return;
+      }
+
+      UserCard? defaultUserCard;
+      try {
+        defaultUserCard = await _userCardsRepository.getDefaultUserCard();
+      } catch (_) {}
+
       emit(
         ChatLoadedState(
-          chatId: event.chatId,
-          char: chat.char,
-          messages: _getChatActiveMV(chat.messages, chat.char, chat.userCard),
-          background: chat.background ?? chat.char.background,
-          userCard: chat.userCard,
-          summary: chat.summaries.lastOrNull?.content ?? '',
+          chatId: -99,
+          char: char,
+          background: char.background,
+          userCard: defaultUserCard,
+          summary: '',
+          messages: [
+            if (char.greeting.isNotEmpty)
+              MessageView.fromMessage(
+                Message(
+                  id: -99,
+                  role: MessageRole.assistant,
+                  content: char.greeting,
+                  createdAt: DateTime.now(),
+                ),
+                char.name,
+                defaultUserCard?.name ?? defUser,
+                1,
+                1,
+              ),
+          ],
         ),
       );
+
+      if (onFallback) {
+        _notification.add(ErrorOccurredEvent(type: ErrType.loadChat));
+      }
     } catch (e) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacter));
       emit(ChatErrorState(ErrType.loadChat, e));
     }
   }
@@ -113,7 +201,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         ),
       );
     } catch (e) {
-      emit(ChatErrorState(ErrType.editMessage, e));
+      _notification.add(ErrorOccurredEvent(type: ErrType.editMessage));
+      emit(currentState.copyWith());
     }
   }
 
@@ -134,7 +223,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         ),
       );
     } catch (e) {
-      emit(ChatErrorState(ErrType.removeMessage, e));
+      _notification.add(ErrorOccurredEvent(type: ErrType.remove));
+      emit(currentState.copyWith());
     }
   }
 
@@ -144,26 +234,31 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     if (currentState.chatId <= 0 || currentState.messages.isEmpty) return;
 
-    final updatedMessages = List<Message>.from(currentState.messages);
+    try {
+      final updatedMessages = List<Message>.from(currentState.messages);
 
-    updatedMessages.removeWhere((e) => e.id == event.messageId);
-    updatedMessages.add(
-      Message(id: -2, role: MessageRole.assistant, content: "", createdAt: DateTime.now()),
-    );
+      updatedMessages.removeWhere((e) => e.id == event.messageId);
+      updatedMessages.add(
+        Message(id: -2, role: MessageRole.assistant, content: "", createdAt: DateTime.now()),
+      );
 
-    emit(
-      currentState.copyWith(
-        messages: _getChatActiveMV(updatedMessages, currentState.char, currentState.userCard),
-        isAiTyping: true,
-      ),
-    );
+      emit(
+        currentState.copyWith(
+          messages: _getChatActiveMV(updatedMessages, currentState.char, currentState.userCard),
+          isAiTyping: true,
+        ),
+      );
 
-    _regenerateMessage(
-      currentState.chatId,
-      event.messageId,
-      await _settingsRepository.getSettings(),
-      event.loreActive,
-    );
+      await _regenerateMessage(
+        currentState.chatId,
+        event.messageId,
+        await _settingsRepository.getSettings(),
+        event.loreActive,
+      );
+    } catch (e) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.regenerate));
+      emit(currentState.copyWith());
+    }
   }
 
   void _onSwitchMessageBranch(SwitchMessageBranchEvent event, Emitter<ChatState> emit) async {
@@ -181,73 +276,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         ),
       );
     } catch (e) {
-      emit(ChatErrorState(ErrType.switchMessage, e));
-    }
-  }
-
-  void _onCheckOrCreateVirtualChat(
-    CheckOrCreateVirtualChatEvent event,
-    Emitter<ChatState> emit,
-  ) async {
-    emit(ChatLoadingState());
-
-    try {
-      final Chat? existingChat = await _repository.getActiveChatByCharId(event.charId);
-
-      if (existingChat != null) {
-        emit(
-          ChatLoadedState(
-            chatId: existingChat.id,
-            char: existingChat.char,
-            background: existingChat.background ?? existingChat.char.background,
-            messages: _getChatActiveMV(
-              existingChat.messages,
-              existingChat.char,
-              existingChat.userCard,
-            ),
-            userCard: existingChat.userCard,
-            summary: existingChat.summaries.lastOrNull?.content ?? '',
-          ),
-        );
-      } else {
-        final char = await _charactersRepository.getCharacterById(event.charId);
-        if (char == null) {
-          emit(ChatErrorState(ErrType.loadChat, 'Character not found'));
-          return;
-        }
-
-        UserCard? defaultUserCard;
-        try {
-          defaultUserCard = await _userCardsRepository.getDefaultUserCard();
-        } catch (_) {}
-
-        emit(
-          ChatLoadedState(
-            chatId: -99,
-            char: char,
-            background: char.background,
-            userCard: defaultUserCard,
-            summary: '',
-            messages: [
-              if (char.greeting.isNotEmpty)
-                MessageView.fromMessage(
-                  Message(
-                    id: -99,
-                    role: MessageRole.assistant,
-                    content: char.greeting,
-                    createdAt: DateTime.now(),
-                  ),
-                  char.name,
-                  defaultUserCard?.name ?? defUser,
-                  1,
-                  1,
-                ),
-            ],
-          ),
-        );
-      }
-    } catch (e) {
-      emit(ChatErrorState(ErrType.loadChat, e));
+      _notification.add(ErrorOccurredEvent(type: ErrType.switchMessage));
+      emit(currentState.copyWith());
     }
   }
 
@@ -256,70 +286,78 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     Emitter<ChatState> emit,
   ) async {
     if (state is! ChatLoadedState) return;
-    var currentState = state as ChatLoadedState;
-    var cards = await _userCardsRepository.getUserCards();
-    emit(currentState.copyWith(availableCards: cards));
+    final currentState = state as ChatLoadedState;
+    try {
+      var cards = await _userCardsRepository.getUserCards();
+      emit(currentState.copyWith(availableCards: cards));
+    } catch (e) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.load));
+      emit(currentState.copyWith());
+    }
   }
 
   void _onSendUserMessage(SendUserMessageEvent event, Emitter<ChatState> emit) async {
     if (state is! ChatLoadedState) return;
-    var currentState = state as ChatLoadedState;
-    final settings = await _settingsRepository.getSettings();
-    final imageFile = currentState.selectedImageFile;
+    final currentState = state as ChatLoadedState;
 
-    var activeChatId = currentState.chatId;
+    final imageFile = currentState.selectedImageFile;
     final updatedMessages = List<Message>.from(currentState.messages);
     String localDisplayContent = event.text;
     String? imagePath;
-    if (imageFile != null) {
-      imagePath = await FileTool.saveAttachment(imageFile);
+    try {
+      if (imageFile != null) {
+        imagePath = await FileTool.saveAttachment(imageFile);
 
-      final String markdownTag = MessageTags.imgTemplate.replaceFirst(
-        MessageTags.urlMarker,
-        imagePath,
+        final String markdownTag = MessageTags.imgTemplate.replaceFirst(
+          MessageTags.urlMarker,
+          imagePath,
+        );
+
+        if (localDisplayContent.contains(MessageTags.img)) {
+          localDisplayContent = localDisplayContent.replaceFirst(MessageTags.img, markdownTag);
+        } else {
+          localDisplayContent = "$localDisplayContent\n$markdownTag";
+        }
+      }
+    } catch (e) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.image));
+    }
+    try {
+      final userMessage = Message(
+        id: -1,
+        role: MessageRole.user,
+        content: localDisplayContent,
+        createdAt: DateTime.now(),
+        imagePath: imagePath,
+      );
+      updatedMessages.add(userMessage);
+
+      updatedMessages.add(
+        Message(id: -2, role: MessageRole.assistant, content: "", createdAt: DateTime.now()),
       );
 
-      if (localDisplayContent.contains(MessageTags.img)) {
-        localDisplayContent = localDisplayContent.replaceFirst(MessageTags.img, markdownTag);
-      } else {
-        localDisplayContent = "$localDisplayContent\n$markdownTag";
-      }
-    }
+      var updatedState = currentState.copyWith(
+        messages: _getChatActiveMV(updatedMessages, currentState.char, currentState.userCard),
+        isAiTyping: true,
+        selectedImageFile: null,
+        isResetImage: true,
+      );
+      emit(updatedState);
 
-    final userMessage = Message(
-      id: -1,
-      role: MessageRole.user,
-      content: localDisplayContent,
-      createdAt: DateTime.now(),
-      imagePath: imagePath,
-    );
-    updatedMessages.add(userMessage);
-
-    updatedMessages.add(
-      Message(id: -2, role: MessageRole.assistant, content: "", createdAt: DateTime.now()),
-    );
-
-    currentState = currentState.copyWith(
-      messages: _getChatActiveMV(updatedMessages, currentState.char, currentState.userCard),
-      isAiTyping: true,
-      selectedImageFile: null,
-      isResetImage: true,
-    );
-    emit(currentState);
-
-    try {
+      final settings = await _settingsRepository.getSettings();
+      var activeChatId = currentState.chatId;
       if (activeChatId <= 0) {
         final Chat newChat = await _repository.createNewChat(
-          currentState.char.id,
-          currentState.userCard?.id,
+          updatedState.char.id,
+          updatedState.userCard?.id,
         );
         activeChatId = newChat.id;
-        currentState = currentState.copyWith(chatId: activeChatId);
-        emit(currentState);
+        updatedState = updatedState.copyWith(chatId: activeChatId);
+        emit(updatedState);
       }
 
-      _sendMessage(
-        currentState.chatId,
+      await _sendMessage(
+        activeChatId,
         event.text,
         settings,
         event.loreActive,
@@ -327,14 +365,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         imagePath: imagePath,
       );
     } catch (e) {
-      final chat = await _repository.getChatById(currentState.chatId);
-      emit(
-        currentState.copyWith(
-          messages: _getChatActiveMV(chat.messages, chat.char, chat.userCard),
-          isAiTyping: false,
-          selectedImageFile: imageFile,
-        ),
-      );
+      _notification.add(ErrorOccurredEvent(type: ErrType.sendMessage));
+      emit(ChatErrorState(ErrType.sendMessage, '', lastUserMessage: event.text));
+      emit(currentState.copyWith(isAiTyping: false, selectedImageFile: imageFile));
     }
   }
 
@@ -343,25 +376,33 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     String text,
     SettingsBase settings,
     bool loreActive,
+
     File? imageFile, {
     String? imagePath,
   }) async {
-    if (imageFile != null) {
-      final Uint8List imageBytes = await imageFile.readAsBytes();
-      final String base64Image = base64Encode(imageBytes);
-      final imageDescription =
-          '${MessageTags.imgXmlStart}${await _client.describeImage(base64Image: base64Image, prompt: DefaultSettings.describeImagePrompt, settings: settings)}${MessageTags.imgXmlEnd}';
-      if (text.contains(MessageTags.img)) {
-        text = text.replaceAll(MessageTags.img, imageDescription);
-      } else {
-        text += '\n$imageDescription';
+    var imageError = false;
+    try {
+      if (imageFile != null && imagePath != null) {
+        final Uint8List imageBytes = await imageFile.readAsBytes();
+        final String base64Image = base64Encode(imageBytes);
+        final imageDescription =
+            '${MessageTags.imgXmlStart}${await _client.describeImage(base64Image: base64Image, prompt: DefaultSettings.describeImagePrompt, settings: settings)}${MessageTags.imgXmlEnd}';
+        if (text.contains(MessageTags.img)) {
+          text = text.replaceAll(MessageTags.img, imageDescription);
+        } else {
+          text += '\n$imageDescription';
+        }
       }
+    } catch (e) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.image));
+      imageError = true;
     }
+
     final userMessageId = await _repository.insertMessage(
       chatId: chatId,
       role: MessageRole.user,
       content: text,
-      imagePath: imagePath,
+      imagePath: imageError ? null : imagePath,
     );
     final chat = await _repository.getChatById(chatId);
     final String? latestSummaryContent =
@@ -376,16 +417,18 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     final messages = await _getMessages(chat, systemContent, settings, text, loreActive);
 
-    return _generationService.requestAiResponse(
-      chatId: chat.id,
-      charId: chat.char.id,
-      settings: settings,
-      formattedMessages: messages,
-      isNew: true,
-      parentId: userMessageId,
-      lastActiveMsgId: null,
-      lastUserTextForError: text,
-      lastUserImageForError: imageFile,
+    unawaited(
+      _generationService.requestAiResponse(
+        chatId: chat.id,
+        charId: chat.char.id,
+        settings: settings,
+        formattedMessages: messages,
+        isNew: true,
+        parentId: userMessageId,
+        lastActiveMsgId: null,
+        lastUserTextForError: text,
+        lastUserImageForError: imageError ? null : imageFile,
+      ),
     );
   }
 
@@ -455,14 +498,16 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         ? chat.messages.firstWhere((e) => e.id == message.parentId!).content
         : '';
     final messages = await _getMessages(chat, systemContent, settings, userMessageText, loreActive);
-    return _generationService.requestAiResponse(
-      chatId: chat.id,
-      charId: chat.char.id,
-      settings: settings,
-      formattedMessages: messages,
-      isNew: false,
-      parentId: message.parentId,
-      lastActiveMsgId: message.id,
+    unawaited(
+      _generationService.requestAiResponse(
+        chatId: chat.id,
+        charId: chat.char.id,
+        settings: settings,
+        formattedMessages: messages,
+        isNew: false,
+        parentId: message.parentId,
+        lastActiveMsgId: message.id,
+      ),
     );
   }
 
@@ -557,13 +602,18 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (currentState.chatId != message.chatId) return;
 
     if (message.status == MessageStatus.completed) {
-      final chat = await _repository.getChatById(currentState.chatId);
-      emit(
-        currentState.copyWith(
-          messages: _getChatActiveMV(chat.messages, chat.char, chat.userCard),
-          isAiTyping: false,
-        ),
-      );
+      try {
+        final chat = await _repository.getChatById(currentState.chatId);
+        emit(
+          currentState.copyWith(
+            messages: _getChatActiveMV(chat.messages, chat.char, chat.userCard),
+            isAiTyping: false,
+          ),
+        );
+      } catch (e) {
+        _notification.add(ErrorOccurredEvent(type: ErrType.loadChat));
+        emit(ChatErrorState(ErrType.loadChat, e));
+      }
     } else {
       final updatedMessages = List<Message>.from(currentState.messages);
       final lastIndex = updatedMessages.length - 1;
@@ -600,14 +650,21 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (currentState.chatId != error.chatId) return;
 
     emit(ChatErrorState(ErrType.sendMessage, '', lastUserMessage: error.lastUserMessage));
-    final chat = await _repository.getChatById(currentState.chatId);
-    emit(
-      currentState.copyWith(
-        messages: _getChatActiveMV(chat.messages, chat.char, chat.userCard),
-        isAiTyping: false,
-        selectedImageFile: error.imageFile,
-      ),
-    );
+    _notification.add(ErrorOccurredEvent(type: ErrType.loadChat));
+
+    try {
+      final chat = await _repository.getChatById(currentState.chatId);
+      emit(
+        currentState.copyWith(
+          messages: _getChatActiveMV(chat.messages, chat.char, chat.userCard),
+          isAiTyping: false,
+          selectedImageFile: error.imageFile,
+        ),
+      );
+    } catch (e) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadChat));
+      emit(ChatErrorState(ErrType.loadChat, e));
+    }
   }
 
   void _onChangeUserCard(ChangeUserCardEvent event, Emitter<ChatState> emit) async {
@@ -620,7 +677,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       final card = currentState.availableCards?.firstWhere((e) => e.id == event.cardId);
       if (card != null) emit(currentState.copyWith(userCard: card));
     } catch (e) {
-      emit(ChatErrorState(ErrType.updateCard, e));
+      _notification.add(ErrorOccurredEvent(type: ErrType.updateCard));
+      emit(currentState.copyWith());
     }
   }
 
@@ -635,11 +693,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         // ignore: empty_catches
       } catch (e) {}
     }
-    final char = await _charactersRepository.getCharacterById(currentState.char.id);
-    if (char == null) {
-      emit(ChatErrorState(ErrType.loadChat, 'Character not found'));
-      return;
-    }
+    final char = currentState.char;
     emit(
       ChatLoadedState(
         chatId: -99,
@@ -670,9 +724,16 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
 
-    final char = await _charactersRepository.getCharacterById(currentState.char.id);
+    try {
+      final char = await _charactersRepository.getCharacterById(currentState.char.id);
+      if (char == null) throw Exception();
 
-    emit(currentState.copyWith(char: char));
+      emit(currentState.copyWith(
+          char: char, background: currentState.background ?? char.background));
+    } catch (e) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacter));
+      emit(ChatErrorState(ErrType.loadChat, e));
+    }
   }
 
   void _onUpdateChatSummary(UpdateChatSummaryEvent event, Emitter<ChatState> emit) async {
@@ -688,7 +749,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       );
       emit(currentState.copyWith(summary: updatedChat.summaries.lastOrNull?.content ?? ''));
     } catch (e) {
-      emit(ChatErrorState(ErrType.saveSummary, e));
+      _notification.add(ErrorOccurredEvent(type: ErrType.saveSummary));
+      emit(currentState.copyWith());
     }
   }
 

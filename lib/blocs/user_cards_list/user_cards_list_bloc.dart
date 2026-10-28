@@ -1,3 +1,4 @@
+import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
@@ -8,8 +9,9 @@ part 'user_cards_list_state.dart';
 
 class UserCardsListBloc extends Bloc<UserCardsListEvent, UserCardsListState> {
   final UserCardsRepository _repository;
+  final NotifyBloc _notification;
 
-  UserCardsListBloc(this._repository) : super(UserCardsListInitialState()) {
+  UserCardsListBloc(this._repository, this._notification) : super(UserCardsListInitialState()) {
     on<LoadAllUserCardsEvent>(_onLoadAllUserCards);
   }
 
@@ -19,7 +21,8 @@ class UserCardsListBloc extends Bloc<UserCardsListEvent, UserCardsListState> {
       final cards = await _repository.getUserCards();
       emit(UserCardsListLoadedState(cards));
     } catch (e) {
-      emit(UserCardsListErrorState(ErrType.loadUserCards, e));
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadUserCards));
+      emit(UserCardsListLoadedState([]));
     }
   }
 }

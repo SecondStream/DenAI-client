@@ -2,10 +2,10 @@ part of 'notify_bloc.dart';
 
 abstract class NotifyEvent {}
 
-class ErrorReceivedNotifyEvent extends NotifyEvent {
-  final WSMessageError message;
+class ErrorOccurredEvent extends NotifyEvent {
+  final ErrType type;
 
-  ErrorReceivedNotifyEvent({required this.message});
+  ErrorOccurredEvent({required this.type});
 }
 
 class ChatReceivedNotifyEvent extends NotifyEvent {
