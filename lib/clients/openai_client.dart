@@ -318,7 +318,7 @@ class OpenAIClient {
       result.sort((a, b) => a.name.compareTo(b.name));
 
       if (result.isEmpty && fallbackResult.isNotEmpty) return (fallbackResult, true);
-      if (result.isNotEmpty) (result, true);
+      if (result.isNotEmpty) return (result, true);
       // ignore: empty_catches
     } catch (e) {}
 

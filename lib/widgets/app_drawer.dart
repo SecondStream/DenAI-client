@@ -2,6 +2,7 @@ import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/blocs/drawer/drawer_bloc.dart';
+import 'package:den_ai/common/images.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:den_ai/models/user_card.dart';
 import 'package:den_ai/widgets/cropped_avatar.dart';
@@ -93,10 +94,17 @@ class AppDrawer extends StatelessWidget {
                 context.replace(AppRoutes.settings);
               },
             ),
+            Spacer(),
+            _buildLogo(context, theme),
+            SizedBox(height: 20),
           ],
         ),
       ),
     );
+  }
+
+  Widget _buildLogo(BuildContext context, ThemeData theme) {
+    return Image.asset(AppImages.logo, width: 150);
   }
 
   Widget _buildUserCard(BuildContext context, ThemeData theme, UserCard? card) {
