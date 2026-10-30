@@ -76,9 +76,16 @@ class LorebookEntriesScreen extends StatelessWidget {
               final entries = state.entries;
 
               if (entries.isEmpty) {
-                return EmptyPlaceholder(
-                  icon: Icons.developer_board_off_outlined,
-                  label: loc.noLorebookEntries,
+                return Column(
+                  children: [
+                    if (!canCreate) LoreUnavailableBanner(),
+                    Expanded(
+                      child: EmptyPlaceholder(
+                        icon: Icons.developer_board_off_outlined,
+                        label: loc.noLorebookEntries,
+                      ),
+                    ),
+                  ],
                 );
               }
 
