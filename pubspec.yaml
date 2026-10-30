@@ -1,5 +1,5 @@
 name: den_ai
-description: "DenAI client."
+description: "DenAI is a user interface for AI-powered text-based role-playing games."
 publish_to: 'none'
 version: 1.0.0+1
 
@@ -43,6 +43,19 @@ dev_dependencies:
   flutter_lints: ^6.0.0
   json_serializable: ^6.14.1
   flutter_launcher_icons: ^0.14.4
+  inno_bundle: ^0.12.0
+
+inno_bundle:
+  id: bb63d2a0-d3ec-11f1-8b20-83c7fc0f5cea
+  name: DenAI
+  version: 1.0.0
+  publisher: SecondStream
+  executable_name: denai
+  icon_path: assets/images/icon.ico
+  installer_icon: assets/images/icon.ico
+  languages:
+    - English
+    - Russian
 
 flutter:
   uses-material-design: true
