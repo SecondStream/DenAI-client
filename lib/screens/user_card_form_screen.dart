@@ -46,6 +46,7 @@ class _UserCardFormScreenState extends PersonaFormScreenState<UserCardFormScreen
     if (card != null) {
       _nameController.text = card.name;
       _descriptionController.text = card.description;
+      _isDefault = card.isDefault;
     }
     _isFieldsInitialized = true;
   }
