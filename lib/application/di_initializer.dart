@@ -5,7 +5,6 @@ import 'package:den_ai/repositories/characters_repository.dart';
 import 'package:den_ai/repositories/chats_repository.dart';
 import 'package:den_ai/repositories/database.dart';
 import 'package:den_ai/repositories/lorebooks_repository.dart';
-import 'package:den_ai/repositories/provider/remote_provider.dart';
 import 'package:den_ai/repositories/provider/interceptor.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
 import 'package:den_ai/repositories/user_cards_repository.dart';
@@ -30,9 +29,7 @@ class DiInitializer {
     dio.interceptors.add(ErrorInterceptor());
     dio.interceptors.add(LogInterceptor());
 
-    final remoteProvider = RemoteProvider(dio);
     final database = AppDatabase();
-    di.registerSingleton(remoteProvider);
     di.registerSingleton(AppRouteObserver());
 
     final client = OpenAIClient(

@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/blocs/app_status/app_status_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
@@ -13,6 +16,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:den_ai/blocs/settings/settings_bloc.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:get_it/get_it.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -101,10 +105,19 @@ class _SettingsScreenState extends State<SettingsScreen> {
         GetIt.instance.get(),
         GetIt.instance.get(),
         context.read<AppStatusBloc>(),
-        context.notifyBloc
+        context.notifyBloc,
       )..add(LoadAllSettingsEvent()),
       child: Scaffold(
-        appBar: AppBar(title: Text(loc.globalSettingsTitle)),
+        appBar: AppBar(
+          title: Text(loc.globalSettingsTitle),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.help_outline, size: 28),
+              onPressed: () =>
+                  launchUrl(Uri.parse('${AppConfig.of(context).siteUrl}/settings')),
+            ),
+          ],
+        ),
         drawer: AppDrawer(),
         body: BlocConsumer<SettingsBloc, SettingsState>(
           listener: (context, state) {

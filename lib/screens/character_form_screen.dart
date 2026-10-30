@@ -15,6 +15,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class CharacterFormScreen extends StatefulWidget {
   final int? characterId;
@@ -116,6 +117,13 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.characterId != null ? loc.characterFormTitleEdit : loc.characterFormTitleCreate),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.help_outline, size: 28),
+              onPressed: () =>
+                  launchUrl(Uri.parse('${AppConfig.of(context).siteUrl}/character')),
+            ),
+          ],
         ),
         body: BlocConsumer<CharacterFormBloc, CharacterFormState>(
           listener: (context, state) {

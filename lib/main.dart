@@ -47,6 +47,7 @@ void main() async {
   runApp(
     AppConfig(
       baseUrl: AppEnv.supportDir,
+      siteUrl: 'https://realwaifu.ru/denai',
       child: WindowObserver(child: AppStatus(child: ChatApp())),
     ),
   );
