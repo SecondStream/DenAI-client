@@ -6,6 +6,7 @@ import 'package:den_ai/widgets/status.dart';
 import 'package:den_ai/widgets/window_observer.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
@@ -48,6 +49,7 @@ void main() async {
     AppConfig(
       baseUrl: AppEnv.supportDir,
       siteUrl: 'https://realwaifu.ru/denai',
+      info: await PackageInfo.fromPlatform(),
       child: WindowObserver(child: AppStatus(child: ChatApp())),
     ),
   );

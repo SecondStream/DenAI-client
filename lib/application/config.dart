@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class AppConfig extends InheritedWidget {
   final String baseUrl;
   final String siteUrl;
+  final PackageInfo info;
 
-  const AppConfig({super.key, required this.baseUrl, required this.siteUrl, required super.child});
+  String get version => '${info.version}-beta';
+
+  const AppConfig({super.key, required this.baseUrl, required this.siteUrl, required this.info, required super.child});
 
   static AppConfig of(BuildContext context) {
     final AppConfig? result = context.dependOnInheritedWidgetOfExactType<AppConfig>();

@@ -96,6 +96,10 @@ class AppDrawer extends StatelessWidget {
             ),
             Spacer(),
             _buildLogo(context, theme),
+            Text(
+              AppConfig.of(context).version,
+              style: TextStyle(color: theme.hintColor, fontSize: 11),
+            ),
             SizedBox(height: 20),
           ],
         ),
