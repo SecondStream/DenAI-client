@@ -6,7 +6,7 @@
 </p>
 <br clear="left">
 
-# Screenshots
+## Screenshots
 <p align="center">
 <img src="readme/screen_1_n.webp" style="width: 48%;">
 <img src="readme/screen_2_n.webp" style="width: 48%;">
