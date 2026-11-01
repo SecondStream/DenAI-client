@@ -121,6 +121,16 @@ class $CharsTable extends Chars with TableInfo<$CharsTable, CharData> {
     requiredDuringInsert: false,
     defaultValue: const Constant(''),
   );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(''),
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -133,6 +143,7 @@ class $CharsTable extends Chars with TableInfo<$CharsTable, CharData> {
     scenario,
     greeting,
     prompt,
+    notes,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -208,6 +219,12 @@ class $CharsTable extends Chars with TableInfo<$CharsTable, CharData> {
         prompt.isAcceptableOrUnknown(data['prompt']!, _promptMeta),
       );
     }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
     return context;
   }
 
@@ -257,6 +274,10 @@ class $CharsTable extends Chars with TableInfo<$CharsTable, CharData> {
         DriftSqlType.string,
         data['${effectivePrefix}prompt'],
       )!,
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      )!,
     );
   }
 
@@ -277,6 +298,7 @@ class CharData extends DataClass implements Insertable<CharData> {
   final String scenario;
   final String greeting;
   final String prompt;
+  final String notes;
   const CharData({
     required this.id,
     required this.name,
@@ -288,6 +310,7 @@ class CharData extends DataClass implements Insertable<CharData> {
     required this.scenario,
     required this.greeting,
     required this.prompt,
+    required this.notes,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -308,6 +331,7 @@ class CharData extends DataClass implements Insertable<CharData> {
     map['scenario'] = Variable<String>(scenario);
     map['greeting'] = Variable<String>(greeting);
     map['prompt'] = Variable<String>(prompt);
+    map['notes'] = Variable<String>(notes);
     return map;
   }
 
@@ -327,6 +351,7 @@ class CharData extends DataClass implements Insertable<CharData> {
       scenario: Value(scenario),
       greeting: Value(greeting),
       prompt: Value(prompt),
+      notes: Value(notes),
     );
   }
 
@@ -346,6 +371,7 @@ class CharData extends DataClass implements Insertable<CharData> {
       scenario: serializer.fromJson<String>(json['scenario']),
       greeting: serializer.fromJson<String>(json['greeting']),
       prompt: serializer.fromJson<String>(json['prompt']),
+      notes: serializer.fromJson<String>(json['notes']),
     );
   }
   @override
@@ -362,6 +388,7 @@ class CharData extends DataClass implements Insertable<CharData> {
       'scenario': serializer.toJson<String>(scenario),
       'greeting': serializer.toJson<String>(greeting),
       'prompt': serializer.toJson<String>(prompt),
+      'notes': serializer.toJson<String>(notes),
     };
   }
 
@@ -376,6 +403,7 @@ class CharData extends DataClass implements Insertable<CharData> {
     String? scenario,
     String? greeting,
     String? prompt,
+    String? notes,
   }) => CharData(
     id: id ?? this.id,
     name: name ?? this.name,
@@ -387,6 +415,7 @@ class CharData extends DataClass implements Insertable<CharData> {
     scenario: scenario ?? this.scenario,
     greeting: greeting ?? this.greeting,
     prompt: prompt ?? this.prompt,
+    notes: notes ?? this.notes,
   );
   CharData copyWithCompanion(CharsCompanion data) {
     return CharData(
@@ -406,6 +435,7 @@ class CharData extends DataClass implements Insertable<CharData> {
       scenario: data.scenario.present ? data.scenario.value : this.scenario,
       greeting: data.greeting.present ? data.greeting.value : this.greeting,
       prompt: data.prompt.present ? data.prompt.value : this.prompt,
+      notes: data.notes.present ? data.notes.value : this.notes,
     );
   }
 
@@ -421,7 +451,8 @@ class CharData extends DataClass implements Insertable<CharData> {
           ..write('personality: $personality, ')
           ..write('scenario: $scenario, ')
           ..write('greeting: $greeting, ')
-          ..write('prompt: $prompt')
+          ..write('prompt: $prompt, ')
+          ..write('notes: $notes')
           ..write(')'))
         .toString();
   }
@@ -438,6 +469,7 @@ class CharData extends DataClass implements Insertable<CharData> {
     scenario,
     greeting,
     prompt,
+    notes,
   );
   @override
   bool operator ==(Object other) =>
@@ -452,7 +484,8 @@ class CharData extends DataClass implements Insertable<CharData> {
           other.personality == this.personality &&
           other.scenario == this.scenario &&
           other.greeting == this.greeting &&
-          other.prompt == this.prompt);
+          other.prompt == this.prompt &&
+          other.notes == this.notes);
 }
 
 class CharsCompanion extends UpdateCompanion<CharData> {
@@ -466,6 +499,7 @@ class CharsCompanion extends UpdateCompanion<CharData> {
   final Value<String> scenario;
   final Value<String> greeting;
   final Value<String> prompt;
+  final Value<String> notes;
   const CharsCompanion({
     this.id = const Value.absent(),
     this.name = const Value.absent(),
@@ -477,6 +511,7 @@ class CharsCompanion extends UpdateCompanion<CharData> {
     this.scenario = const Value.absent(),
     this.greeting = const Value.absent(),
     this.prompt = const Value.absent(),
+    this.notes = const Value.absent(),
   });
   CharsCompanion.insert({
     this.id = const Value.absent(),
@@ -489,6 +524,7 @@ class CharsCompanion extends UpdateCompanion<CharData> {
     this.scenario = const Value.absent(),
     this.greeting = const Value.absent(),
     this.prompt = const Value.absent(),
+    this.notes = const Value.absent(),
   }) : name = Value(name);
   static Insertable<CharData> custom({
     Expression<int>? id,
@@ -501,6 +537,7 @@ class CharsCompanion extends UpdateCompanion<CharData> {
     Expression<String>? scenario,
     Expression<String>? greeting,
     Expression<String>? prompt,
+    Expression<String>? notes,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -513,6 +550,7 @@ class CharsCompanion extends UpdateCompanion<CharData> {
       if (scenario != null) 'scenario': scenario,
       if (greeting != null) 'greeting': greeting,
       if (prompt != null) 'prompt': prompt,
+      if (notes != null) 'notes': notes,
     });
   }
 
@@ -527,6 +565,7 @@ class CharsCompanion extends UpdateCompanion<CharData> {
     Value<String>? scenario,
     Value<String>? greeting,
     Value<String>? prompt,
+    Value<String>? notes,
   }) {
     return CharsCompanion(
       id: id ?? this.id,
@@ -539,6 +578,7 @@ class CharsCompanion extends UpdateCompanion<CharData> {
       scenario: scenario ?? this.scenario,
       greeting: greeting ?? this.greeting,
       prompt: prompt ?? this.prompt,
+      notes: notes ?? this.notes,
     );
   }
 
@@ -575,6 +615,9 @@ class CharsCompanion extends UpdateCompanion<CharData> {
     if (prompt.present) {
       map['prompt'] = Variable<String>(prompt.value);
     }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
     return map;
   }
 
@@ -590,7 +633,8 @@ class CharsCompanion extends UpdateCompanion<CharData> {
           ..write('personality: $personality, ')
           ..write('scenario: $scenario, ')
           ..write('greeting: $greeting, ')
-          ..write('prompt: $prompt')
+          ..write('prompt: $prompt, ')
+          ..write('notes: $notes')
           ..write(')'))
         .toString();
   }
@@ -4424,6 +4468,7 @@ typedef $$CharsTableCreateCompanionBuilder =
       Value<String> scenario,
       Value<String> greeting,
       Value<String> prompt,
+      Value<String> notes,
     });
 typedef $$CharsTableUpdateCompanionBuilder =
     CharsCompanion Function({
@@ -4437,6 +4482,7 @@ typedef $$CharsTableUpdateCompanionBuilder =
       Value<String> scenario,
       Value<String> greeting,
       Value<String> prompt,
+      Value<String> notes,
     });
 
 final class $$CharsTableReferences
@@ -4536,6 +4582,11 @@ class $$CharsTableFilterComposer extends Composer<_$AppDatabase, $CharsTable> {
 
   ColumnFilters<String> get prompt => $composableBuilder(
     column: $table.prompt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4648,6 +4699,11 @@ class $$CharsTableOrderingComposer
     column: $table.prompt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CharsTableAnnotationComposer
@@ -4694,6 +4750,9 @@ class $$CharsTableAnnotationComposer
 
   GeneratedColumn<String> get prompt =>
       $composableBuilder(column: $table.prompt, builder: (column) => column);
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
 
   Expression<T> charLorebooksRefs<T extends Object>(
     Expression<T> Function($$CharLorebooksTableAnnotationComposer a) f,
@@ -4784,6 +4843,7 @@ class $$CharsTableTableManager
                 Value<String> scenario = const Value.absent(),
                 Value<String> greeting = const Value.absent(),
                 Value<String> prompt = const Value.absent(),
+                Value<String> notes = const Value.absent(),
               }) => CharsCompanion(
                 id: id,
                 name: name,
@@ -4795,6 +4855,7 @@ class $$CharsTableTableManager
                 scenario: scenario,
                 greeting: greeting,
                 prompt: prompt,
+                notes: notes,
               ),
           createCompanionCallback:
               ({
@@ -4808,6 +4869,7 @@ class $$CharsTableTableManager
                 Value<String> scenario = const Value.absent(),
                 Value<String> greeting = const Value.absent(),
                 Value<String> prompt = const Value.absent(),
+                Value<String> notes = const Value.absent(),
               }) => CharsCompanion.insert(
                 id: id,
                 name: name,
@@ -4819,6 +4881,7 @@ class $$CharsTableTableManager
                 scenario: scenario,
                 greeting: greeting,
                 prompt: prompt,
+                notes: notes,
               ),
           withReferenceMapper: (p0) => p0
               .map(

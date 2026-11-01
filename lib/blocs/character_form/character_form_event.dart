@@ -18,6 +18,7 @@ class SubmitCharacterFormEvent extends CharacterFormEvent {
   final String scenario;
   final String greeting;
   final String prompt;
+  final String notes;
   final File? avatarFile;
   final CropData? cropData;
   final File? backgroundFile;
@@ -31,6 +32,7 @@ class SubmitCharacterFormEvent extends CharacterFormEvent {
     required this.scenario,
     required this.greeting,
     required this.prompt,
+    required this.notes,
     required this.lorebookIds,
     this.avatarFile,
     this.cropData,
@@ -47,6 +49,7 @@ class ExportCardEvent extends CharacterFormEvent {
   final String scenario;
   final String greeting;
   final String prompt;
+  final String notes;
   final File? avatarFile;
   final List<int> lorebookIds;
 
@@ -59,6 +62,7 @@ class ExportCardEvent extends CharacterFormEvent {
     required this.scenario,
     required this.greeting,
     required this.prompt,
+    required this.notes,
     required this.lorebookIds,
     this.avatarFile,
   });

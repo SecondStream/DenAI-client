@@ -4,7 +4,7 @@ class ImportedCardData {
   final String personality;
   final String scenario;
   final String greeting;
-  final String definition;
+  final String notes;
   final String instructions;
   final List<String> tags;
   final List<ImportedLorebookData> lorebooks;
@@ -15,7 +15,7 @@ class ImportedCardData {
     required this.personality,
     required this.scenario,
     required this.greeting,
-    required this.definition,
+    required this.notes,
     required this.instructions,
     required this.tags,
     required this.lorebooks,

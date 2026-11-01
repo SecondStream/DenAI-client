@@ -137,6 +137,7 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
         scenario: importedData.scenario,
         greeting: importedData.greeting,
         prompt: importedData.instructions,
+        notes: importedData.notes,
         lorebookIds: bookIds,
         cropData: null,
       );
@@ -170,6 +171,7 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
         scenario: event.scenario,
         greeting: event.greeting,
         prompt: event.prompt,
+        notes: event.notes,
         avatarPath: avatarPath,
         cropData: event.cropData,
         backgroundPath: backgroundPath,
@@ -212,6 +214,7 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
         scenario: event.scenario,
         greeting: event.greeting,
         prompt: event.prompt,
+        notes: event.notes,
       );
 
       Uint8List? avatar = event.avatarFile != null ? await event.avatarFile!.readAsBytes() : null;

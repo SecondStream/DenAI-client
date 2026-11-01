@@ -18,7 +18,7 @@
 2. Run the executable and follow the installation prompts.
 
 > [!WARNING]
-> **Windows SmartScreen Notice**
+> **Windows SmartScreen Notice:**
 > When running the installer, Windows may display a blue warning screen stating *"Windows protected your PC"*. This is standard behavior for independent open-source software. 
 > 
 > Obtaining a digital certificate from Microsoft involves regular corporate fees, which goes against the nature of a completely free, community-driven project. To bypass this, click **"More info"** and then choose **"Run anyway"**.

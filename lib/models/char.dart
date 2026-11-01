@@ -17,6 +17,7 @@ class Char extends Persona {
   final String scenario;
   final String greeting;
   final String prompt;
+  final String notes;
   final List<Lorebook> lorebooks;
 
   Char({
@@ -30,6 +31,7 @@ class Char extends Persona {
     this.scenario = "",
     this.greeting = "",
     this.prompt = "",
+    this.notes = "",
     required this.lorebooks,
   });
 
@@ -45,6 +47,7 @@ class Char extends Persona {
       scenario: data.scenario,
       greeting: data.greeting,
       prompt: data.prompt,
+      notes: data.notes,
       lorebooks: lorebooks,
     );
   }
@@ -80,4 +83,5 @@ class Chars extends Table {
   TextColumn get scenario => text().withDefault(const Constant(''))();
   TextColumn get greeting => text().withDefault(const Constant(''))();
   TextColumn get prompt => text().withDefault(const Constant(''))();
+  TextColumn get notes => text().withDefault(const Constant(''))();
 }

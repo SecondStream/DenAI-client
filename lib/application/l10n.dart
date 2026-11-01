@@ -111,6 +111,8 @@ class AppLocalization {
       'scenario_hint': 'Global plot: what is happening and what the characters are striving for',
       'prompt_label': 'System Instructions',
       'prompt_hint': 'Rules for AI',
+      'notes_label': 'Author\'s notes',
+      'notes_hint': 'A field for notes; it has no effect on the character.',
       'delete_button': 'Delete',
       'save_button': 'Save Changes',
       'change': 'Change',
@@ -327,6 +329,8 @@ class AppLocalization {
       'scenario_hint': 'Глобальный сюжет: что происходит и к чему стремятся персонажи',
       'prompt_label': 'Системные инструкции',
       'prompt_hint': 'Правила для ИИ',
+      'notes_label': 'Заметки автора',
+      'notes_hint': 'Поле для заметок и никак не влияет на персонажа.',
       'delete_button': 'Удалить',
       'save_button': 'Сохранить изменения',
       'char_create_button': 'Создать персонажа',
@@ -490,6 +494,8 @@ class AppLocalization {
   String get scenarioHint => _localizedValues[locale.languageCode]?['scenario_hint'] ?? empty;
   String get promptLabel => _localizedValues[locale.languageCode]?['prompt_label'] ?? empty;
   String get promptHint => _localizedValues[locale.languageCode]?['prompt_hint'] ?? empty;
+  String get notesLabel => _localizedValues[locale.languageCode]?['notes_label'] ?? empty;
+  String get notesHint => _localizedValues[locale.languageCode]?['notes_hint'] ?? empty;
   String get deleteButton => _localizedValues[locale.languageCode]?['delete_button'] ?? empty;
   String get saveButton => _localizedValues[locale.languageCode]?['save_button'] ?? empty;
   String get charCreateButton =>

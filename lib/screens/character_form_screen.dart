@@ -35,6 +35,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
   late final TextEditingController _scenarioController;
   late final TextEditingController _greetingController;
   late final TextEditingController _promptController;
+  late final TextEditingController _notesController;
   late List<int> _selectedLorebookIds;
 
   File? _selectedBackgroundFile;
@@ -49,6 +50,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     _scenarioController = TextEditingController();
     _greetingController = TextEditingController();
     _promptController = TextEditingController();
+    _notesController = TextEditingController();
   }
 
   @override
@@ -59,6 +61,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     _scenarioController.dispose();
     _greetingController.dispose();
     _promptController.dispose();
+    _notesController.dispose();
     super.dispose();
   }
 
@@ -92,6 +95,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
       _scenarioController.text = char.scenario;
       _greetingController.text = char.greeting;
       _promptController.text = char.prompt;
+      _notesController.text = char.notes;
     }
     _selectedLorebookIds = List<int>.from(initialBookIds);
     _isFieldsInitialized = true;
@@ -240,6 +244,12 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                         controller: _promptController,
                         label: loc.promptLabel,
                         hint: loc.promptHint,
+                        minLines: 3,
+                      ),
+                      _buildTextField(
+                        controller: _notesController,
+                        label: loc.notesLabel,
+                        hint: loc.notesHint,
                         minLines: 3,
                       ),
 
@@ -522,6 +532,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
         scenario: _scenarioController.text.trim(),
         greeting: _greetingController.text.trim(),
         prompt: _promptController.text.trim(),
+        notes: _notesController.text.trim(),
         avatarFile: selectedAvatarFile,
         lorebookIds: _selectedLorebookIds,
       ),
@@ -539,6 +550,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
         scenario: _scenarioController.text.trim(),
         greeting: _greetingController.text.trim(),
         prompt: _promptController.text.trim(),
+        notes: _notesController.text.trim(),
         cropData: currentCropData,
         avatarFile: selectedAvatarFile,
         backgroundFile: _selectedBackgroundFile,
