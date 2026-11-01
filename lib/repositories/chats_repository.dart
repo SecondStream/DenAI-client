@@ -290,7 +290,7 @@ class ChatsRepository extends BaseRepository {
           if (startIdx != -1 && endIdx != -1) {
             final String xmlTag = oldContent.substring(
               startIdx,
-              endIdx + '</attached_image>'.length,
+              endIdx + MessageTags.imgXmlEnd.length,
             );
             processedContent = processedContent.replaceAll(MessageTags.img, xmlTag);
           }

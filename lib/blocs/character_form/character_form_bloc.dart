@@ -7,6 +7,7 @@ import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/repositories/lorebooks_repository.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
+import 'package:den_ai/repositories/user_cards_repository.dart';
 import 'package:den_ai/tools/character_card_tool.dart';
 import 'package:den_ai/tools/file_tool.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,6 +23,7 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
   final CharactersRepository _repository;
   final LorebooksRepository _loreRepository;
   final SettingsRepository _settingsRepository;
+  final UserCardsRepository _userCardRepository;
   final OpenAIClient _client;
   final LoreVectorStorage _vectorStorage;
   final NotifyBloc _notification;
@@ -30,6 +32,7 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
     this._repository,
     this._loreRepository,
     this._settingsRepository,
+    this._userCardRepository,
     this._client,
     this._vectorStorage,
     this._notification,
@@ -229,7 +232,13 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
         }
       }
 
-      final res = await CharacterCardTool.exportCard(character: character, avatarBytes: avatar);
+      var creatorName = AppEnv.appName;
+      try {
+        final userCard = await _userCardRepository.getDefaultUserCard();
+        if (userCard != null) creatorName = userCard.name;
+      } catch(_){}
+
+      final res = await CharacterCardTool.exportCard(character: character, avatarBytes: avatar, userNickname: creatorName);
 
       emit(
         CharacterFormExportCardSucessState(

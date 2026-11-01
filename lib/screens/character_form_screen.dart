@@ -116,6 +116,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
         GetIt.instance.get(),
         GetIt.instance.get(),
         GetIt.instance.get(),
+        GetIt.instance.get(),
         context.notifyBloc,
       )..add(InitCharacterFormEvent(widget.characterId)),
       child: Scaffold(

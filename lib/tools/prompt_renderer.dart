@@ -92,7 +92,7 @@ class PromptRenderer {
     final int endIdx = text.indexOf(MessageTags.imgXmlEnd);
 
     if (startIdx != -1 && endIdx != -1) {
-      final String xmlTag = text.substring(startIdx, endIdx + '</attached_image>'.length);
+      final String xmlTag = text.substring(startIdx, endIdx + MessageTags.imgXmlEnd.length);
       text = text.replaceFirst(xmlTag, markdownTag);
     }
     return text;
