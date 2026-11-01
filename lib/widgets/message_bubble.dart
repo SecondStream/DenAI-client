@@ -42,7 +42,7 @@ class MessageBubble extends StatelessWidget {
           SourceTag(),
         ],
         imageBuilder: (context, imageUrl, width, height) => LocalRoundedImage(
-          imagePath: p.join(AppConfig.of(context).baseUrl, imageUrl),
+          imagePath: imageUrl.startsWith('http') ? imageUrl : p.join(AppConfig.of(context).baseUrl, imageUrl),
           width: width,
           height: height,
         ),

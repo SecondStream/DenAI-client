@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 class LocalRoundedImage extends StatelessWidget {
@@ -24,7 +25,7 @@ class LocalRoundedImage extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
         child: Image(
-          image: FileImage(File(imagePath)),
+          image: imagePath.startsWith('http') ? CachedNetworkImageProvider(imagePath) : FileImage(File(imagePath)),
           fit: BoxFit.fill,
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
