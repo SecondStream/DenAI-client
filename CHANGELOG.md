@@ -1,5 +1,9 @@
 ## Next release
 
+### Fixed
+
+- Breaking down the text before token counting to prevent freezing.
+
 ## v1.0.1 (2026-11-09)
 
 ### Added
