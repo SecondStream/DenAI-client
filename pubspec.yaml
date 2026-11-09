@@ -1,7 +1,7 @@
 name: den_ai
 description: "DenAI is a user interface for AI-powered text-based role-playing games."
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+1
 
 environment:
   sdk: ^3.10.7
@@ -30,7 +30,9 @@ dependencies:
   png_chunks_extract: ^1.0.2
   png_chunk_text: ^1.0.0
   png_chunks_encode: ^1.0.0
+  record: ^7.1.2
   shared_preferences: ^2.5.6
+  sherpa_onnx: ^2.0.1
   sqlite3: ^3.7.1
   url_launcher: ^6.3.3
   web_socket_channel: ^3.0.3
@@ -49,7 +51,7 @@ dev_dependencies:
 inno_bundle:
   id: bb63d2a0-d3ec-11f1-8b20-83c7fc0f5cea
   name: DenAI
-  version: 1.0.0
+  version: 1.0.1
   publisher: SecondStream
   executable_name: denai
   icon_path: assets/images/icon.ico
@@ -64,3 +66,4 @@ flutter:
   assets:
     - assets/tokenizers/
     - assets/images/
+    - assets/stt/

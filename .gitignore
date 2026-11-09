@@ -126,3 +126,4 @@ app.*.symbols
 
 # FVM Version Cache
 .fvm/
+assets/stt/

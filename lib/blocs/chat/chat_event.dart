@@ -9,6 +9,12 @@ class ShownChatEvent extends ChatEvent {
   ShownChatEvent({required this.chatId, required this.charId});
 }
 
+class RecordedUserMessageEvent extends ChatEvent {
+  final Float32List samples;
+
+  RecordedUserMessageEvent({required this.samples});
+}
+
 class UpdateCharacterEvent extends ChatEvent {
   UpdateCharacterEvent();
 }

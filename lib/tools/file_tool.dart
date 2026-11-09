@@ -1,15 +1,19 @@
 import 'dart:io';
 
 import 'package:den_ai/application/env.dart';
+import 'package:den_ai/common/stt_assets.dart';
+import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 
 import 'package:den_ai/application/l10n.dart';
 import 'package:file_selector/file_selector.dart';
 
 abstract class FileTool {
+  static STTModelsPath? ttsModelsPath;
   static const String _avatarsDir = 'avatars';
   static const String _backgroundsDir = 'backgrounds';
   static const String _attachmentsDir = 'attachments';
+  static const String _ttsDir = 'stt';
 
   static Future<File?> pickImage() async {
     const XTypeGroup typeGroup = XTypeGroup(
@@ -73,4 +77,57 @@ abstract class FileTool {
     await file.copy(finalPath);
     return p.join(directoryName, fileName);
   }
+
+  static Future<void> copyModelFromAssets() async {
+    final Directory modelDir = await _getDirectory(_ttsDir);
+
+    if (!await modelDir.exists()) {
+      await modelDir.create(recursive: true);
+    }
+
+    final path = modelDir.path;
+
+    final files = [
+      STTAssets.encoder,
+      STTAssets.decoder,
+      STTAssets.joiner,
+      STTAssets.tokens,
+      STTAssets.vad,
+    ];
+
+    for (final fileName in files) {
+      final targetFile = File(p.join(path, fileName));
+      if (!await targetFile.exists()) {
+        final byteData = await rootBundle.load(STTAssets.folder + fileName);
+        final buffer = byteData.buffer;
+        await targetFile.writeAsBytes(
+          buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+        );
+      }
+    }
+
+    ttsModelsPath = STTModelsPath(
+      encoder: p.join(path, STTAssets.encoder),
+      decoder: p.join(path, STTAssets.decoder),
+      joiner: p.join(path, STTAssets.joiner),
+      tokens: p.join(path, STTAssets.tokens),
+      vad: p.join(path, STTAssets.vad),
+    );
+  }
+}
+
+class STTModelsPath {
+  final String encoder;
+  final String decoder;
+  final String joiner;
+  final String tokens;
+  final String vad;
+
+  STTModelsPath({
+    required this.encoder,
+    required this.decoder,
+    required this.joiner,
+    required this.tokens,
+    required this.vad,
+  });
 }

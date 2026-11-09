@@ -4,6 +4,7 @@ import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
+import 'package:den_ai/tools/audio_record_tool.dart';
 import 'package:den_ai/widgets/status.dart';
 import 'package:den_ai/blocs/chat/chat_bloc.dart';
 import 'package:den_ai/consts/consts.dart';
@@ -46,6 +47,7 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  AudioRecordTool? _audioRecordTool;
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
@@ -61,6 +63,7 @@ class _ChatScreenState extends State<ChatScreen> {
   void dispose() {
     _textController.dispose();
     _scrollController.dispose();
+    _audioRecordTool?.reset();
     super.dispose();
   }
 
@@ -87,7 +90,8 @@ class _ChatScreenState extends State<ChatScreen> {
           return current is ChatErrorState ||
               (prev is ChatLoadedState &&
                   current is ChatLoadedState &&
-                  prev.messages.length > current.messages.length);
+                  prev.messages.length > current.messages.length) ||
+              current is ChatRecordSuccessState;
         },
         listener: (context, state) {
           if (state is ChatLoadedState) {
@@ -99,6 +103,8 @@ class _ChatScreenState extends State<ChatScreen> {
             if (state.lastUserMessage != null) {
               _textController.text = state.lastUserMessage!;
             }
+          } else if (state is ChatRecordSuccessState) {
+            _textController.text = state.text;
           }
         },
         builder: (context, state) {
@@ -226,7 +232,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   loc,
                   state.userCard,
                   state.availableCards,
-                  state.isAiTyping,
+                  state.isAiTyping || (_audioRecordTool != null && _audioRecordTool!.isRecording),
                 ),
               ],
             ),
@@ -407,6 +413,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final status = AppStatus.of(context);
     final imgAv = status.visionAvailable;
     final chatAv = status.chatAvailable;
+    final isRecording = _audioRecordTool != null && _audioRecordTool!.isRecording;
 
     return Container(
       padding: const EdgeInsets.all(12),
@@ -425,6 +432,18 @@ class _ChatScreenState extends State<ChatScreen> {
           Tooltip(
             message: isBlocked
                 ? loc.empty
+                : isRecording
+                ? loc.recordingStop
+                : loc.recordingStart,
+            child: IconButton(
+              icon: Icon(isRecording ? Icons.stop : Icons.mic, color: theme.hintColor, size: 22),
+              onPressed: isBlocked && !isRecording ? null : () => _recording(context),
+            ),
+          ),
+          const SizedBox(width: 4),
+          Tooltip(
+            message: isBlocked
+                ? loc.empty
                 : hasUserCard
                 ? loc.changeRoleButton
                 : loc.selectRoleButton,
@@ -434,7 +453,7 @@ class _ChatScreenState extends State<ChatScreen> {
               child: PersonaAvatar(userCard, size: 50),
             ),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 20),
           Expanded(
             child: Shortcuts(
               shortcuts: <ShortcutActivator, Intent>{
@@ -462,7 +481,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   enabled: !isBlocked && chatAv,
                   decoration: InputDecoration(
                     hintText: isBlocked
-                        ? loc.characterTyping
+                        ? (isRecording ? loc.recordingProcess : loc.characterTyping)
                         : (chatAv ? loc.writeSomething : loc.chatUnavailable),
                     fillColor: theme.cardColor,
                     filled: true,
@@ -582,6 +601,19 @@ class _ChatScreenState extends State<ChatScreen> {
       SendUserMessageEvent(_textController.text, status.embeddingsAvailable),
     );
     _textController.clear();
+  }
+
+  Future<void> _recording(BuildContext context) async {
+    if (_audioRecordTool == null || !_audioRecordTool!.isRecording) {
+      _audioRecordTool ??= GetIt.instance.get<AudioRecordTool>();
+      await _audioRecordTool!.startRecording();
+      setState(() {});
+    } else {
+      final samples = await _audioRecordTool!.stopRecording();
+      if (context.mounted) {
+        context.read<ChatBloc>().add(RecordedUserMessageEvent(samples: samples));
+      }
+    }
   }
 }
 

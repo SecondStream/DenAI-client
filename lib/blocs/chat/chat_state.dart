@@ -6,6 +6,12 @@ class ChatInitialState extends ChatState {}
 
 class ChatLoadingState extends ChatState {}
 
+class ChatRecordSuccessState extends ChatState {
+  final String text;
+
+  ChatRecordSuccessState({required this.text});
+}
+
 class ChatLoadedState extends ChatState {
   final int chatId;
   final Char char;
@@ -15,6 +21,7 @@ class ChatLoadedState extends ChatState {
   final List<UserCard>? availableCards;
   final String summary;
   final bool isAiTyping;
+  final bool isRecognizing;
   final File? selectedImageFile;
 
   ChatLoadedState({
@@ -26,6 +33,7 @@ class ChatLoadedState extends ChatState {
     this.userCard,
     this.availableCards,
     this.selectedImageFile,
+    this.isRecognizing = false,
     this.isAiTyping = false,
   });
 
@@ -38,6 +46,7 @@ class ChatLoadedState extends ChatState {
     String? summary,
     List<UserCard>? availableCards,
     File? selectedImageFile,
+    bool? isRecognizing,
     bool? isAiTyping,
     bool isResetImage = false,
   }) {
@@ -50,6 +59,7 @@ class ChatLoadedState extends ChatState {
       userCard: userCard ?? this.userCard,
       availableCards: availableCards ?? this.availableCards?.toList(),
       selectedImageFile: selectedImageFile ?? (!isResetImage ? this.selectedImageFile : null),
+      isRecognizing: isRecognizing ?? this.isRecognizing,
       isAiTyping: isAiTyping ?? this.isAiTyping,
     );
   }

@@ -19,7 +19,9 @@ import 'package:den_ai/services/lore_search_service.dart';
 import 'package:den_ai/services/token_counter_service.dart';
 import 'package:den_ai/tools/file_tool.dart';
 import 'package:den_ai/tools/prompt_renderer.dart';
+import 'package:den_ai/tools/stt_tool.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 
 part 'chat_event.dart';
 
@@ -38,6 +40,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final UserCardsRepository _userCardsRepository;
   final NotifyBloc _notification;
   StreamSubscription<StreamMessage>? _messageSubscription;
+  STTTool? sttTool;
 
   final Map<int, List<List<double>>> _loreVectors = {};
 
@@ -67,6 +70,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<UpdateChatSummaryEvent>(_onUpdateChatSummary);
     on<SelectImageEvent>(_onSelectImage);
     on<UpdateCharacterEvent>(_onUpdateCharacter);
+    on<RecordedUserMessageEvent>(_onRecordedUserMessage);
 
     _messageSubscription = _generationService.allMessagesStream.listen(
       (message) => add(ReceivedAiTokenEvent(message)),
@@ -81,6 +85,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   Future<void> close() {
     _messageSubscription?.cancel();
     _messageSubscription = null;
+    //sttTool?.dispose();
     return super.close();
   }
 
@@ -107,6 +112,21 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       }
     }
     await _onCheckOrCreateVirtualChat(event.charId, emit, error);
+  }
+
+  void _onRecordedUserMessage(RecordedUserMessageEvent event, Emitter<ChatState> emit) async {
+    if (state is! ChatLoadedState) return;
+    var currentState = state as ChatLoadedState;
+    currentState = currentState.copyWith(isRecognizing: true);
+    sttTool ??= GetIt.instance.get<STTTool>();
+    emit(currentState);
+    final text = sttTool!.recognize(event.samples);
+    if (text != null) {
+      emit(ChatRecordSuccessState(text: text));
+    } else {
+      _notification.add(ErrorOccurredEvent(type: ErrType.recognize));
+    }
+    emit(currentState.copyWith(isRecognizing: false));
   }
 
   Future<void> _onCheckOrCreateVirtualChat(
@@ -650,7 +670,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (currentState.chatId != error.chatId) return;
 
     emit(ChatErrorState(ErrType.sendMessage, '', lastUserMessage: error.lastUserMessage));
-    _notification.add(ErrorOccurredEvent(type: ErrType.loadChat));
+    _notification.add(ErrorOccurredEvent(type: ErrType.sendMessage));
 
     try {
       final chat = await _repository.getChatById(currentState.chatId);
@@ -728,8 +748,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       final char = await _charactersRepository.getCharacterById(currentState.char.id);
       if (char == null) throw Exception();
 
-      emit(currentState.copyWith(
-          char: char, background: currentState.background ?? char.background));
+      emit(
+        currentState.copyWith(char: char, background: currentState.background ?? char.background),
+      );
     } catch (e) {
       _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacter));
       emit(ChatErrorState(ErrType.loadChat, e));

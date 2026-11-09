@@ -88,7 +88,6 @@ class NotifyWidget extends StatelessWidget {
                         width: 6,
                         color: isError ? Colors.redAccent.shade700 : theme.dividerColor,
                       ),
-                      // Возвращаем внутренние отступы для контента
                       Expanded(
                         child: Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

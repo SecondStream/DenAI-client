@@ -11,6 +11,8 @@ import 'package:den_ai/repositories/user_cards_repository.dart';
 import 'package:den_ai/services/chat_generation_service.dart';
 import 'package:den_ai/services/lore_search_service.dart';
 import 'package:den_ai/services/token_counter_service.dart';
+import 'package:den_ai/tools/audio_record_tool.dart';
+import 'package:den_ai/tools/stt_tool.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -51,5 +53,8 @@ class DiInitializer {
     di.registerSingleton(SettingsRepository(database, secureStorage));
     di.registerSingleton(LorebooksRepository(database));
     di.registerSingleton(ChatGenerationService(client, chatsRepo, tokenCounter));
+
+    di.registerLazySingleton<STTTool>(() => STTTool());
+    di.registerLazySingleton<AudioRecordTool>(() => AudioRecordTool());
   }
 }

@@ -21,8 +21,7 @@ void main() async {
     getApplicationSupportDirectory(),
   ]);
 
-  AppEnv.init(docPath: paths[0].path, supportPath: paths[1].path, prod: false);
-
+  AppEnv.init(docPath: paths[0].path, supportPath: paths[1].path, prod: true);
   await DiInitializer.init();
 
   await windowManager.ensureInitialized();

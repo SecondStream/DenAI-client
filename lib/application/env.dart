@@ -9,11 +9,14 @@ abstract class AppEnv {
   static late final String supportDir;
   static late final String tokenizersDir;
   static late final bool isProduction;
+  static late final bool isDesktop;
 
-  static void init({required String docPath, required String supportPath, bool prod = false}) {
+  static void init({required String docPath, required String supportPath, bool prod = false, bool desktop = true}) {
     docDir = p.join(docPath, appName);
     supportDir = supportPath;
     isProduction = prod;
+    isDesktop = desktop;
+
     tokenizersDir = p.join(docDir, tokenizersDirName);
 
     Directory(tokenizersDir).createSync(recursive: true);

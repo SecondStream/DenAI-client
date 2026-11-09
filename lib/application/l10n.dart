@@ -37,8 +37,9 @@ class AppLocalization {
       'err_delete_lorebook': 'Error deleting lorebook.',
       'err_load_lore_entries': 'Failed to load entries list.',
       'err_regenerate': 'An error occurred while regenerating the message',
+      'err_recognize': 'An error occurred during audio recognition',
       'error_network': 'Network error. Check your connection.',
-      'err_image' : 'Could not recognize the image; the character will only respond to text.',
+      'err_image': 'Could not recognize the image; the character will only respond to text.',
       'err_load': 'An error occurred during loading',
       'err_save': 'An error occurred while saving',
       'err_remove': 'An error occurred during removal',
@@ -226,6 +227,9 @@ class AppLocalization {
           'The embedding model is unavailable. Records are read-only. Please check your settings.',
       'vision_unavailable': 'The model for viewing images is unavailable',
       'chat_unavailable': 'The model for chat is unavailable. Check your settings',
+      'recording_process': 'Voice recording in progress',
+      'recording_start': 'Record message',
+      'recording_stop': 'Finish recording',
     },
     'ru': {
       // --- Базовые сообщения ---
@@ -255,12 +259,13 @@ class AppLocalization {
       'err_load_lore_entries': 'Ошибка при загрузке записей.',
       'error_network': 'Ошибка сети. Проверьте подключение.',
       'err_regenerate': 'При перегенерации сообщения возникла ошибка',
+      'err_recognize': 'При распознавании аудио произошла ошибка',
       'err_load': 'При загрузке произошла ошибка',
       'err_save': 'При сохранении произошла ошибка',
       'err_remove': 'При удалении произошла ошибка',
       'error_unknown': 'Произошла неизвестная ошибка.',
       'edit_text': 'Редактировать текст',
-      'err_image' : 'Не удалось распознать изображение, персонаж ответит только на текст.',
+      'err_image': 'Не удалось распознать изображение, персонаж ответит только на текст.',
       'cancel': 'Отмена',
       'save': 'Сохранить',
       'delete': 'Удалить',
@@ -444,6 +449,9 @@ class AppLocalization {
           'Embedding-модель недоступна. Записи открыты только для чтения. Проверьте настройки.',
       'vision_unavailable': 'Модель для просмотра изображений недоступна',
       'chat_unavailable': 'Модель для чата недоступна. Проверьте настройки',
+      'recording_process': 'Идет запись голоса',
+      'recording_start': 'Записать сообщение',
+      'recording_stop': 'Закончить запить',
     },
   };
 
@@ -699,6 +707,12 @@ class AppLocalization {
   String get visionUnavailable =>
       _localizedValues[locale.languageCode]?['vision_unavailable'] ?? empty;
   String get chatUnavailable => _localizedValues[locale.languageCode]?['chat_unavailable'] ?? empty;
+  String get recordingProcess =>
+      _localizedValues[locale.languageCode]?['recording_process'] ?? empty;
+  String get recordingStart =>
+      _localizedValues[locale.languageCode]?['recording_start'] ?? empty;
+  String get recordingStop =>
+      _localizedValues[locale.languageCode]?['recording_stop'] ?? empty;
 
   String getError(ErrType type, [Object? exception]) {
     switch (type) {
@@ -756,6 +770,8 @@ class AppLocalization {
         return _localizedValues[locale.languageCode]?['err_load'] ?? type.name;
       case ErrType.regenerate:
         return _localizedValues[locale.languageCode]?['err_regenerate'] ?? type.name;
+      case ErrType.recognize:
+        return _localizedValues[locale.languageCode]?['err_recognize'] ?? type.name;
     }
   }
 }
@@ -790,6 +806,7 @@ enum ErrType {
   remove,
   save,
   regenerate,
+  recognize,
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalization> {

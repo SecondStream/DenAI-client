@@ -30,7 +30,6 @@ class StatusButton extends StatelessWidget {
             );
           }
           return Center(
-            // <-- Вот этот парень заставит SizedBox работать
             child: SizedBox(
               width: 25,
               height: 40,

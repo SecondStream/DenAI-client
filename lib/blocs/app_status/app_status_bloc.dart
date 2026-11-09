@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
+import 'package:den_ai/tools/file_tool.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sherpa_onnx/sherpa_onnx.dart' as sherpa_onnx;
 
 part 'app_status_event.dart';
 part 'app_status_state.dart';
@@ -12,12 +14,18 @@ class AppStatusBloc extends Bloc<AppStatusEvent, AppStatusState> {
   final SettingsRepository _repository;
 
   AppStatusBloc(this._client, this._repository) : super(AppStatusInitialState()) {
-    on<AppStartedEvent>(_onStatusChecked);
+    on<AppStartedEvent>(_onAppStarted);
     on<StatusCheckedEvent>(_onStatusChecked);
     on<ProviderChangedEvent>(_onProviderChanged);
   }
 
-  Future<void> _onStatusChecked(AppStatusEvent event, Emitter<AppStatusState> emit) async {
+  Future<void> _onAppStarted(AppStartedEvent event, Emitter<AppStatusState> emit) async {
+    await FileTool.copyModelFromAssets();
+    await sherpa_onnx.initBindingsAsync();
+    await _checkStatus(emit);
+  }
+
+  Future<void> _onStatusChecked(StatusCheckedEvent event, Emitter<AppStatusState> emit) async {
     await _checkStatus(emit);
   }
 
