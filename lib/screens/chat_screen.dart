@@ -610,6 +610,10 @@ class _ChatScreenState extends State<ChatScreen> {
       setState(() {});
     } else {
       final samples = await _audioRecordTool!.stopRecording();
+      if (samples.length < 3200) {
+        setState(() {});
+        return;
+      }
       if (context.mounted) {
         context.read<ChatBloc>().add(RecordedUserMessageEvent(samples: samples));
       }
