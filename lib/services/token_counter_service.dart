@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:isolate';
 import 'package:flutter/services.dart';
 import 'package:dart_sentencepiece_tokenizer/dart_sentencepiece_tokenizer.dart';
 
@@ -16,12 +17,8 @@ class TokenCounterService {
         _tokenizerCache[tokenizerPath] = TokenizerJsonLoader.fromJsonString(jsonString);
       }
       final tokenizer = _tokenizerCache[tokenizerPath]!;
-      var len = 0;
-      for (int i = 0; i < text.length; i += maxLength) {
-        int end = (i + maxLength < text.length) ? i + maxLength : text.length;
-        len += tokenizer.encode(text.substring(i, end)).length;
-      }
-      return len;
+      if (text.length > maxLength) return tokenizer.encode(text).length;
+      return await Isolate.run(() => tokenizer.encode(text).length);
     } catch (e) {
       return (text.length / 2).ceil();
     }
