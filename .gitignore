@@ -126,4 +126,10 @@ app.*.symbols
 
 # FVM Version Cache
 .fvm/
-assets/stt/
+
+# onnx models
+*.onnx
+assets/tts/voice.bin
+assets/tts/unicode_indexer.bin
+assets/tts/tts.json
+assets/stt/tokens.txt

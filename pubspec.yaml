@@ -67,3 +67,5 @@ flutter:
     - assets/tokenizers/
     - assets/images/
     - assets/stt/
+    - assets/dict/
+    - assets/tts/
