@@ -1,60 +1,105 @@
+import 'dart:async';
+import 'dart:isolate';
 import 'dart:typed_data';
-
 import 'package:den_ai/application/env.dart';
 import 'package:den_ai/tools/file_tool.dart';
 import 'package:sherpa_onnx/sherpa_onnx.dart';
 
 class STTTool {
-  final OfflineRecognizer? _recognizer;
+  SendPort? _workerPort;
+  Completer<String?>? _currentTask;
+  bool _initAttempted = false;
 
-  STTTool() : _recognizer = _createRecognizer();
+  Future<void> init() async {
+    if (_initAttempted) return;
+    _initAttempted = true;
 
-  String? recognize(Float32List samples) {
-    final recognizer = _recognizer;
-    if (recognizer != null) {
-      final stream = recognizer.createStream();
-      stream.acceptWaveform(samples: samples, sampleRate: 16000);
-      recognizer.decode(stream);
-      final result = recognizer.getResult(stream);
-      stream.free();
-      return result.text;
-    }
+    final path = FileTool.sttModelsPath;
+    if (path == null) return;
 
-    return null;
+    final receivePort = ReceivePort();
+    final ready = Completer<SendPort?>();
+
+    await Isolate.spawn(_workerEntry, (
+    receivePort.sendPort,
+    path.encoder,
+    path.decoder,
+    path.joiner,
+    path.tokens,
+    AppEnv.isDesktop ? 4 : 2,
+    !AppEnv.isProduction,
+    ));
+
+    receivePort.listen((msg) {
+      if (!ready.isCompleted) {
+        ready.complete(msg as SendPort?);
+        if (msg == null) receivePort.close();
+        return;
+      }
+
+      _currentTask?.complete(msg as String?);
+      _currentTask = null;
+    });
+
+    _workerPort = await ready.future;
   }
 
-  void dispose() {
-    _recognizer?.free();
+  Future<String?> recognize(Float32List samples) async {
+    if (!_initAttempted) await init();
+    if (_workerPort == null || _currentTask != null) return null;
+
+    _currentTask = Completer<String?>();
+    _workerPort!.send(TransferableTypedData.fromList([samples]));
+    return _currentTask!.future;
   }
 
-  static OfflineRecognizer? _createRecognizer() {
-    final path = FileTool.ttsModelsPath;
-    if (path != null) {
-      final transducerConfig = OfflineTransducerModelConfig(
-        encoder: path.encoder,
-        decoder: path.decoder,
-        joiner: path.joiner,
+  static void _workerEntry(
+      (SendPort, String, String, String, String, int, bool) args,
+      ) {
+    final (mainPort, encoder, decoder, joiner, tokens, threads, debug) = args;
+    final workerPort = ReceivePort();
+
+    final OfflineRecognizer recognizer;
+    try {
+      initBindings();
+      recognizer = OfflineRecognizer(
+        OfflineRecognizerConfig(
+          feat: FeatureConfig(sampleRate: 16000, featureDim: 80),
+          model: OfflineModelConfig(
+            transducer: OfflineTransducerModelConfig(
+              encoder: encoder,
+              decoder: decoder,
+              joiner: joiner,
+            ),
+            tokens: tokens,
+            numThreads: threads,
+            debug: debug,
+            modelType: 'nemo_transducer',
+          ),
+          decodingMethod: 'greedy_search',
+        ),
       );
-
-      final modelConfig = OfflineModelConfig(
-        transducer: transducerConfig,
-        tokens: path.tokens,
-        numThreads: AppEnv.isDesktop ? 4 : 2,
-        debug: !AppEnv.isProduction,
-        modelType: 'nemo_transducer',
-      );
-
-      final featConfig = FeatureConfig(sampleRate: 16000, featureDim: 80);
-
-      final config = OfflineRecognizerConfig(
-        feat: featConfig,
-        model: modelConfig,
-        decodingMethod: 'greedy_search',
-      );
-
-      return OfflineRecognizer(config);
+    } catch (_) {
+      workerPort.close();
+      mainPort.send(null);
+      return;
     }
 
-    return null;
+    mainPort.send(workerPort.sendPort);
+
+    workerPort.listen((msg) {
+      OfflineStream? stream;
+      try {
+        final samples = (msg as TransferableTypedData).materialize().asFloat32List();
+        stream = recognizer.createStream();
+        stream.acceptWaveform(samples: samples, sampleRate: 16000);
+        recognizer.decode(stream);
+        mainPort.send(recognizer.getResult(stream).text);
+      } catch (_) {
+        mainPort.send(null);
+      } finally {
+        stream?.free();
+      }
+    });
   }
 }

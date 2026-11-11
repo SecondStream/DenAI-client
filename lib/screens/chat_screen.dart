@@ -5,6 +5,7 @@ import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/tools/audio_record_tool.dart';
+import 'package:den_ai/tools/stt_tool.dart';
 import 'package:den_ai/widgets/status.dart';
 import 'package:den_ai/blocs/chat/chat_bloc.dart';
 import 'package:den_ai/consts/consts.dart';
@@ -609,11 +610,14 @@ class _ChatScreenState extends State<ChatScreen> {
       await _audioRecordTool!.startRecording();
       setState(() {});
     } else {
+      final sttTool = GetIt.instance.get<STTTool>();
+      final initializeFuture = sttTool.init();
       final samples = await _audioRecordTool!.stopRecording();
       if (samples.length < 3200) {
         setState(() {});
         return;
       }
+      await initializeFuture; // must be initialized
       if (context.mounted) {
         context.read<ChatBloc>().add(RecordedUserMessageEvent(samples: samples));
       }
