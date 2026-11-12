@@ -10,7 +10,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class TTSPlayerService {
   static const int _minLength = 5;
-  static const int _minFirstLength = 25;
+  static const int _minFirstLength = 30;
   static const _prefAutoTts = 'tts_auto_enabled';
   static const _prefOnlyDialogue = 'tts_only_dialogue';
   final TTSTool _ttsTool;

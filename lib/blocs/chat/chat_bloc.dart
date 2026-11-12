@@ -221,6 +221,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     try {
       final updatedChat = await _repository.editMessage(event.messageId, event.newContent);
+      _stopIsEqualTTS(event.messageId);
       emit(
         currentState.copyWith(
           messages: _getChatActiveMV(updatedChat.messages, updatedChat.char, updatedChat.userCard),
@@ -273,12 +274,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         ),
       );
 
-      final player = _ttsPlayerService;
-      if (player != null &&
-          player.activeMessageId.value != null &&
-          player.activeMessageId.value == event.messageId) {
-        player.stop();
-      }
+      _stopIsEqualTTS(event.messageId);
 
       emit(
         currentState.copyWith(
@@ -847,6 +843,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (player != null && player.activeMessageId.value != null) {
       final i = messages.indexWhere((e) => e.id == player.activeMessageId.value);
       if (i < 0) player.stop();
+    }
+  }
+
+  void _stopIsEqualTTS(int messageId) {
+    final player = _ttsPlayerService;
+    if (player != null && player.activeMessageId.value != null && player.activeMessageId.value == messageId) {
+      player.stop();
     }
   }
 }
