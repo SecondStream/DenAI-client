@@ -1,5 +1,9 @@
 ## Next release
 
+### Added
+
+- TTS
+
 ### Fixed
 
 - Breaking down the text before token counting to prevent freezing.
