@@ -72,7 +72,7 @@ void main() async {
   runApp(
     AppConfig(
       baseUrl: AppEnv.supportDir,
-      siteUrl: 'https://realwaifu.ru/denai',
+      siteUrl: 'https://realwaifu.ru',
       info: await PackageInfo.fromPlatform(),
       child: AppStatus(child: ChatApp()),
     ),

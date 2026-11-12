@@ -126,7 +126,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
             IconButton(
               icon: const Icon(Icons.help_outline, size: 28),
               onPressed: () =>
-                  launchUrl(Uri.parse('${AppConfig.of(context).siteUrl}/character')),
+                  launchUrl(Uri.parse('${AppConfig.of(context).getSiteUrl(loc)}/denai/character')),
             ),
           ],
         ),

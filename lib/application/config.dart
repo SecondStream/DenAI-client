@@ -1,3 +1,4 @@
+import 'package:den_ai/application/l10n.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
@@ -14,6 +15,10 @@ class AppConfig extends InheritedWidget {
     final AppConfig? result = context.dependOnInheritedWidgetOfExactType<AppConfig>();
     assert(result != null, 'No AppConfig found in context');
     return result!;
+  }
+
+  String getSiteUrl(AppLocalization loc) {
+    return '$siteUrl${loc.locale.languageCode != 'ru' ? '/en' : ''}';
   }
 
   @override

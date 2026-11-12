@@ -114,7 +114,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             IconButton(
               icon: const Icon(Icons.help_outline, size: 28),
               onPressed: () =>
-                  launchUrl(Uri.parse('${AppConfig.of(context).siteUrl}/settings')),
+                  launchUrl(Uri.parse('${AppConfig.of(context).getSiteUrl(loc)}/denai/settings')),
             ),
           ],
         ),
