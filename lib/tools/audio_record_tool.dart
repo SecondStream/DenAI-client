@@ -124,10 +124,10 @@ class AudioRecordTool {
   }
 
   static sherpa_onnx.VoiceActivityDetector? _createSmartGateVad() {
-    final path = FileTool.ttsModelsPath;
+    final path = FileTool.sttModelsPath;
     if (path != null) {
       final config = sherpa_onnx.SileroVadModelConfig(
-        model: FileTool.ttsModelsPath!.vad,
+        model: FileTool.sttModelsPath!.vad,
         threshold: 0.5,
         minSilenceDuration: 0.25,
         minSpeechDuration: 0.1,

@@ -36,11 +36,11 @@ class UserMessage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.3),
+                      color: Colors.black.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.edit, size: 14, color: theme.hintColor),
+                      icon: Icon(Icons.edit, size: 16, color: theme.hintColor),
                       constraints: const BoxConstraints(),
                       padding: const EdgeInsets.all(2),
                       onPressed: onEditMessage != null ? () => onEditMessage?.call(message) : null,
@@ -50,11 +50,11 @@ class UserMessage extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.3),
+                      color: Colors.black.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: IconButton(
-                      icon: Icon(Icons.delete_outline, size: 14, color: Colors.red.shade400),
+                      icon: Icon(Icons.delete_outline, size: 16, color: Colors.red.shade400),
                       constraints: const BoxConstraints(),
                       padding: const EdgeInsets.all(2),
                       onPressed: onDeleteMessage != null

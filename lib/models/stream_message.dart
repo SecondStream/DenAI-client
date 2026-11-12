@@ -3,6 +3,7 @@ import 'dart:io';
 class StreamMessage {
   final int chatId;
   final int charId;
+  final int messageId;
   final String token;
   final String model;
   final MessageStatus status;
@@ -10,6 +11,7 @@ class StreamMessage {
   StreamMessage({
     required this.chatId,
     required this.charId,
+    required this.messageId,
     required this.token,
     required this.model,
     required this.status,

@@ -20,7 +20,9 @@ class AppStatusBloc extends Bloc<AppStatusEvent, AppStatusState> {
   }
 
   Future<void> _onAppStarted(AppStartedEvent event, Emitter<AppStatusState> emit) async {
-    await FileTool.copyModelFromAssets();
+    try {
+      await FileTool.copyModelFromAssets();
+    } catch (_) {}
     await sherpa_onnx.initBindingsAsync();
     await _checkStatus(emit);
   }
@@ -29,7 +31,10 @@ class AppStatusBloc extends Bloc<AppStatusEvent, AppStatusState> {
     await _checkStatus(emit);
   }
 
-  FutureOr<void> _onProviderChanged(ProviderChangedEvent event, Emitter<AppStatusState> emit) async {
+  FutureOr<void> _onProviderChanged(
+    ProviderChangedEvent event,
+    Emitter<AppStatusState> emit,
+  ) async {
     if (event.modelsLoadedSuccess) {
       await _checkStatus(emit);
     } else {

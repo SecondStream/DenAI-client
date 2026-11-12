@@ -17,6 +17,7 @@ import 'package:den_ai/repositories/user_cards_repository.dart';
 import 'package:den_ai/services/chat_generation_service.dart';
 import 'package:den_ai/services/lore_search_service.dart';
 import 'package:den_ai/services/token_counter_service.dart';
+import 'package:den_ai/services/tts_player_service.dart';
 import 'package:den_ai/tools/file_tool.dart';
 import 'package:den_ai/tools/prompt_renderer.dart';
 import 'package:den_ai/tools/stt_tool.dart';
@@ -41,6 +42,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   final NotifyBloc _notification;
   StreamSubscription<StreamMessage>? _messageSubscription;
   STTTool? sttTool;
+  final TTSPlayerService? _ttsPlayerService;
 
   final Map<int, List<List<double>>> _loreVectors = {};
 
@@ -55,6 +57,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     this._charactersRepository,
     this._userCardsRepository,
     this._notification,
+    this._ttsPlayerService,
   ) : super(ChatInitialState()) {
     on<ShownChatEvent>(_onShown);
     on<SendUserMessageEvent>(_onSendUserMessage);
@@ -71,6 +74,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     on<SelectImageEvent>(_onSelectImage);
     on<UpdateCharacterEvent>(_onUpdateCharacter);
     on<RecordedUserMessageEvent>(_onRecordedUserMessage);
+    on<ChatChangeVoiceEvent>(_onChangeVoiceEvent);
 
     _messageSubscription = _generationService.allMessagesStream.listen(
       (message) => add(ReceivedAiTokenEvent(message)),
@@ -103,6 +107,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
             background: chat.background ?? chat.char.background,
             userCard: chat.userCard,
             summary: chat.summaries.lastOrNull?.content ?? '',
+            voice: chat.voice,
           ),
         );
 
@@ -120,7 +125,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     currentState = currentState.copyWith(isRecognizing: true);
     sttTool ??= GetIt.instance.get<STTTool>();
     emit(currentState);
-    final text = sttTool!.recognize(event.samples);
+    final text = await sttTool!.recognize(event.samples);
     if (text != null) {
       emit(ChatRecordSuccessState(text: text));
     } else {
@@ -143,6 +148,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
             chatId: existingChat.id,
             char: existingChat.char,
             background: existingChat.background ?? existingChat.char.background,
+            voice: existingChat.voice,
             messages: _getChatActiveMV(
               existingChat.messages,
               existingChat.char,
@@ -177,7 +183,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       emit(
         ChatLoadedState(
-          chatId: -99,
+          chatId: Consts.chatTmp,
           char: char,
           background: char.background,
           userCard: defaultUserCard,
@@ -186,7 +192,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
             if (char.greeting.isNotEmpty)
               MessageView.fromMessage(
                 Message(
-                  id: -99,
+                  id: Consts.greetingTmp,
                   role: MessageRole.assistant,
                   content: char.greeting,
                   createdAt: DateTime.now(),
@@ -233,15 +239,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     try {
       final Chat updatedChat = await _repository.deleteMessage(event.messageId);
 
-      emit(
-        currentState.copyWith(
-          messages: _getChatActiveMV(
-            updatedChat.messages,
-            currentState.char,
-            currentState.userCard,
-          ),
-        ),
+      final messages = _getChatActiveMV(
+        updatedChat.messages,
+        currentState.char,
+        currentState.userCard,
       );
+
+      _stopNotExitedTTS(messages);
+
+      emit(currentState.copyWith(messages: messages));
     } catch (e) {
       _notification.add(ErrorOccurredEvent(type: ErrType.remove));
       emit(currentState.copyWith());
@@ -259,8 +265,20 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       updatedMessages.removeWhere((e) => e.id == event.messageId);
       updatedMessages.add(
-        Message(id: -2, role: MessageRole.assistant, content: "", createdAt: DateTime.now()),
+        Message(
+          id: Consts.messageTmp,
+          role: MessageRole.assistant,
+          content: "",
+          createdAt: DateTime.now(),
+        ),
       );
+
+      final player = _ttsPlayerService;
+      if (player != null &&
+          player.activeMessageId.value != null &&
+          player.activeMessageId.value == event.messageId) {
+        player.stop();
+      }
 
       emit(
         currentState.copyWith(
@@ -290,11 +308,15 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         event.direction,
       );
 
-      emit(
-        currentState.copyWith(
-          messages: _getChatActiveMV(updatedChat.messages, updatedChat.char, updatedChat.userCard),
-        ),
+      final messages = _getChatActiveMV(
+        updatedChat.messages,
+        updatedChat.char,
+        updatedChat.userCard,
       );
+
+      _stopNotExitedTTS(messages);
+
+      emit(currentState.copyWith(messages: messages));
     } catch (e) {
       _notification.add(ErrorOccurredEvent(type: ErrType.switchMessage));
       emit(currentState.copyWith());
@@ -353,7 +375,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       updatedMessages.add(userMessage);
 
       updatedMessages.add(
-        Message(id: -2, role: MessageRole.assistant, content: "", createdAt: DateTime.now()),
+        Message(
+          id: Consts.messageTmp,
+          role: MessageRole.assistant,
+          content: "",
+          createdAt: DateTime.now(),
+        ),
       );
 
       var updatedState = currentState.copyWith(
@@ -370,6 +397,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         final Chat newChat = await _repository.createNewChat(
           updatedState.char.id,
           updatedState.userCard?.id,
+          updatedState.voice,
         );
         activeChatId = newChat.id;
         updatedState = updatedState.copyWith(chatId: activeChatId);
@@ -619,11 +647,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
     final message = event.message;
+
     if (currentState.chatId != message.chatId) return;
 
     if (message.status == MessageStatus.completed) {
       try {
         final chat = await _repository.getChatById(currentState.chatId);
+        _playTTS(message.messageId, message.token, chat.voice, true);
         emit(
           currentState.copyWith(
             messages: _getChatActiveMV(chat.messages, chat.char, chat.userCard),
@@ -638,7 +668,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       final updatedMessages = List<Message>.from(currentState.messages);
       final lastIndex = updatedMessages.length - 1;
       final lastMessage = updatedMessages[lastIndex];
-      if (lastMessage.id < 0) {
+      if (lastMessage.id == message.messageId) {
         updatedMessages[lastIndex] = lastMessage.copyWith(
           content: message.token,
           modelName: message.model,
@@ -646,7 +676,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       } else {
         updatedMessages.add(
           Message(
-            id: -2,
+            id: message.messageId,
             role: MessageRole.assistant,
             content: message.token,
             createdAt: DateTime.now(),
@@ -654,6 +684,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           ),
         );
       }
+      _playTTS(message.messageId, message.token, currentState.voice, false);
       emit(
         currentState.copyWith(
           messages: _getChatActiveMV(updatedMessages, currentState.char, currentState.userCard),
@@ -671,6 +702,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
     emit(ChatErrorState(ErrType.sendMessage, '', lastUserMessage: error.lastUserMessage));
     _notification.add(ErrorOccurredEvent(type: ErrType.sendMessage));
+
+    final player = _ttsPlayerService;
+    if (player != null) player.stop(); //just in case)
 
     try {
       final chat = await _repository.getChatById(currentState.chatId);
@@ -716,16 +750,17 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     final char = currentState.char;
     emit(
       ChatLoadedState(
-        chatId: -99,
+        chatId: Consts.chatTmp,
         char: char,
         background: char.background,
         userCard: currentState.userCard,
+        voice: currentState.voice,
         summary: '',
         messages: [
           if (char.greeting.isNotEmpty)
             MessageView.fromMessage(
               Message(
-                id: -99,
+                id: Consts.greetingTmp,
                 role: MessageRole.assistant,
                 content: char.greeting,
                 createdAt: DateTime.now(),
@@ -779,5 +814,39 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (state is! ChatLoadedState) return;
     final currentState = state as ChatLoadedState;
     emit(currentState.copyWith(selectedImageFile: event.fileImage, isResetImage: true));
+  }
+
+  Future<void> _onChangeVoiceEvent(ChatChangeVoiceEvent event, Emitter<ChatState> emit) async {
+    if (state is! ChatLoadedState) return;
+    final currentState = state as ChatLoadedState;
+
+    if (currentState.chatId > 0) {
+      await _repository.changeVoice(currentState.chatId, event.voice);
+    }
+
+    emit(currentState.copyWith(voice: event.voice));
+  }
+
+  void _playTTS(int messageId, String token, String? voice, bool completed) {
+    final player = _ttsPlayerService;
+    if (player != null && voice != null && player.isAutoEnabled.value) {
+      if (completed) {
+        if (player.onlyDialogue.value) {
+          player.playMessage(messageId: messageId, fullText: token, voice: voice);
+        } else {
+          player.finishStream(realMessageId: messageId, fullText: token, voice: voice);
+        }
+      } else if (!player.onlyDialogue.value) {
+        player.feedStream(tempMessageId: messageId, fullText: token, voice: voice);
+      }
+    }
+  }
+
+  void _stopNotExitedTTS(List<MessageView> messages) {
+    final player = _ttsPlayerService;
+    if (player != null && player.activeMessageId.value != null) {
+      final i = messages.indexWhere((e) => e.id == player.activeMessageId.value);
+      if (i < 0) player.stop();
+    }
   }
 }

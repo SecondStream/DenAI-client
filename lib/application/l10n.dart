@@ -38,6 +38,7 @@ class AppLocalization {
       'err_load_lore_entries': 'Failed to load entries list.',
       'err_regenerate': 'An error occurred while regenerating the message',
       'err_recognize': 'An error occurred during audio recognition',
+      'err_tts': 'Failed to play the message',
       'error_network': 'Network error. Check your connection.',
       'err_image': 'Could not recognize the image; the character will only respond to text.',
       'err_load': 'An error occurred during loading',
@@ -260,6 +261,7 @@ class AppLocalization {
       'error_network': 'Ошибка сети. Проверьте подключение.',
       'err_regenerate': 'При перегенерации сообщения возникла ошибка',
       'err_recognize': 'При распознавании аудио произошла ошибка',
+      'err_tts': 'Не удалось воспроизвести сообщение',
       'err_load': 'При загрузке произошла ошибка',
       'err_save': 'При сохранении произошла ошибка',
       'err_remove': 'При удалении произошла ошибка',
@@ -772,6 +774,8 @@ class AppLocalization {
         return _localizedValues[locale.languageCode]?['err_regenerate'] ?? type.name;
       case ErrType.recognize:
         return _localizedValues[locale.languageCode]?['err_recognize'] ?? type.name;
+      case ErrType.tts:
+        return _localizedValues[locale.languageCode]?['err_tts'] ?? type.name;
     }
   }
 }
@@ -807,6 +811,7 @@ enum ErrType {
   save,
   regenerate,
   recognize,
+  tts,
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<AppLocalization> {

@@ -4,8 +4,10 @@ import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
+import 'package:den_ai/services/tts_player_service.dart';
 import 'package:den_ai/tools/audio_record_tool.dart';
 import 'package:den_ai/tools/stt_tool.dart';
+import 'package:den_ai/widgets/dialogs/voice_settings.dart';
 import 'package:den_ai/widgets/status.dart';
 import 'package:den_ai/blocs/chat/chat_bloc.dart';
 import 'package:den_ai/consts/consts.dart';
@@ -49,6 +51,7 @@ class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _textController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
   AudioRecordTool? _audioRecordTool;
+  TTSPlayerService? _ttsPlayerService;
 
   void _scrollToBottom() {
     if (_scrollController.hasClients) {
@@ -61,10 +64,23 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    try {
+      _ttsPlayerService ??= TTSPlayerService(
+        GetIt.instance.get(),
+        context.read(),
+        GetIt.instance.get(),
+      );
+    } catch (_) {}
+  }
+
+  @override
   void dispose() {
     _textController.dispose();
     _scrollController.dispose();
     _audioRecordTool?.reset();
+    _ttsPlayerService?.dispose();
     super.dispose();
   }
 
@@ -85,6 +101,7 @@ class _ChatScreenState extends State<ChatScreen> {
         GetIt.instance.get(),
         GetIt.instance.get(),
         context.notifyBloc,
+        _ttsPlayerService,
       )..add(ShownChatEvent(chatId: widget.chatId, charId: widget.charId)),
       child: BlocConsumer<ChatBloc, ChatState>(
         listenWhen: (prev, current) {
@@ -115,12 +132,26 @@ class _ChatScreenState extends State<ChatScreen> {
               title: Text(state is! ChatLoadedState ? loc.chatTitle : state.char.name),
               actions: [
                 Tooltip(
+                  message: isActionsBlocked ? loc.empty : loc.historyTooltip,
+                  child: IconButton(
+                    icon: const Icon(
+                      Icons.record_voice_over_outlined,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                    onPressed: isActionsBlocked
+                        ? null
+                        : () => _showVoiceSettings(context, loc, theme),
+                  ),
+                ),
+                Tooltip(
                   message: isActionsBlocked ? loc.empty : loc.editPrompts,
                   child: IconButton(
                     icon: const Icon(Icons.edit, color: Colors.white, size: 24),
                     onPressed: isActionsBlocked
                         ? null
                         : () async {
+                            _ttsPlayerService?.stop();
                             await Navigator.of(
                               context,
                             ).pushNamed(AppRoutes.characterEdit, arguments: state.char.id);
@@ -217,12 +248,14 @@ class _ChatScreenState extends State<ChatScreen> {
                         return _buildMessageBubble(
                           context,
                           loc,
+                          theme,
                           status,
                           message,
                           state.char,
                           state.userCard,
                           state.isAiTyping,
                           state.messages.last.id == message.id,
+                          state.voice,
                         );
                       },
                     ),
@@ -293,12 +326,14 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget _buildMessageBubble(
     BuildContext context,
     AppLocalization loc,
+    ThemeData theme,
     AppStatus status,
     MessageView message,
     Char char,
     UserCard? user,
     bool isTyping,
     bool isLastMessage,
+    String? voice,
   ) {
     late Widget messageWidget;
     final isRegeneratinonActive =
@@ -319,6 +354,7 @@ class _ChatScreenState extends State<ChatScreen> {
         char: char,
         message: message,
         isThinking: isTyping,
+        player: _ttsPlayerService,
         onEditMessage: isTyping ? null : (_) => _showEditMessageDialog(context, loc, message),
 
         onSwitchMessage: isRegeneratinonActive
@@ -335,6 +371,24 @@ class _ChatScreenState extends State<ChatScreen> {
                 );
               }
             : null,
+        onPlayTTS: (id) {
+          if (voice != null) {
+            final player = _ttsPlayerService;
+            if (player != null) {
+              if (player.activeMessageId.value == null || player.activeMessageId.value! != id) {
+                _ttsPlayerService?.playMessage(
+                  messageId: message.id,
+                  fullText: message.content,
+                  voice: voice,
+                );
+              } else {
+                player.stop();
+              }
+            }
+          } else {
+            _showVoiceSettings(context, loc, theme);
+          }
+        },
       );
     }
 
@@ -518,6 +572,29 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
+  Future<void> _showVoiceSettings(
+    BuildContext context,
+    AppLocalization loc,
+    ThemeData theme,
+  ) async {
+    final bloc = context.read<ChatBloc>();
+    if (bloc.state is! ChatLoadedState) return;
+    final state = bloc.state as ChatLoadedState;
+    final prepared = state.voice?.split(':');
+    showVoiceSettingsModal(
+      context,
+      currentLanguage: prepared?[1] ?? loc.locale.languageCode,
+      currentVoiceId: prepared?[0] ?? '0',
+      onSave: (lang, voice) {
+        final voiceStr = '$voice:$lang';
+        if (state.voice != voiceStr) {
+          _ttsPlayerService?.stop();
+          bloc.add(ChatChangeVoiceEvent(voiceStr));
+        }
+      },
+    );
+  }
+
   void _showChangeCardDialog(
     BuildContext context,
     AppLocalization loc,
@@ -592,6 +669,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final chatBloc = context.read<ChatBloc>();
     final res = await NewChatConfirmationDialog.open(context);
     if (res != null) {
+      _ttsPlayerService?.stop();
       chatBloc.add(StartNewChatSessionEvent(res.deleteCurrent));
     }
   }

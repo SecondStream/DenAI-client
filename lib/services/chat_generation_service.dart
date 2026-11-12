@@ -47,11 +47,11 @@ class ChatGenerationService {
     File? lastUserImageForError,
   }) async {
     if (_activeGenerations.containsKey(chatId)) return;
-
     _messageController.add(
       StreamMessage(
         chatId: chatId,
         charId: charId,
+        messageId: Consts.messageTmp,
         token: "",
         model: settings.modelName,
         status: MessageStatus.thinking,
@@ -69,6 +69,7 @@ class ChatGenerationService {
           StreamMessage(
             chatId: chatId,
             charId: charId,
+            messageId: Consts.messageTmp,
             token: accumulatedText,
             model: settings.modelName,
             status: MessageStatus.typing,
@@ -92,6 +93,7 @@ class ChatGenerationService {
           StreamMessage(
             chatId: chatId,
             charId: charId,
+            messageId: Consts.messageTmp,
             token: accumulatedText,
             model: settings.modelName,
             status: MessageStatus.typing,
@@ -119,7 +121,7 @@ class ChatGenerationService {
         }
 
         try {
-          await _repository.insertMessage(
+          final messageId = await _repository.insertMessage(
             chatId: chatId,
             role: MessageRole.assistant,
             content: accumulatedText,
@@ -131,6 +133,7 @@ class ChatGenerationService {
             StreamMessage(
               chatId: chatId,
               charId: charId,
+              messageId: messageId,
               token: accumulatedText,
               model: settings.modelName,
               status: MessageStatus.completed,

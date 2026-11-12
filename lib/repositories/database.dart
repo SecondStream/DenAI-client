@@ -25,7 +25,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -41,6 +41,9 @@ class AppDatabase extends _$AppDatabase {
             steps: migrationSteps(
               from1To2: (m, schema) async {
                 await m.addColumn(schema.chars, schema.chars.notes);
+              },
+              from2To3: (m, schema) async {
+                await m.addColumn(schema.chats, schema.chats.voice);
               },
             ),
           );

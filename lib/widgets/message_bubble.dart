@@ -28,7 +28,7 @@ class MessageBubble extends StatelessWidget {
           bottomRight: Radius.circular(isRight ? 0 : 12),
         ),
       ),
-      constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.65),
+      constraints: BoxConstraints(minWidth: 200, maxWidth: MediaQuery.of(context).size.width * 0.65),
       child: GptMarkdown(
         message,
         style: TextStyle(color: isRight ? Colors.white70 : Colors.white, fontSize: 15, height: 1.4),

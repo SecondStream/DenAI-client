@@ -7,6 +7,7 @@ environment:
   sdk: ^3.10.7
 
 dependencies:
+  audioplayers: ^6.8.1
   cached_network_image: ^4.0.4
   dio: ^5.9.2
   drift: ^2.35.2

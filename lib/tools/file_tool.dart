@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:den_ai/application/env.dart';
 import 'package:den_ai/common/stt_assets.dart';
+import 'package:den_ai/common/tts_assets.dart';
 import 'package:flutter/services.dart';
 import 'package:path/path.dart' as p;
 
@@ -9,11 +10,13 @@ import 'package:den_ai/application/l10n.dart';
 import 'package:file_selector/file_selector.dart';
 
 abstract class FileTool {
-  static STTModelsPath? ttsModelsPath;
+  static STTModelsPath? sttModelsPath;
+  static TTSModelsPath? ttsModelsPath;
   static const String _avatarsDir = 'avatars';
   static const String _backgroundsDir = 'backgrounds';
   static const String _attachmentsDir = 'attachments';
-  static const String _ttsDir = 'stt';
+  static const String _sttDir = 'stt';
+  static const String _ttsDir = 'tts';
 
   static Future<File?> pickImage() async {
     const XTypeGroup typeGroup = XTypeGroup(
@@ -79,15 +82,21 @@ abstract class FileTool {
   }
 
   static Future<void> copyModelFromAssets() async {
-    final Directory modelDir = await _getDirectory(_ttsDir);
+    final Directory modelSTTDir = await _getDirectory(_sttDir);
+    final Directory modelTTSDir = await _getDirectory(_ttsDir);
 
-    if (!await modelDir.exists()) {
-      await modelDir.create(recursive: true);
+    if (!await modelSTTDir.exists()) {
+      await modelSTTDir.create(recursive: true);
     }
 
-    final path = modelDir.path;
+    if (!await modelTTSDir.exists()) {
+      await modelTTSDir.create(recursive: true);
+    }
 
-    final files = [
+    final pathSTT = modelSTTDir.path;
+    final pathTTS = modelTTSDir.path;
+
+    final sttFiles = [
       STTAssets.encoder,
       STTAssets.decoder,
       STTAssets.joiner,
@@ -95,8 +104,8 @@ abstract class FileTool {
       STTAssets.vad,
     ];
 
-    for (final fileName in files) {
-      final targetFile = File(p.join(path, fileName));
+    for (final fileName in sttFiles) {
+      final targetFile = File(p.join(pathSTT, fileName));
       if (!await targetFile.exists()) {
         final byteData = await rootBundle.load(STTAssets.folder + fileName);
         final buffer = byteData.buffer;
@@ -106,14 +115,65 @@ abstract class FileTool {
       }
     }
 
-    ttsModelsPath = STTModelsPath(
-      encoder: p.join(path, STTAssets.encoder),
-      decoder: p.join(path, STTAssets.decoder),
-      joiner: p.join(path, STTAssets.joiner),
-      tokens: p.join(path, STTAssets.tokens),
-      vad: p.join(path, STTAssets.vad),
+    final ttsFiles = [
+      TTSAssets.predictor,
+      TTSAssets.textEncoder,
+      TTSAssets.vectorEstimator,
+      TTSAssets.vocoder,
+      TTSAssets.unicodeIndexer,
+      TTSAssets.voice,
+      TTSAssets.tts,
+    ];
+
+    for (final fileName in ttsFiles) {
+      final targetFile = File(p.join(pathTTS, fileName));
+      if (!await targetFile.exists()) {
+        final byteData = await rootBundle.load(TTSAssets.folder + fileName);
+        final buffer = byteData.buffer;
+        await targetFile.writeAsBytes(
+          buffer.asUint8List(byteData.offsetInBytes, byteData.lengthInBytes),
+        );
+      }
+    }
+
+    sttModelsPath = STTModelsPath(
+      encoder: p.join(pathSTT, STTAssets.encoder),
+      decoder: p.join(pathSTT, STTAssets.decoder),
+      joiner: p.join(pathSTT, STTAssets.joiner),
+      tokens: p.join(pathSTT, STTAssets.tokens),
+      vad: p.join(pathSTT, STTAssets.vad),
+    );
+
+    ttsModelsPath = TTSModelsPath(
+      predictor: p.join(pathTTS, TTSAssets.predictor),
+      textEncoder: p.join(pathTTS, TTSAssets.textEncoder),
+      vectorEstimator: p.join(pathTTS, TTSAssets.vectorEstimator),
+      vocoder: p.join(pathTTS, TTSAssets.vocoder),
+      unicodeIndexer: p.join(pathTTS, TTSAssets.unicodeIndexer),
+      voice: p.join(pathTTS, TTSAssets.voice),
+      tts: p.join(pathTTS, TTSAssets.tts),
     );
   }
+}
+
+class TTSModelsPath {
+  final String predictor;
+  final String textEncoder;
+  final String vectorEstimator;
+  final String vocoder;
+  final String unicodeIndexer;
+  final String voice;
+  final String tts;
+
+  TTSModelsPath({
+    required this.predictor,
+    required this.textEncoder,
+    required this.vectorEstimator,
+    required this.vocoder,
+    required this.unicodeIndexer,
+    required this.voice,
+    required this.tts,
+  });
 }
 
 class STTModelsPath {

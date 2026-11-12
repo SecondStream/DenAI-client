@@ -12,7 +12,9 @@ import 'package:den_ai/services/chat_generation_service.dart';
 import 'package:den_ai/services/lore_search_service.dart';
 import 'package:den_ai/services/token_counter_service.dart';
 import 'package:den_ai/tools/audio_record_tool.dart';
+import 'package:den_ai/tools/russian_stress_dic.dart';
 import 'package:den_ai/tools/stt_tool.dart';
+import 'package:den_ai/tools/tts_tool.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_it/get_it.dart';
@@ -42,6 +44,8 @@ class DiInitializer {
     );
     final chatsRepo = ChatsRepository(database);
     final tokenCounter = TokenCounterService();
+    final dict =  di.registerSingleton<RussianStressDic>(RussianStressDic());
+    await dict.init();
 
     di.registerSingleton(LoreVectorStorage());
     di.registerSingleton(LoreSearchService());
@@ -56,5 +60,7 @@ class DiInitializer {
 
     di.registerLazySingleton<STTTool>(() => STTTool());
     di.registerLazySingleton<AudioRecordTool>(() => AudioRecordTool());
+    di.registerLazySingleton<TTSTool>(() => TTSTool());
+
   }
 }

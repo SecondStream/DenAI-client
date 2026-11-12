@@ -23,6 +23,7 @@ class ChatLoadedState extends ChatState {
   final bool isAiTyping;
   final bool isRecognizing;
   final File? selectedImageFile;
+  final String? voice;
 
   ChatLoadedState({
     required this.chatId,
@@ -30,6 +31,7 @@ class ChatLoadedState extends ChatState {
     required this.messages,
     required this.summary,
     this.background,
+    this.voice,
     this.userCard,
     this.availableCards,
     this.selectedImageFile,
@@ -42,6 +44,7 @@ class ChatLoadedState extends ChatState {
     Char? char,
     List<MessageView>? messages,
     String? background,
+    String? voice,
     UserCard? userCard,
     String? summary,
     List<UserCard>? availableCards,
@@ -55,6 +58,7 @@ class ChatLoadedState extends ChatState {
       char: char ?? this.char,
       messages: messages ?? this.messages.toList(),
       background: background ?? this.background,
+      voice: voice ?? this.voice,
       summary: summary ?? this.summary,
       userCard: userCard ?? this.userCard,
       availableCards: availableCards ?? this.availableCards?.toList(),

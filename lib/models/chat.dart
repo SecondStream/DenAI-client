@@ -11,6 +11,7 @@ class Chat {
   final Char char;
   final List<Message> messages;
   final String? background;
+  final String? voice;
   final UserCard? userCard;
   final List<Summary> summaries;
   final DateTime createdAt;
@@ -23,6 +24,7 @@ class Chat {
     required this.summaries,
     required this.createdAt,
     this.background,
+    this.voice,
     this.userCard,
   });
 
@@ -41,6 +43,7 @@ class Chat {
       summaries: summaries,
       userCard: userCard,
       background: data.background,
+      voice: data.voice,
       createdAt: data.createdAt,
     );
   }
@@ -59,4 +62,5 @@ class Chats extends Table {
       integer().nullable().references(UserCards, #id, onDelete: KeyAction.setNull)();
 
   TextColumn get background => text().nullable()();
+  TextColumn get voice => text().nullable()();
 }

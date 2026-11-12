@@ -44,6 +44,11 @@ class ChangeUserCardEvent extends ChatEvent {
   final int cardId;
   ChangeUserCardEvent(this.cardId);
 }
+class ChatChangeVoiceEvent extends ChatEvent {
+  final String voice;
+  ChatChangeVoiceEvent(this.voice);
+}
+
 
 class StartNewChatSessionEvent extends ChatEvent {
   final bool shouldDeleteCurrent;

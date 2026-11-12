@@ -372,7 +372,7 @@ class ChatsRepository extends BaseRepository {
     return await db.into(db.messages).insert(companion);
   }
 
-  Future<Chat> createNewChat(int charId, int? userCardId) async {
+  Future<Chat> createNewChat(int charId, int? userCardId, String? voice) async {
     return await db.transaction(() async {
       final charData = await (db.select(
         db.chars,
@@ -392,6 +392,7 @@ class ChatsRepository extends BaseRepository {
         title: charData.name,
         charId: charId,
         userCardId: userCardData != null ? Value(userCardData.id) : const Value.absent(),
+        voice: voice != null ? Value(voice): const Value.absent(),
         background: Value(charData.background),
         createdAt: DateTime.now(),
       );
@@ -526,4 +527,13 @@ class ChatsRepository extends BaseRepository {
   void dispose() {
     _messageController.close();
   }
+
+  Future<void> changeVoice(int chatId, String voice) async {
+    await (db.update(db.chats)..where((tbl) => tbl.id.equals(chatId))).write(
+      ChatsCompanion(
+        voice: Value(voice),
+      ),
+    );
+  }
+
 }

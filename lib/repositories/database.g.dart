@@ -2036,6 +2036,15 @@ class $ChatsTable extends Chats with TableInfo<$ChatsTable, ChatData> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _voiceMeta = const VerificationMeta('voice');
+  @override
+  late final GeneratedColumn<String> voice = GeneratedColumn<String>(
+    'voice',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2044,6 +2053,7 @@ class $ChatsTable extends Chats with TableInfo<$ChatsTable, ChatData> {
     charId,
     userCardId,
     background,
+    voice,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2099,6 +2109,12 @@ class $ChatsTable extends Chats with TableInfo<$ChatsTable, ChatData> {
         background.isAcceptableOrUnknown(data['background']!, _backgroundMeta),
       );
     }
+    if (data.containsKey('voice')) {
+      context.handle(
+        _voiceMeta,
+        voice.isAcceptableOrUnknown(data['voice']!, _voiceMeta),
+      );
+    }
     return context;
   }
 
@@ -2132,6 +2148,10 @@ class $ChatsTable extends Chats with TableInfo<$ChatsTable, ChatData> {
         DriftSqlType.string,
         data['${effectivePrefix}background'],
       ),
+      voice: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}voice'],
+      ),
     );
   }
 
@@ -2148,6 +2168,7 @@ class ChatData extends DataClass implements Insertable<ChatData> {
   final int charId;
   final int? userCardId;
   final String? background;
+  final String? voice;
   const ChatData({
     required this.id,
     required this.title,
@@ -2155,6 +2176,7 @@ class ChatData extends DataClass implements Insertable<ChatData> {
     required this.charId,
     this.userCardId,
     this.background,
+    this.voice,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2168,6 +2190,9 @@ class ChatData extends DataClass implements Insertable<ChatData> {
     }
     if (!nullToAbsent || background != null) {
       map['background'] = Variable<String>(background);
+    }
+    if (!nullToAbsent || voice != null) {
+      map['voice'] = Variable<String>(voice);
     }
     return map;
   }
@@ -2184,6 +2209,9 @@ class ChatData extends DataClass implements Insertable<ChatData> {
       background: background == null && nullToAbsent
           ? const Value.absent()
           : Value(background),
+      voice: voice == null && nullToAbsent
+          ? const Value.absent()
+          : Value(voice),
     );
   }
 
@@ -2199,6 +2227,7 @@ class ChatData extends DataClass implements Insertable<ChatData> {
       charId: serializer.fromJson<int>(json['charId']),
       userCardId: serializer.fromJson<int?>(json['userCardId']),
       background: serializer.fromJson<String?>(json['background']),
+      voice: serializer.fromJson<String?>(json['voice']),
     );
   }
   @override
@@ -2211,6 +2240,7 @@ class ChatData extends DataClass implements Insertable<ChatData> {
       'charId': serializer.toJson<int>(charId),
       'userCardId': serializer.toJson<int?>(userCardId),
       'background': serializer.toJson<String?>(background),
+      'voice': serializer.toJson<String?>(voice),
     };
   }
 
@@ -2221,6 +2251,7 @@ class ChatData extends DataClass implements Insertable<ChatData> {
     int? charId,
     Value<int?> userCardId = const Value.absent(),
     Value<String?> background = const Value.absent(),
+    Value<String?> voice = const Value.absent(),
   }) => ChatData(
     id: id ?? this.id,
     title: title ?? this.title,
@@ -2228,6 +2259,7 @@ class ChatData extends DataClass implements Insertable<ChatData> {
     charId: charId ?? this.charId,
     userCardId: userCardId.present ? userCardId.value : this.userCardId,
     background: background.present ? background.value : this.background,
+    voice: voice.present ? voice.value : this.voice,
   );
   ChatData copyWithCompanion(ChatsCompanion data) {
     return ChatData(
@@ -2241,6 +2273,7 @@ class ChatData extends DataClass implements Insertable<ChatData> {
       background: data.background.present
           ? data.background.value
           : this.background,
+      voice: data.voice.present ? data.voice.value : this.voice,
     );
   }
 
@@ -2252,14 +2285,15 @@ class ChatData extends DataClass implements Insertable<ChatData> {
           ..write('createdAt: $createdAt, ')
           ..write('charId: $charId, ')
           ..write('userCardId: $userCardId, ')
-          ..write('background: $background')
+          ..write('background: $background, ')
+          ..write('voice: $voice')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode =>
-      Object.hash(id, title, createdAt, charId, userCardId, background);
+      Object.hash(id, title, createdAt, charId, userCardId, background, voice);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -2269,7 +2303,8 @@ class ChatData extends DataClass implements Insertable<ChatData> {
           other.createdAt == this.createdAt &&
           other.charId == this.charId &&
           other.userCardId == this.userCardId &&
-          other.background == this.background);
+          other.background == this.background &&
+          other.voice == this.voice);
 }
 
 class ChatsCompanion extends UpdateCompanion<ChatData> {
@@ -2279,6 +2314,7 @@ class ChatsCompanion extends UpdateCompanion<ChatData> {
   final Value<int> charId;
   final Value<int?> userCardId;
   final Value<String?> background;
+  final Value<String?> voice;
   const ChatsCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
@@ -2286,6 +2322,7 @@ class ChatsCompanion extends UpdateCompanion<ChatData> {
     this.charId = const Value.absent(),
     this.userCardId = const Value.absent(),
     this.background = const Value.absent(),
+    this.voice = const Value.absent(),
   });
   ChatsCompanion.insert({
     this.id = const Value.absent(),
@@ -2294,6 +2331,7 @@ class ChatsCompanion extends UpdateCompanion<ChatData> {
     required int charId,
     this.userCardId = const Value.absent(),
     this.background = const Value.absent(),
+    this.voice = const Value.absent(),
   }) : title = Value(title),
        createdAt = Value(createdAt),
        charId = Value(charId);
@@ -2304,6 +2342,7 @@ class ChatsCompanion extends UpdateCompanion<ChatData> {
     Expression<int>? charId,
     Expression<int>? userCardId,
     Expression<String>? background,
+    Expression<String>? voice,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -2312,6 +2351,7 @@ class ChatsCompanion extends UpdateCompanion<ChatData> {
       if (charId != null) 'char_id': charId,
       if (userCardId != null) 'user_card_id': userCardId,
       if (background != null) 'background': background,
+      if (voice != null) 'voice': voice,
     });
   }
 
@@ -2322,6 +2362,7 @@ class ChatsCompanion extends UpdateCompanion<ChatData> {
     Value<int>? charId,
     Value<int?>? userCardId,
     Value<String?>? background,
+    Value<String?>? voice,
   }) {
     return ChatsCompanion(
       id: id ?? this.id,
@@ -2330,6 +2371,7 @@ class ChatsCompanion extends UpdateCompanion<ChatData> {
       charId: charId ?? this.charId,
       userCardId: userCardId ?? this.userCardId,
       background: background ?? this.background,
+      voice: voice ?? this.voice,
     );
   }
 
@@ -2354,6 +2396,9 @@ class ChatsCompanion extends UpdateCompanion<ChatData> {
     if (background.present) {
       map['background'] = Variable<String>(background.value);
     }
+    if (voice.present) {
+      map['voice'] = Variable<String>(voice.value);
+    }
     return map;
   }
 
@@ -2365,7 +2410,8 @@ class ChatsCompanion extends UpdateCompanion<ChatData> {
           ..write('createdAt: $createdAt, ')
           ..write('charId: $charId, ')
           ..write('userCardId: $userCardId, ')
-          ..write('background: $background')
+          ..write('background: $background, ')
+          ..write('voice: $voice')
           ..write(')'))
         .toString();
   }
@@ -6331,6 +6377,7 @@ typedef $$ChatsTableCreateCompanionBuilder =
       required int charId,
       Value<int?> userCardId,
       Value<String?> background,
+      Value<String?> voice,
     });
 typedef $$ChatsTableUpdateCompanionBuilder =
     ChatsCompanion Function({
@@ -6340,6 +6387,7 @@ typedef $$ChatsTableUpdateCompanionBuilder =
       Value<int> charId,
       Value<int?> userCardId,
       Value<String?> background,
+      Value<String?> voice,
     });
 
 final class $$ChatsTableReferences
@@ -6442,6 +6490,11 @@ class $$ChatsTableFilterComposer extends Composer<_$AppDatabase, $ChatsTable> {
 
   ColumnFilters<String> get background => $composableBuilder(
     column: $table.background,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get voice => $composableBuilder(
+    column: $table.voice,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -6571,6 +6624,11 @@ class $$ChatsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get voice => $composableBuilder(
+    column: $table.voice,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CharsTableOrderingComposer get charId {
     final $$CharsTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -6640,6 +6698,9 @@ class $$ChatsTableAnnotationComposer
     column: $table.background,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get voice =>
+      $composableBuilder(column: $table.voice, builder: (column) => column);
 
   $$CharsTableAnnotationComposer get charId {
     final $$CharsTableAnnotationComposer composer = $composerBuilder(
@@ -6777,6 +6838,7 @@ class $$ChatsTableTableManager
                 Value<int> charId = const Value.absent(),
                 Value<int?> userCardId = const Value.absent(),
                 Value<String?> background = const Value.absent(),
+                Value<String?> voice = const Value.absent(),
               }) => ChatsCompanion(
                 id: id,
                 title: title,
@@ -6784,6 +6846,7 @@ class $$ChatsTableTableManager
                 charId: charId,
                 userCardId: userCardId,
                 background: background,
+                voice: voice,
               ),
           createCompanionCallback:
               ({
@@ -6793,6 +6856,7 @@ class $$ChatsTableTableManager
                 required int charId,
                 Value<int?> userCardId = const Value.absent(),
                 Value<String?> background = const Value.absent(),
+                Value<String?> voice = const Value.absent(),
               }) => ChatsCompanion.insert(
                 id: id,
                 title: title,
@@ -6800,6 +6864,7 @@ class $$ChatsTableTableManager
                 charId: charId,
                 userCardId: userCardId,
                 background: background,
+                voice: voice,
               ),
           withReferenceMapper: (p0) => p0
               .map(

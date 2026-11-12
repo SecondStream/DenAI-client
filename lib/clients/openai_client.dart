@@ -5,6 +5,7 @@ import 'package:den_ai/common/exceptions.dart';
 import 'package:den_ai/models/model_info.dart';
 import 'package:den_ai/models/settings_base.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 class OpenAIClient {
   static const String urlChat = "/chat/completions";
@@ -40,7 +41,9 @@ class OpenAIClient {
   }) async* {
     final Map<String, dynamic> payload = _getPayload(settings, messages);
 
-    print('PAYLOAD: $payload');
+    if (kDebugMode) {
+      print('PAYLOAD: $payload');
+    }
 
     const int maxRetries = 1;
     final random = Random();

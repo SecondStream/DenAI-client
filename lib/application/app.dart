@@ -87,6 +87,25 @@ class ChatApp extends StatelessWidget {
             return Colors.indigo.shade400.withAlpha(150);
           }),
         ),
+
+        segmentedButtonTheme: SegmentedButtonThemeData(
+          selectedIcon: const Icon(Icons.check_circle, size: 18),
+          style: SegmentedButton.styleFrom(
+            //backgroundColor: Colors.grey.shade200,
+            //foregroundColor: Colors.black87,
+            selectedBackgroundColor: Colors.indigo.shade400,
+            selectedForegroundColor: Colors.white,
+            side: const BorderSide(color: Colors.blue, width: 1.5),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+            textStyle: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Colors.white,
+            ),
+          ),
+        ),
       ),
 
       supportedLocales: const [Locale('en'), Locale('ru')],

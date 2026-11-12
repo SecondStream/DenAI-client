@@ -1,3 +1,9 @@
+class Consts {
+  static const chatTmp = -99;
+  static const greetingTmp = -99;
+  static const messageTmp = -2;
+}
+
 class MessageTags {
   static const String urlMarker = '{url}';
   static const String imgTemplate = '\n![]($urlMarker)\n';

@@ -3,6 +3,7 @@ import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/di_initializer.dart';
 import 'package:den_ai/application/env.dart';
 import 'package:den_ai/widgets/status.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get_it/get_it.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -21,7 +22,7 @@ void main() async {
     getApplicationSupportDirectory(),
   ]);
 
-  AppEnv.init(docPath: paths[0].path, supportPath: paths[1].path, prod: true);
+  AppEnv.init(docPath: paths[0].path, supportPath: paths[1].path, prod: kReleaseMode);
   await DiInitializer.init();
 
   if (window != null) {
