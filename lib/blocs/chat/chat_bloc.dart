@@ -189,14 +189,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           userCard: defaultUserCard,
           summary: '',
           messages: [
-            if (char.greeting.isNotEmpty)
+            if (char.greeting.trim().isNotEmpty)
               MessageView.fromMessage(
-                Message(
-                  id: Consts.greetingTmp,
-                  role: MessageRole.assistant,
-                  content: char.greeting,
-                  createdAt: DateTime.now(),
-                ),
+                _getTempGreeting(char),
                 char.name,
                 defaultUserCard?.name ?? defUser,
                 1,
@@ -725,7 +720,16 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         await _repository.updateChatUserCard(currentState.chatId, event.cardId);
       }
       final card = currentState.availableCards?.firstWhere((e) => e.id == event.cardId);
-      if (card != null) emit(currentState.copyWith(userCard: card));
+      if (card != null) {
+        final messages = currentState.chatId > 0
+            ? (await _repository.getChatById(currentState.chatId)).messages
+            : currentState.char.greeting.trim().isNotEmpty
+            ? [_getTempGreeting(currentState.char)]
+            : <Message>[];
+        final updMessages = _getChatActiveMV(messages, currentState.char, card);
+
+        emit(currentState.copyWith(userCard: card, messages: updMessages));
+      }
     } catch (e) {
       _notification.add(ErrorOccurredEvent(type: ErrType.updateCard));
       emit(currentState.copyWith());
@@ -753,14 +757,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         voice: currentState.voice,
         summary: '',
         messages: [
-          if (char.greeting.isNotEmpty)
+          if (char.greeting.trim().isNotEmpty)
             MessageView.fromMessage(
-              Message(
-                id: Consts.greetingTmp,
-                role: MessageRole.assistant,
-                content: char.greeting,
-                createdAt: DateTime.now(),
-              ),
+              _getTempGreeting(char),
               char.name,
               currentState.userCard?.name ?? defUser,
               1,
@@ -779,8 +778,19 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       final char = await _charactersRepository.getCharacterById(currentState.char.id);
       if (char == null) throw Exception();
 
+      final messages = currentState.chatId > 0
+          ? (await _repository.getChatById(currentState.chatId)).messages
+          : currentState.char.greeting.trim().isNotEmpty
+          ? [_getTempGreeting(currentState.char)]
+          : <Message>[];
+      final updMessages = _getChatActiveMV(messages, char, currentState.userCard);
+
       emit(
-        currentState.copyWith(char: char, background: currentState.background ?? char.background),
+        currentState.copyWith(
+          char: char,
+          background: currentState.background ?? char.background,
+          messages: updMessages,
+        ),
       );
     } catch (e) {
       _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacter));
@@ -848,8 +858,19 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
   void _stopIsEqualTTS(int messageId) {
     final player = _ttsPlayerService;
-    if (player != null && player.activeMessageId.value != null && player.activeMessageId.value == messageId) {
+    if (player != null &&
+        player.activeMessageId.value != null &&
+        player.activeMessageId.value == messageId) {
       player.stop();
     }
+  }
+
+  Message _getTempGreeting(Char char) {
+    return Message(
+      id: Consts.greetingTmp,
+      role: MessageRole.assistant,
+      content: char.greeting,
+      createdAt: DateTime.now(),
+    );
   }
 }

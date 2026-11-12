@@ -8,6 +8,7 @@
 
 - Breaking down the text before token counting to prevent freezing.
 - Incorrect link to documentation
+- Updating the name in placeholders when a user card or character is changed.
 
 ## v1.0.1 (2026-11-09)
 
