@@ -1,8 +1,10 @@
 ## Next release
 
+## v1.0.1 (2026-11-13)
+
 ### Added
 
-- TTS
+- TTS – text-to-speech for messages
 
 ### Fixed
 
