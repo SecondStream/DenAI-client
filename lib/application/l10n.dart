@@ -231,6 +231,16 @@ class AppLocalization {
       'recording_process': 'Voice recording in progress',
       'recording_start': 'Record message',
       'recording_stop': 'Finish recording',
+
+      'voice_settings': 'Voice settings',
+      'voice_lang': 'Voice language',
+      'voice_ru': 'Russian',
+      'voice_en': 'English',
+      'voice_male': 'Male voices',
+      'voice_female': 'Female voices',
+      'voice_male_label': 'Male',
+      'voice_female_label': 'Female',
+      'voice_settings_hint': 'Select a voice',
     },
     'ru': {
       // --- Базовые сообщения ---
@@ -454,8 +464,47 @@ class AppLocalization {
       'recording_process': 'Идет запись голоса',
       'recording_start': 'Записать сообщение',
       'recording_stop': 'Закончить запить',
+
+      'voice_settings': 'Настройки голоса',
+      'voice_lang': 'Язык озвучки',
+      'voice_ru': 'Русский',
+      'voice_en': 'Английский',
+      'voice_male': 'Мужские голоса',
+      'voice_female': 'Женские голоса',
+      'voice_male_label': 'Мужские',
+      'voice_female_label': 'Женские',
+      'voice_settings_hint': 'Выбрать голос',
     },
   };
+
+  static const Map<String, List<String>> _localizedVoices = {
+    'en': [
+      'Sarah',
+      'Lily',
+      'Jessica',
+      'Olivia',
+      'Emily',
+      'Alex',
+      'James',
+      'Robert',
+      'Sam',
+      'Daniel',
+    ],
+    'ru': [
+      'Сара',
+      'Лили',
+      'Джессика',
+      'Оливия',
+      'Эмили',
+      'Алекс',
+      'Джеймс',
+      'Роберт',
+      'Сэм',
+      'Дэниел',
+    ],
+  };
+
+  List<String> get voices => _localizedVoices[locale.languageCode] ?? List.filled(10, empty);
 
   String contextSize(int tokens) {
     final template = _localizedValues[locale.languageCode]?['label_context_size'] ?? empty;
@@ -711,10 +760,17 @@ class AppLocalization {
   String get chatUnavailable => _localizedValues[locale.languageCode]?['chat_unavailable'] ?? empty;
   String get recordingProcess =>
       _localizedValues[locale.languageCode]?['recording_process'] ?? empty;
-  String get recordingStart =>
-      _localizedValues[locale.languageCode]?['recording_start'] ?? empty;
-  String get recordingStop =>
-      _localizedValues[locale.languageCode]?['recording_stop'] ?? empty;
+  String get recordingStart => _localizedValues[locale.languageCode]?['recording_start'] ?? empty;
+  String get recordingStop => _localizedValues[locale.languageCode]?['recording_stop'] ?? empty;
+  String get voiceSettings => _localizedValues[locale.languageCode]?['voice_settings'] ?? empty;
+  String get voiceLang => _localizedValues[locale.languageCode]?['voice_lang'] ?? empty;
+  String get voiceRu => _localizedValues[locale.languageCode]?['voice_ru'] ?? empty;
+  String get voiceEn => _localizedValues[locale.languageCode]?['voice_en'] ?? empty;
+  String get voiceMale => _localizedValues[locale.languageCode]?['voice_male'] ?? empty;
+  String get voiceFemale => _localizedValues[locale.languageCode]?['voice_female'] ?? empty;
+  String get voiceMaleLabel => _localizedValues[locale.languageCode]?['voice_male_label'] ?? empty;
+  String get voiceFemaleLabel => _localizedValues[locale.languageCode]?['voice_female_label'] ?? empty;
+  String get voiceSettingsHint => _localizedValues[locale.languageCode]?['voice_settings_hint'] ?? empty;
 
   String getError(ErrType type, [Object? exception]) {
     switch (type) {

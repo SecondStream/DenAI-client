@@ -132,7 +132,7 @@ class _ChatScreenState extends State<ChatScreen> {
               title: Text(state is! ChatLoadedState ? loc.chatTitle : state.char.name),
               actions: [
                 Tooltip(
-                  message: isActionsBlocked ? loc.empty : loc.historyTooltip,
+                  message: isActionsBlocked ? loc.empty : loc.voiceSettingsHint,
                   child: IconButton(
                     icon: const Icon(
                       Icons.record_voice_over_outlined,

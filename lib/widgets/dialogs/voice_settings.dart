@@ -77,27 +77,30 @@ class _VoiceSettingsContentState extends State<VoiceSettingsContent> {
   late String _selectedVoiceId;
   bool _mobileShowFemale = true;
 
-  final List<VoiceOption> _maleVoices = const [
-    VoiceOption(id: '5', name: 'Александр', isMale: true),
-    VoiceOption(id: '6', name: 'Дмитрий', isMale: true),
-    VoiceOption(id: '7', name: 'Максим', isMale: true),
-    VoiceOption(id: '8', name: 'Артём', isMale: true),
-    VoiceOption(id: '9', name: 'Виктор', isMale: true),
-  ];
-
-  final List<VoiceOption> _femaleVoices = const [
-    VoiceOption(id: '0', name: 'Алиса', isMale: false),
-    VoiceOption(id: '1', name: 'Елена', isMale: false),
-    VoiceOption(id: '2', name: 'София', isMale: false),
-    VoiceOption(id: '3', name: 'Виктория', isMale: false),
-    VoiceOption(id: '4', name: 'Анна', isMale: false),
-  ];
+  late List<VoiceOption> _maleVoices;
+  late List<VoiceOption> _femaleVoices;
 
   @override
   void initState() {
     super.initState();
     _selectedLang = widget.initialLanguage;
     _selectedVoiceId = widget.initialVoiceId;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final names = AppLocalization.of(context).voices;
+    _femaleVoices = [];
+    for (var i = 0; i < 5; ++i) {
+      _femaleVoices.add(VoiceOption(id: '$i', name: names[i], isMale: false));
+    }
+
+    _maleVoices = [];
+    for (var i = 5; i < 10; ++i) {
+      _maleVoices.add(VoiceOption(id: '$i', name: names[i], isMale: true));
+    }
+
     _mobileShowFemale = _femaleVoices.any((v) => v.id == _selectedVoiceId);
   }
 
@@ -118,12 +121,9 @@ class _VoiceSettingsContentState extends State<VoiceSettingsContent> {
                 children: [
                   Icon(Icons.record_voice_over, color: theme.colorScheme.primary, size: 22),
                   SizedBox(width: 10),
-                  const Text(
-                    'Настройки голоса',
-                    style: TextStyle(
-                      fontSize: 22,
-                      color: Colors.white,
-                    ),
+                  Text(
+                    loc.voiceSettings,
+                    style: TextStyle(fontSize: 22, color: Colors.white),
                   ),
                 ],
               ),
@@ -136,19 +136,18 @@ class _VoiceSettingsContentState extends State<VoiceSettingsContent> {
           const SizedBox(height: 12),
 
           if (loc.locale.languageCode == 'ru') ...[
-            // Выбор языка (чипсами, чтобы не плодить выпадающие списки)
-            Text('Язык озвучки', style: TextStyle(color: theme.hintColor, fontSize: 13)),
+            Text(loc.voiceLang, style: TextStyle(color: theme.hintColor, fontSize: 13)),
             const SizedBox(height: 8),
             SegmentedButton<String>(
-              segments: const [
+              segments: [
                 ButtonSegment(
                   value: 'ru',
-                  label: Text('Русский'),
+                  label: Text(loc.voiceRu),
                   icon: Icon(Icons.language, size: 18),
                 ),
                 ButtonSegment(
                   value: 'en',
-                  label: Text('English'),
+                  label: Text(loc.voiceEn),
                   icon: Icon(Icons.language, size: 18),
                 ),
               ],
@@ -165,16 +164,16 @@ class _VoiceSettingsContentState extends State<VoiceSettingsContent> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: _buildVoiceColumn(theme, 'Женские голоса', _femaleVoices)),
+                Expanded(child: _buildVoiceColumn(theme, loc.voiceFemale, _femaleVoices)),
                 const SizedBox(width: 16),
-                Expanded(child: _buildVoiceColumn(theme, 'Мужские голоса', _maleVoices)),
+                Expanded(child: _buildVoiceColumn(theme, loc.voiceMale, _maleVoices)),
               ],
             )
           else ...[
             SegmentedButton<bool>(
-              segments: const [
-                ButtonSegment(value: true, label: Text('Женские (5)')),
-                ButtonSegment(value: false, label: Text('Мужские (5)')),
+              segments: [
+                ButtonSegment(value: true, label: Text(loc.voiceFemaleLabel)),
+                ButtonSegment(value: false, label: Text(loc.voiceMaleLabel)),
               ],
               selected: {_mobileShowFemale},
               onSelectionChanged: (val) => setState(() => _mobileShowFemale = val.first),
