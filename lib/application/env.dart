@@ -10,12 +10,14 @@ abstract class AppEnv {
   static late final String tokenizersDir;
   static late final bool isProduction;
   static late final bool isDesktop;
+  static late final bool isFull; // Temporary flag, pending implementation of loading models over the network
 
-  static void init({required String docPath, required String supportPath, bool prod = false, bool desktop = true}) {
+  static void init({required String docPath, required String supportPath, bool prod = false, bool desktop = true, bool full = true}) {
     docDir = p.join(docPath, appName);
     supportDir = supportPath;
     isProduction = prod;
     isDesktop = desktop;
+    isFull = full;
 
     tokenizersDir = p.join(docDir, tokenizersDirName);
 

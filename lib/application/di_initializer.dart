@@ -1,3 +1,4 @@
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/managers/lore_vector_storage.dart';
@@ -44,8 +45,6 @@ class DiInitializer {
     );
     final chatsRepo = ChatsRepository(database);
     final tokenCounter = TokenCounterService();
-    final dict =  di.registerSingleton<RussianStressDic>(RussianStressDic());
-    await dict.init();
 
     di.registerSingleton(LoreVectorStorage());
     di.registerSingleton(LoreSearchService());
@@ -58,9 +57,13 @@ class DiInitializer {
     di.registerSingleton(LorebooksRepository(database));
     di.registerSingleton(ChatGenerationService(client, chatsRepo, tokenCounter));
 
-    di.registerLazySingleton<STTTool>(() => STTTool());
-    di.registerLazySingleton<AudioRecordTool>(() => AudioRecordTool());
-    di.registerLazySingleton<TTSTool>(() => TTSTool());
+    if (AppEnv.isFull) {
+      final dict =  di.registerSingleton<RussianStressDic>(RussianStressDic());
+      await dict.init();
+      di.registerLazySingleton<STTTool>(() => STTTool());
+      di.registerLazySingleton<AudioRecordTool>(() => AudioRecordTool());
+      di.registerLazySingleton<TTSTool>(() => TTSTool());
+    }
 
   }
 }

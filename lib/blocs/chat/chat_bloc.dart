@@ -4,6 +4,7 @@ import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:den_ai/clients/openai_client.dart';
@@ -120,7 +121,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
   }
 
   void _onRecordedUserMessage(RecordedUserMessageEvent event, Emitter<ChatState> emit) async {
-    if (state is! ChatLoadedState) return;
+    if (state is! ChatLoadedState || !AppEnv.isFull) return;
     var currentState = state as ChatLoadedState;
     currentState = currentState.copyWith(isRecognizing: true);
     sttTool ??= GetIt.instance.get<STTTool>();

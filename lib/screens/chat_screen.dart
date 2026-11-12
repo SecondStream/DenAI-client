@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:den_ai/application/config.dart';
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
@@ -66,13 +67,15 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    try {
-      _ttsPlayerService ??= TTSPlayerService(
-        GetIt.instance.get(),
-        context.read(),
-        GetIt.instance.get(),
-      );
-    } catch (_) {}
+    if (AppEnv.isFull) {
+      try {
+        _ttsPlayerService ??= TTSPlayerService(
+          GetIt.instance.get(),
+          context.read(),
+          GetIt.instance.get(),
+        );
+      } catch (_) {}
+    }
   }
 
   @override
@@ -131,19 +134,20 @@ class _ChatScreenState extends State<ChatScreen> {
             appBar: AppBar(
               title: Text(state is! ChatLoadedState ? loc.chatTitle : state.char.name),
               actions: [
-                Tooltip(
-                  message: isActionsBlocked ? loc.empty : loc.voiceSettingsHint,
-                  child: IconButton(
-                    icon: const Icon(
-                      Icons.record_voice_over_outlined,
-                      color: Colors.white,
-                      size: 24,
+                if (AppEnv.isFull)
+                  Tooltip(
+                    message: isActionsBlocked ? loc.empty : loc.voiceSettingsHint,
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.record_voice_over_outlined,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                      onPressed: isActionsBlocked
+                          ? null
+                          : () => _showVoiceSettings(context, loc, theme),
                     ),
-                    onPressed: isActionsBlocked
-                        ? null
-                        : () => _showVoiceSettings(context, loc, theme),
                   ),
-                ),
                 Tooltip(
                   message: isActionsBlocked ? loc.empty : loc.editPrompts,
                   child: IconButton(
@@ -371,24 +375,27 @@ class _ChatScreenState extends State<ChatScreen> {
                 );
               }
             : null,
-        onPlayTTS: (id) {
-          if (voice != null) {
-            final player = _ttsPlayerService;
-            if (player != null) {
-              if (player.activeMessageId.value == null || player.activeMessageId.value! != id) {
-                _ttsPlayerService?.playMessage(
-                  messageId: message.id,
-                  fullText: message.content,
-                  voice: voice,
-                );
-              } else {
-                player.stop();
+        onPlayTTS: _ttsPlayerService != null
+            ? (id) {
+                if (voice != null) {
+                  final player = _ttsPlayerService;
+                  if (player != null) {
+                    if (player.activeMessageId.value == null ||
+                        player.activeMessageId.value! != id) {
+                      _ttsPlayerService?.playMessage(
+                        messageId: message.id,
+                        fullText: message.content,
+                        voice: voice,
+                      );
+                    } else {
+                      player.stop();
+                    }
+                  }
+                } else {
+                  _showVoiceSettings(context, loc, theme);
+                }
               }
-            }
-          } else {
-            _showVoiceSettings(context, loc, theme);
-          }
-        },
+            : null,
       );
     }
 
@@ -484,18 +491,20 @@ class _ChatScreenState extends State<ChatScreen> {
             ),
           ),
           const SizedBox(width: 4),
-          Tooltip(
-            message: isBlocked
-                ? loc.empty
-                : isRecording
-                ? loc.recordingStop
-                : loc.recordingStart,
-            child: IconButton(
-              icon: Icon(isRecording ? Icons.stop : Icons.mic, color: theme.hintColor, size: 22),
-              onPressed: isBlocked && !isRecording ? null : () => _recording(context),
+          if (AppEnv.isFull) ...[
+            Tooltip(
+              message: isBlocked
+                  ? loc.empty
+                  : isRecording
+                  ? loc.recordingStop
+                  : loc.recordingStart,
+              child: IconButton(
+                icon: Icon(isRecording ? Icons.stop : Icons.mic, color: theme.hintColor, size: 22),
+                onPressed: isBlocked && !isRecording ? null : () => _recording(context),
+              ),
             ),
-          ),
-          const SizedBox(width: 4),
+            const SizedBox(width: 4),
+          ],
           Tooltip(
             message: isBlocked
                 ? loc.empty
@@ -683,6 +692,7 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Future<void> _recording(BuildContext context) async {
+    if (!AppEnv.isFull) return;
     if (_audioRecordTool == null || !_audioRecordTool!.isRecording) {
       _audioRecordTool ??= GetIt.instance.get<AudioRecordTool>();
       await _audioRecordTool!.startRecording();
