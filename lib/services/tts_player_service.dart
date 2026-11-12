@@ -92,14 +92,13 @@ class TTSPlayerService {
 
   void playMessage({required int messageId, required String fullText, required String voice}) {
     stop();
-    activeMessageId.value = messageId;
-    _activeVoice = voice;
-
     final preparedText = onlyDialogue.value
         ? fullText.replaceAll(_roleplayActionRegex, ' ')
         : fullText;
 
     if (preparedText.trim().isNotEmpty) {
+      activeMessageId.value = messageId;
+      _activeVoice = voice;
       _extractSentences(preparedText, isFinal: true);
     }
   }
