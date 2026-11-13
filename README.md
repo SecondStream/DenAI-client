@@ -43,8 +43,11 @@ For a detailed breakdown of all available parameters, visit the [Documentation P
 ### Context & Model Control
 * **Chat Management:** Inline editing, response deletion, and swipe-to-regenerate capabilities.
 * **Auto-Summarization:** Automated context window management with manual editing support.
-* **Vision Support:** Image recognition capabilities for multimodal models.
 * **LLM Tuning:** Custom generation parameters (Sampling) and persistent global system instructions.
+
+### Other
+* **Vision Support:** Image recognition capabilities for multimodal models.
+* **STT+TTS:** Recording messages via voice and playing back responses from the character (AI).
 
 ## System Requirements
 The client itself consumes very few resources and will run on any device with Windows 10 / 11 (64-bit). However, DenAI is only an interface; you will need access to an LLM backend. If you use cloud providers, all you need is a stable internet connection. For local execution, the requirements depend on the model itself.
