@@ -21,32 +21,32 @@ class AppLogger {
 
   static Future<void> init(String appVersion) async {
     if (_initialized) return;
+    try {
+      final logDir = Directory(p.join(AppEnv.supportDir, 'logs'));
+      if (!await logDir.exists()) {
+        await logDir.create(recursive: true);
+      }
 
-    final logDir = Directory(p.join(AppEnv.supportDir, 'logs'));
-    if (!await logDir.exists()) {
-      await logDir.create(recursive: true);
+      _currentFile = File(p.join(logDir.path, 'denai.log'));
+      await _rotateIfNeeded();
+
+      _sink = _currentFile!.openWrite(mode: FileMode.append);
+      _sink!.done.catchError((_) {});
+      _initialized = true;
+
+      info(
+        '=== Session started | App: $appVersion | OS: ${Platform.operatingSystem} ${Platform.operatingSystemVersion} ===',
+      );
+    } catch (e) {
+      debugPrint('AppLogger init failed: $e');
     }
-
-    _currentFile = File(p.join(logDir.path, 'denai.log'));
-    await _rotateIfNeeded();
-
-    _sink = _currentFile!.openWrite(mode: FileMode.append);
-    _initialized = true;
-
-    info(
-      '=== Session started | App: $appVersion | OS: ${Platform.operatingSystem} ${Platform.operatingSystemVersion} ===',
-    );
   }
 
   static void info(String message) => _write('INFO', message);
 
   static void warn(String message) => _write('WARN', message);
 
-  static void error(
-      String message, {
-        Object? error,
-        StackTrace? stackTrace,
-      }) {
+  static void error(String message, {Object? error, StackTrace? stackTrace}) {
     final buffer = StringBuffer(message);
     if (error != null) buffer.write('\n  Error: $error');
     if (stackTrace != null) buffer.write('\n  StackTrace:\n$stackTrace');
@@ -54,15 +54,17 @@ class AppLogger {
   }
 
   static void _write(String level, String rawMessage) {
-    final timestamp = DateTime.now().toIso8601String();
-    final safeMessage = _sanitize(rawMessage);
-    final line = '[$timestamp] [$level] $safeMessage';
+    try {
+      final timestamp = DateTime.now().toIso8601String();
+      final safeMessage = _sanitize(rawMessage);
+      final line = '[$timestamp] [$level] $safeMessage';
 
-    if (kDebugMode) {
-      debugPrint(line);
-    }
+      if (kDebugMode) {
+        debugPrint(line);
+      }
 
-    _sink?.writeln(line);
+      _sink?.writeln(line);
+    } catch (_) {}
   }
 
   static String _sanitize(String input) {
