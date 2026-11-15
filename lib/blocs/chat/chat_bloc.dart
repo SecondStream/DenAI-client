@@ -6,6 +6,7 @@ import 'dart:typed_data';
 
 import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/consts/consts.dart';
@@ -13,6 +14,7 @@ import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/repositories/characters_repository.dart';
 import 'package:den_ai/repositories/chats_repository.dart';
+import 'package:den_ai/repositories/provider/interceptor.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
 import 'package:den_ai/repositories/user_cards_repository.dart';
 import 'package:den_ai/services/chat_generation_service.dart';
@@ -113,7 +115,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         );
 
         return;
-      } catch (e) {
+      } catch (e, st) {
+        AppLogger.error('getChatById error', error: e, stackTrace: st);
         error = true;
       }
     }
@@ -130,7 +133,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (text != null) {
       emit(ChatRecordSuccessState(text: text));
     } else {
-      _notification.add(ErrorOccurredEvent(type: ErrType.recognize));
+      _notification.add(ErrorOccurredEvent(type: ErrType.recognize, error: AppException('Recognize error')));
     }
     emit(currentState.copyWith(isRecognizing: false));
   }
@@ -161,12 +164,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         );
 
         if (onFallback) {
-          _notification.add(ErrorOccurredEvent(type: ErrType.loadChatHistory));
+          _notification.add(ErrorOccurredEvent(type: ErrType.loadChatHistory, error: null));
         }
 
         return;
       }
-    } catch (_) {
+    } catch (e, st) {
+      AppLogger.error('getChatById error', error: e, stackTrace: st);
       onFallback = true;
     }
 
@@ -180,7 +184,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       UserCard? defaultUserCard;
       try {
         defaultUserCard = await _userCardsRepository.getDefaultUserCard();
-      } catch (_) {}
+      } catch (e, st) {
+        AppLogger.error('Failed to load user card', error: e, stackTrace: st);
+      }
 
       emit(
         ChatLoadedState(
@@ -203,10 +209,10 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       );
 
       if (onFallback) {
-        _notification.add(ErrorOccurredEvent(type: ErrType.loadChat));
+        _notification.add(ErrorOccurredEvent(type: ErrType.loadChat, error: null));
       }
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacter));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacter, error: e, stackTrace: st));
       emit(ChatErrorState(ErrType.loadChat, e));
     }
   }
@@ -223,8 +229,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           messages: _getChatActiveMV(updatedChat.messages, updatedChat.char, updatedChat.userCard),
         ),
       );
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.editMessage));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.editMessage, error: e, stackTrace: st));
       emit(currentState.copyWith());
     }
   }
@@ -245,8 +251,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       _stopNotExitedTTS(messages);
 
       emit(currentState.copyWith(messages: messages));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.remove));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.remove, error: e, stackTrace: st));
       emit(currentState.copyWith());
     }
   }
@@ -285,8 +291,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         await _settingsRepository.getSettings(),
         event.loreActive,
       );
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.regenerate));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.regenerate, error: e, stackTrace: st));
       emit(currentState.copyWith());
     }
   }
@@ -309,8 +315,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
       _stopNotExitedTTS(messages);
 
       emit(currentState.copyWith(messages: messages));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.switchMessage));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.switchMessage, error: e, stackTrace: st));
       emit(currentState.copyWith());
     }
   }
@@ -324,8 +330,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     try {
       var cards = await _userCardsRepository.getUserCards();
       emit(currentState.copyWith(availableCards: cards));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.load));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.load, error: e, stackTrace: st));
       emit(currentState.copyWith());
     }
   }
@@ -353,8 +359,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           localDisplayContent = "$localDisplayContent\n$markdownTag";
         }
       }
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.image));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.image, error: e, stackTrace: st));
     }
     try {
       final userMessage = Message(
@@ -404,8 +410,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         imageFile,
         imagePath: imagePath,
       );
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.sendMessage));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.sendMessage, error: e, stackTrace: st));
       emit(ChatErrorState(ErrType.sendMessage, '', lastUserMessage: event.text));
       emit(currentState.copyWith(isAiTyping: false, selectedImageFile: imageFile));
     }
@@ -433,8 +439,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           text += '\n$imageDescription';
         }
       }
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.image));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.image, error: e, stackTrace: st));
       imageError = true;
     }
 
@@ -652,8 +658,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
             isAiTyping: false,
           ),
         );
-      } catch (e) {
-        _notification.add(ErrorOccurredEvent(type: ErrType.loadChat));
+      } catch (e, st) {
+        _notification.add(ErrorOccurredEvent(type: ErrType.loadChat, error: e, stackTrace: st));
         emit(ChatErrorState(ErrType.loadChat, e));
       }
     } else {
@@ -693,7 +699,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (currentState.chatId != error.chatId) return;
 
     emit(ChatErrorState(ErrType.sendMessage, '', lastUserMessage: error.lastUserMessage));
-    _notification.add(ErrorOccurredEvent(type: ErrType.sendMessage));
+    _notification.add(ErrorOccurredEvent(type: ErrType.sendMessage, error: event.error));
 
     final player = _ttsPlayerService;
     if (player != null) player.stop(); //just in case)
@@ -707,8 +713,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           selectedImageFile: error.imageFile,
         ),
       );
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.loadChat));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadChat, error: e, stackTrace: st));
       emit(ChatErrorState(ErrType.loadChat, e));
     }
   }
@@ -731,8 +737,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
         emit(currentState.copyWith(userCard: card, messages: updMessages));
       }
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.updateCard));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.updateCard, error: e, stackTrace: st));
       emit(currentState.copyWith());
     }
   }
@@ -793,8 +799,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           messages: updMessages,
         ),
       );
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacter));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacter, error: e, stackTrace: st));
       emit(ChatErrorState(ErrType.loadChat, e));
     }
   }
@@ -811,8 +817,8 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         event.newSummary,
       );
       emit(currentState.copyWith(summary: updatedChat.summaries.lastOrNull?.content ?? ''));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.saveSummary));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.saveSummary, error: e, stackTrace: st));
       emit(currentState.copyWith());
     }
   }

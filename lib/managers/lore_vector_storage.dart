@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:den_ai/application/env.dart';
+import 'package:den_ai/application/logger.dart';
 import 'package:path/path.dart' as p;
 
 class LoreVectorStorage {
@@ -18,7 +19,9 @@ class LoreVectorStorage {
           return true;
         }
       }
-    } catch (_) {}
+    } catch (e, st) {
+      AppLogger.error('hasVectorFiles', error: e, stackTrace: st);
+    }
     return false;
   }
 

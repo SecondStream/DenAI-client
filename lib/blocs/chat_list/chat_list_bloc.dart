@@ -20,8 +20,8 @@ class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
     try {
       final chats = await _repository.getChats();
       emit(ChatsListLoadedState(chats));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.loadChats));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadChats, error: e, stackTrace: st));
       emit(ChatsListLoadedState([]));
     }
   }
@@ -36,8 +36,8 @@ class ChatsListBloc extends Bloc<ChatsListEvent, ChatsListState> {
         ..removeWhere((c) => c.id == event.chatId);
 
       emit(currentState.copyWith(chats: updatedChats));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.deleteChat));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.deleteChat, error: e, stackTrace: st));
       emit(currentState.copyWith());
     }
   }

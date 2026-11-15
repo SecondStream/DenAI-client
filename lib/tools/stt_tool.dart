@@ -79,7 +79,7 @@ class STTTool {
           decodingMethod: 'greedy_search',
         ),
       );
-    } catch (_) {
+    } catch (e) {
       workerPort.close();
       mainPort.send(null);
       return;
@@ -95,8 +95,9 @@ class STTTool {
         stream.acceptWaveform(samples: samples, sampleRate: 16000);
         recognizer.decode(stream);
         mainPort.send(recognizer.getResult(stream).text);
-      } catch (_) {
+      } catch (e) {
         mainPort.send(null);
+        rethrow;
       } finally {
         stream?.free();
       }

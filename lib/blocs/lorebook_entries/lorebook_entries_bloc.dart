@@ -1,4 +1,5 @@
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/managers/lore_vector_storage.dart';
@@ -28,8 +29,8 @@ class LorebookEntriesBloc extends Bloc<LorebookEntriesEvent, LorebookEntriesStat
     try {
       final entries = await _repository.getLoreEntries(event.bookId);
       emit(LorebookEntriesLoadedState(entries));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.loadLoreEntries));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadLoreEntries, error: e, stackTrace: st));
       emit(LorebookEntriesLoadedState([]));
     }
   }
@@ -56,8 +57,8 @@ class LorebookEntriesBloc extends Bloc<LorebookEntriesEvent, LorebookEntriesStat
       await _repository.deleteLoreEntry(event.entryId);
 
       emit(LorebookEntriesLoadedState(updatedBook.entries));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.remove));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.remove, error: e, stackTrace: st));
       emit(currentState.copy());
     }
   }
@@ -82,12 +83,13 @@ class LorebookEntriesBloc extends Bloc<LorebookEntriesEvent, LorebookEntriesStat
         } else {
           vectorStorage.deleteVectors(updatedBook.id);
         }
-      } catch (e) {
+      } catch (e, st) {
+        AppLogger.error('Error while saving a lorebook entry', error: e, stackTrace: st);
         if (id != null) await _repository.deleteLoreEntry(id);
       }
       emit(LorebookEntriesLoadedState(updatedBook.entries));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.save));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.save, error: e, stackTrace: st));
       emit(currentState.copy());
     }
   }

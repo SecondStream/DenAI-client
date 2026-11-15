@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/models/character_card.dart';
 import 'package:png_chunks_extract/png_chunks_extract.dart' as extract;
 import 'package:png_chunks_encode/png_chunks_encode.dart' as encode;
@@ -90,7 +91,9 @@ abstract class CharacterCardTool {
 
         chunks.insert(1, charaChunk);
         finalPngBytes = Uint8List.fromList(encode.encodeChunks(chunks));
-      } catch (_) {}
+      } catch (e, st) {
+        AppLogger.error('exportCard', error: e, stackTrace: st);
+      }
     }
 
     return (cardJson: cardV2, cardPng: finalPngBytes);
@@ -106,7 +109,9 @@ abstract class CharacterCardTool {
         if (maybeJsonString.startsWith('{') && maybeJsonString.endsWith('}')) {
           cardJson = jsonDecode(maybeJsonString) as Map<String, dynamic>?;
         }
-      } catch (_) {}
+      } catch (e, st) {
+        AppLogger.error('importCard jsonDecode', error: e, stackTrace: st);
+      }
       if (cardJson == null) {
         final chunks = extract.extractChunks(fileBytes);
         isPng = true;
@@ -165,7 +170,9 @@ abstract class CharacterCardTool {
           lorebooks: importedLorebooks,
         ), isPng);
       }
-    } catch (_) {}
+    } catch (e, st) {
+      AppLogger.error('importCard', error: e, stackTrace: st);
+    }
     return (null, false);
   }
 }

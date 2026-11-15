@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/services/tts_player_service.dart';
@@ -74,7 +75,9 @@ class _ChatScreenState extends State<ChatScreen> {
           context.read(),
           GetIt.instance.get(),
         );
-      } catch (_) {}
+      } catch (e, st) {
+        AppLogger.error('TTSPlayerService create', error: e, stackTrace: st);
+      }
     }
   }
 

@@ -21,8 +21,8 @@ class CharactersBloc extends Bloc<CharactersEvent, CharactersState> {
       final characters = await _repository.getCharacters();
       characters.sort((a, b) => b.id.compareTo(a.id));
       emit(CharactersLoadedState(characters));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacters));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacters, error: e, stackTrace: st));
       emit(CharactersLoadedState([]));
     }
   }

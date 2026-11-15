@@ -1,6 +1,10 @@
 ## Next release
 
-## v1.0.1 (2026-11-13)
+### Added
+
+- Error logging
+
+## v1.0.2 (2026-11-13)
 
 ### Added
 

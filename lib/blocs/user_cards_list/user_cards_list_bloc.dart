@@ -20,8 +20,8 @@ class UserCardsListBloc extends Bloc<UserCardsListEvent, UserCardsListState> {
     try {
       final cards = await _repository.getUserCards();
       emit(UserCardsListLoadedState(cards));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.loadUserCards));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadUserCards, error: e, stackTrace: st));
       emit(UserCardsListLoadedState([]));
     }
   }

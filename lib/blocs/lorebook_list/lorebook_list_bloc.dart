@@ -23,8 +23,8 @@ class LorebookListBloc extends Bloc<LorebookListEvent, LorebookListState> {
     try {
       final list = await _repository.getAllLorebooks();
       emit(LorebookListLoadedState(list));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.load));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.load, error: e, stackTrace: st));
       emit(LorebookListLoadedState([]));
     }
   }

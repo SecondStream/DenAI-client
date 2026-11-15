@@ -51,6 +51,19 @@ abstract class FileTool {
     return output?.path;
   }
 
+  static Future<String?> getSaveLogPath(AppLocalization loc) async {
+    final XTypeGroup typeGroup = XTypeGroup(label: 'Log files', extensions: <String>['log']);
+
+    final output = await getSaveLocation(
+      acceptedTypeGroups: <XTypeGroup>[typeGroup],
+      suggestedName: 'denai.log',
+      confirmButtonText: loc.save,
+      canCreateDirectories: true,
+    );
+
+    return output?.path;
+  }
+
   static Future<Directory> _getDirectory(String subDir) async {
     final Directory targetDir = Directory(p.join(AppEnv.supportDir, subDir));
     if (!await targetDir.exists()) {

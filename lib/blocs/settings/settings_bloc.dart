@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/blocs/app_status/app_status_bloc.dart';
 import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:den_ai/clients/openai_client.dart';
@@ -75,8 +76,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       await _repository.saveSettings(event.settings);
       statusBloc.add(StatusCheckedEvent());
       emit(SettingsSaveSuccess());
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.saveSettings));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.saveSettings, error: e, stackTrace: st));
       emit(currentState.copyWith());
     }
   }
@@ -107,7 +108,9 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
         tokenizers.add(TokenizerInfo(id: assetPath, displayName: displayName));
       }
-    } catch (_) {}
+    } catch (e, st) {
+      AppLogger.error('getAvailableTokenizers', error: e, stackTrace: st);
+    }
 
     try {
       final Directory customTokenizersDir = Directory(AppEnv.tokenizersDir);
@@ -122,7 +125,9 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           }
         }
       }
-    } catch (_) {}
+    } catch (e, st) {
+      AppLogger.error('getAvailableTokenizers custom', error: e, stackTrace: st);
+    }
 
     return tokenizers;
   }
@@ -152,8 +157,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           settings: settings,
         ),
       );
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.loadSettings));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadSettings, error: e, stackTrace: st));
       emit(currentState.copyWith());
     }
   }
@@ -196,8 +201,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       } else {
         emit(currentState.copyWith(providers: await _repository.getAllProviders()));
       }
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.save));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.save, error: e, stackTrace: st));
       emit(currentState.copyWith());
     }
   }
@@ -230,8 +235,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           providers: await _repository.getAllProviders(),
         ),
       );
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.remove));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.remove, error: e, stackTrace: st));
       emit(currentState.copyWith());
     }
   }

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
+import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/common/exceptions.dart';
 import 'package:den_ai/models/model_info.dart';
 import 'package:den_ai/models/settings_base.dart';
@@ -429,7 +430,9 @@ class OpenAIClient {
       try {
         final extraParams = jsonDecode(extraJson) as Map<String, dynamic>;
         return {...basePayload, ...extraParams};
-      } catch (_) {}
+      } catch (e, st) {
+        AppLogger.error('jsonDecode extra', error: e, stackTrace: st);
+      }
     }
     return basePayload;
   }

@@ -4,6 +4,7 @@ import 'package:audioplayers/audioplayers.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:den_ai/consts/consts.dart';
+import 'package:den_ai/repositories/provider/interceptor.dart';
 import 'package:flutter/foundation.dart';
 import 'package:den_ai/tools/tts_tool.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -180,7 +181,7 @@ class TTSPlayerService {
           _audioQueue.addLast(wavBytes);
           _playNextFromQueue();
         } else {
-          notifyBloc.add(ErrorOccurredEvent(type: ErrType.tts));
+          notifyBloc.add(ErrorOccurredEvent(type: ErrType.tts, error: AppException('Wav bytes is empty')));
         }
       }
     }

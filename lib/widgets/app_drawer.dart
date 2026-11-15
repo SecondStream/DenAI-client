@@ -1,10 +1,12 @@
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/blocs/drawer/drawer_bloc.dart';
 import 'package:den_ai/common/images.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:den_ai/models/user_card.dart';
+import 'package:den_ai/tools/file_tool.dart';
 import 'package:den_ai/widgets/cropped_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -96,10 +98,19 @@ class AppDrawer extends StatelessWidget {
             ),
             Spacer(),
             _buildLogo(context, theme),
+            GestureDetector(
+              onTap: () async {
+                final file = await AppLogger.getLogFileForExport();
+                if (file != null) {
+                  final path = await FileTool.getSaveLogPath(loc);
+                  if(path != null) file.copy(path);
+                }
+              },
+              child:
             Text(
               AppConfig.of(context).version,
               style: TextStyle(color: theme.hintColor, fontSize: 11),
-            ),
+            ),),
             SizedBox(height: 20),
           ],
         ),

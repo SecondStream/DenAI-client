@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:den_ai/application/env.dart';
+import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/managers/lore_vector_storage.dart';
@@ -53,7 +54,9 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
       List<Lorebook> allLorebooks = [];
       try {
         allLorebooks = await _loreRepository.getAllLorebooks();
-      } catch (_) {}
+      } catch (e, st) {
+        AppLogger.error('getAllLorebooks', error: e, stackTrace: st);
+      }
       Char? char;
       List<int> selectedIds = [];
       if (event.characterId != null) {
@@ -67,8 +70,8 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
           selectedLorebookIds: selectedIds,
         ),
       );
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacter));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacter, error: e, stackTrace: st));
       emit(CharacterFormLoadedState(allLorebooks: [], selectedLorebookIds: []));
     }
   }
@@ -128,7 +131,9 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
 
             bookIds.add(newBook.id);
           }
-        } catch (_) {}
+        } catch (e, st) {
+          AppLogger.error('Import character card', error: e, stackTrace: st);
+        }
       }
 
       final Char newChar = await _repository.saveCharacter(
@@ -146,8 +151,8 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
       );
 
       emit(CharacterFormSuccessState(newChar));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacter));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.loadCharacter, error: e, stackTrace: st));
       emit(currentState.copy());
     }
   }
@@ -181,8 +186,8 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
         lorebookIds: event.lorebookIds,
       );
       emit(CharacterFormSuccessState(savedChar));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.saveCharacter));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.saveCharacter, error: e, stackTrace: st));
       emit(currentState.copy());
     }
   }
@@ -194,8 +199,8 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
     try {
       await _repository.deleteCharacter(event.id);
       emit(CharacterDeleteSuccessState());
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.removeCharacter));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.removeCharacter, error: e, stackTrace: st));
       emit(currentState.copy());
     }
   }
@@ -249,8 +254,8 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
       );
 
       emit(currentState.copy());
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.exportCharacter));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.exportCharacter, error: e, stackTrace: st));
       emit(currentState.copy());
     }
   }

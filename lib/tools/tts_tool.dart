@@ -119,8 +119,9 @@ class TTSTool {
 
 
           mainSendPort.send([id, wavBytes]);
-        } catch (_) {
+        } catch (e) {
           mainSendPort.send([id, null]);
+          rethrow;
         }
       }
     });

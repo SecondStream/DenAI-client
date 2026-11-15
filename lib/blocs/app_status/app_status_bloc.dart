@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:den_ai/application/env.dart';
+import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
 import 'package:den_ai/tools/file_tool.dart';
@@ -24,7 +25,9 @@ class AppStatusBloc extends Bloc<AppStatusEvent, AppStatusState> {
     if (AppEnv.isFull) {
       try {
         await FileTool.copyModelFromAssets();
-      } catch (_) {}
+      } catch (e, st) {
+        AppLogger.error('copyModelFromAssets', error: e, stackTrace: st);
+      }
       await sherpa_onnx.initBindingsAsync();
     }
     await _checkStatus(emit);

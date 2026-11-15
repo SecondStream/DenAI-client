@@ -24,8 +24,8 @@ class LorebookFormBloc extends Bloc<LorebookFormEvent, LorebookFormState> {
     try {
       final book = event.id != null ? await _repository.getLorebook(event.id!) : null;
       emit(LorebookFormSuccessState(lorebook: book));
-    } catch(e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.load));
+    } catch(e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.load, error: e, stackTrace: st));
       emit(LorebookFormSuccessState());
     }
   }
@@ -48,8 +48,8 @@ class LorebookFormBloc extends Bloc<LorebookFormEvent, LorebookFormState> {
         cropData: event.cropData,
       );
       emit(LorebookFormSaveSuccessState());
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.saveLorebook));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.saveLorebook, error: e, stackTrace: st));
       emit(currentState.copy());
     }
   }
@@ -61,8 +61,8 @@ class LorebookFormBloc extends Bloc<LorebookFormEvent, LorebookFormState> {
     try {
       await _repository.deleteLorebook(event.id);
       emit(LorebookFormDeleteSuccessState());
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.deleteLorebook));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.deleteLorebook, error: e, stackTrace: st));
       emit(currentState.copy());
     }
   }

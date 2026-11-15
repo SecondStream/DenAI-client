@@ -2,6 +2,7 @@ import 'package:den_ai/application/app.dart';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/di_initializer.dart';
 import 'package:den_ai/application/env.dart';
+import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/widgets/status.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -70,11 +71,32 @@ void main() async {
     });
   }
 
+  final info = await PackageInfo.fromPlatform();
+  await AppLogger.init(info.version);
+
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    AppLogger.error(
+      'FlutterError',
+      error: details.exception,
+      stackTrace: details.stack,
+    );
+  };
+
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    AppLogger.error(
+      'Uncaught Platform Error',
+      error: error,
+      stackTrace: stack,
+    );
+    return true;
+  };
+
   runApp(
     AppConfig(
       baseUrl: AppEnv.supportDir,
       siteUrl: 'https://realwaifu.ru',
-      info: await PackageInfo.fromPlatform(),
+      info: info,
       child: AppStatus(child: ChatApp()),
     ),
   );

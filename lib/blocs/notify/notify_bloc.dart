@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/repositories/characters_repository.dart';
 import 'package:den_ai/services/chat_generation_service.dart';

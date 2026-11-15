@@ -25,8 +25,8 @@ class UserCardFormBloc extends Bloc<UserCardFormEvent, UserCardFormState> {
     try {
       final userCard = event.id != null ? await _repository.getUserCard(event.id!) : null;
       emit(UserCardFormSuccessState(userCard));
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.load));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.load, error: e, stackTrace: st));
       emit(UserCardFormSuccessState(null));
     }
   }
@@ -51,8 +51,8 @@ class UserCardFormBloc extends Bloc<UserCardFormEvent, UserCardFormState> {
         cropData: event.cropData,
       );
       emit(UserCardFormSaveSuccessState());
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.saveUserCard));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.saveUserCard, error: e, stackTrace: st));
       emit(currentState.copy());
     }
   }
@@ -64,8 +64,8 @@ class UserCardFormBloc extends Bloc<UserCardFormEvent, UserCardFormState> {
     try {
       await _repository.deleteUserCard(event.id);
       emit(UserCardFormDeleteSuccessState());
-    } catch (e) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.remove));
+    } catch (e, st) {
+      _notification.add(ErrorOccurredEvent(type: ErrType.remove, error: e, stackTrace: st));
       emit(currentState.copy());
     }
   }
