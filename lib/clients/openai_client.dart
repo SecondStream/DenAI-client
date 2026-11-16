@@ -421,7 +421,7 @@ class OpenAIClient {
       "stream": true,
       "temperature": double.parse(settings.temperature.toStringAsFixed(2)),
       "top_p": double.parse(settings.topP.toStringAsFixed(2)),
-      "min_p": double.parse(settings.minP.toStringAsFixed(2)),
+      // "min_p": double.parse(settings.minP.toStringAsFixed(2)),
       "frequency_penalty": double.parse((settings.repeatPenalty - 1.0).toStringAsFixed(2)),
     };
 
