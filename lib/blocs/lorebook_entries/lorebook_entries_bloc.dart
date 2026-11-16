@@ -17,8 +17,13 @@ class LorebookEntriesBloc extends Bloc<LorebookEntriesEvent, LorebookEntriesStat
   final SettingsRepository settingsRepository;
   final NotifyBloc _notification;
 
-  LorebookEntriesBloc(this._repository, this.vectorStorage, this.client, this.settingsRepository, this._notification)
-    : super(LorebookEntriesInitialState()) {
+  LorebookEntriesBloc(
+    this._repository,
+    this.vectorStorage,
+    this.client,
+    this.settingsRepository,
+    this._notification,
+  ) : super(LorebookEntriesInitialState()) {
     on<LoadEntriesEvent>(_onLoadEntries);
     on<DeleteEntryEvent>(_onDeleteEntry);
     on<SaveEntryEvent>(_onSaveEntry);
@@ -30,7 +35,9 @@ class LorebookEntriesBloc extends Bloc<LorebookEntriesEvent, LorebookEntriesStat
       final entries = await _repository.getLoreEntries(event.bookId);
       emit(LorebookEntriesLoadedState(entries));
     } catch (e, st) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.loadLoreEntries, error: e, stackTrace: st));
+      _notification.add(
+        ErrorOccurredEvent(type: ErrType.loadLoreEntries, error: e, stackTrace: st),
+      );
       emit(LorebookEntriesLoadedState([]));
     }
   }
@@ -49,7 +56,12 @@ class LorebookEntriesBloc extends Bloc<LorebookEntriesEvent, LorebookEntriesStat
       final texts = updatedBook.getEntriesTexts();
       if (texts.isNotEmpty) {
         final settings = await settingsRepository.getSettings();
-        final embeddings = await client.getEmbeddings(texts: texts, settings: settings);
+        final model = await settingsRepository.getActiveModel(ModelType.embedding, settings);
+        final embeddings = await client.getEmbeddings(
+          texts: texts,
+          settings: settings,
+          model: model,
+        );
         vectorStorage.saveVectors(updatedBook.id, embeddings);
       } else {
         vectorStorage.deleteVectors(updatedBook.id);
@@ -78,7 +90,12 @@ class LorebookEntriesBloc extends Bloc<LorebookEntriesEvent, LorebookEntriesStat
         final texts = updatedBook.getEntriesTexts();
         if (texts.isNotEmpty) {
           final settings = await settingsRepository.getSettings();
-          final embeddings = await client.getEmbeddings(texts: texts, settings: settings);
+          final model = await settingsRepository.getActiveModel(ModelType.embedding, settings);
+          final embeddings = await client.getEmbeddings(
+            texts: texts,
+            settings: settings,
+            model: model,
+          );
           vectorStorage.saveVectors(updatedBook.id, embeddings);
         } else {
           vectorStorage.deleteVectors(updatedBook.id);

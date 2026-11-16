@@ -6,6 +6,7 @@ class SettingsBase {
   final String modelName;
   final String visionModelName;
   final String embeddingModelName;
+  final bool embeddingEnabled;
   final String tokenizerPath;
   final int maxContextTokens;
   final double temperature;
@@ -29,6 +30,7 @@ class SettingsBase {
     required this.globalSystemPrompt,
     required this.template,
     required this.provider,
+    this.embeddingEnabled = true,
   });
 
   factory SettingsBase.fromDb(SettingsData data, {required Provider provider}) {
@@ -36,6 +38,7 @@ class SettingsBase {
       modelName: data.modelName,
       visionModelName: data.visionModelName,
       embeddingModelName: data.embeddingModelName,
+      embeddingEnabled: data.embeddingEnabled,
       tokenizerPath: data.tokenizerPath,
       maxContextTokens: data.maxContextTokens,
       temperature: data.temperature,
@@ -47,6 +50,23 @@ class SettingsBase {
       provider: provider,
     );
   }
+
+  SettingsBase copy() {
+    return SettingsBase(
+      modelName: modelName,
+      visionModelName: visionModelName,
+      embeddingModelName: embeddingModelName,
+      tokenizerPath: tokenizerPath,
+      maxContextTokens: maxContextTokens,
+      temperature: temperature,
+      minP: minP,
+      topP: topP,
+      repeatPenalty: repeatPenalty,
+      globalSystemPrompt: globalSystemPrompt,
+      template: template,
+      provider: provider.copy(),
+    );
+  }
 }
 
 @DataClassName('SettingsData')
@@ -56,6 +76,7 @@ class SettingsTable extends Table {
   TextColumn get modelName => text()();
   TextColumn get visionModelName => text()();
   TextColumn get embeddingModelName => text()();
+  BoolColumn get embeddingEnabled => boolean().withDefault(const Constant(true))();
   TextColumn get tokenizerPath => text()();
   IntColumn get maxContextTokens => integer()();
 

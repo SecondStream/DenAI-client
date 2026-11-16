@@ -1,5 +1,14 @@
 ## Next release
 
+### Added
+
+- Option to manually enter the model name.
+
+### Fixed
+
+- The summarization was lost.
+- The `min_p` parameter has been temporarily removed (it does not work with many providers).
+
 ## v1.0.3 (2026-11-15)
 
 ### Added

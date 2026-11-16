@@ -23,7 +23,7 @@ class AppStatus extends InheritedWidget {
   @override
   bool updateShouldNotify(AppStatus oldWidget) => false;
 
-  void _updateStatuses(bool provider, bool chat, bool vision, bool embeddings) {
+  void _updateStatuses(bool provider, bool chat, bool vision, bool embeddings, int code) {
     provider ? _appStatuses.add(AppStatuses.provider) : _appStatuses.remove(AppStatuses.provider);
     chat ? _appStatuses.add(AppStatuses.chat) : _appStatuses.remove(AppStatuses.chat);
     vision ? _appStatuses.add(AppStatuses.vision) : _appStatuses.remove(AppStatuses.vision);
@@ -50,6 +50,7 @@ class AppStatusWidget extends StatelessWidget {
               state.chatModelAvailable,
               state.visionModelAvailable,
               state.embeddingModelAvailable,
+              state.code,
             );
           }
         },

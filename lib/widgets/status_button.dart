@@ -1,4 +1,5 @@
 import 'package:den_ai/blocs/app_status/app_status_bloc.dart';
+import 'package:den_ai/consts/consts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -15,12 +16,13 @@ class StatusButton extends StatelessWidget {
         builder: (context, state) {
           if (state is AppStatusSuccessState) {
             final available = state.providerAvailable;
+            final unknown = state.code == Consts.notFoundCode;
             return Padding(
               padding: EdgeInsets.only(bottom: 17),
               child: IconButton(
                 icon: Icon(
-                  available ? Icons.check_circle : Icons.error,
-                  color: available ? theme.colorScheme.primary : Color(0xFFCC5555),
+                  available ? Icons.check_circle : unknown ? Icons.help : Icons.error,
+                  color: available || unknown ? theme.colorScheme.primary : Color(0xFFCC5555),
                   size: 35,
                 ),
                 onPressed: () {

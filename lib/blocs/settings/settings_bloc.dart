@@ -11,6 +11,7 @@ import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/repositories/lorebooks_repository.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
+import 'package:den_ai/screens/settings_screen.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path/path.dart' as p;
@@ -33,7 +34,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     this._client,
     this._storage,
     this.statusBloc,
-      this._notification,
+    this._notification,
   ) : super(SettingsInitialState()) {
     on<LoadAllSettingsEvent>(_onLoadAllSettings);
     on<UpdateProviderEvent>(_onUpdateProvider);
@@ -49,6 +50,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       final providers = await _repository.getAllProviders();
       final (models, visionModels, embeddingModels, success) = await _getModels(settings);
       final tokenizers = await getAvailableTokenizers();
+      final activeModes = await _repository.getActiveModels(settings);
       emit(
         SettingsLoadedState(
           models: models,
@@ -57,6 +59,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
           tokenizers: tokenizers,
           settings: settings,
           providers: providers,
+          activeModels: activeModes,
         ),
       );
     } catch (e) {
@@ -69,11 +72,38 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     if (currentState is! SettingsLoadedState) return;
     emit(SettingsLoadingState());
     try {
-      final settings = await _repository.getSettings();
-      if (settings.embeddingModelName != event.settings.embeddingModelName) {
-        await _rebuildAllEmbeddings(event.settings);
+      final oldSettings = await _repository.getSettings();
+      final models = await _repository.getActiveModels(oldSettings);
+      final providerId = oldSettings.provider.id; // TODO: Different providers
+
+      if (models.embedding.name != event.modelEmbedding.name) {
+        await _rebuildAllEmbeddings(
+          event.settings,
+          models.embedding.copyWith(name: event.modelEmbedding.name),
+        );
+        _repository.updateModel(ModelType.embedding, event.modelEmbedding.name, providerId, false);
       }
+
       await _repository.saveSettings(event.settings);
+
+      if (models.chat.name != event.model.name) {
+        await _repository.updateModel(
+          ModelType.chat,
+          event.model.name,
+          providerId,
+          event.model.handInputName,
+        );
+      }
+
+      if (models.vision.name != event.modelVision.name) {
+        await _repository.updateModel(
+          ModelType.vision,
+          event.modelVision.name,
+          providerId,
+          event.modelVision.handInputName,
+        );
+      }
+
       statusBloc.add(StatusCheckedEvent());
       emit(SettingsSaveSuccess());
     } catch (e, st) {
@@ -137,26 +167,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     final currentState = state as SettingsLoadedState;
     emit(SettingsLoadingState());
     try {
-      final settings = await _repository.updateActiveProviderId(event.providerId);
-      _client.clearCache();
-      final (models, visionModels, embeddingModels, success) = await _getModels(settings);
-      emit(
-        SettingsProviderSaveSuccess(
-          models: models,
-          visionModels: visionModels,
-          embeddingModels: embeddingModels,
-          settings: settings,
-        ),
-      );
-      statusBloc.add(ProviderChangedEvent(success));
-      emit(
-        currentState.copyWith(
-          models: models,
-          visionModels: visionModels,
-          embeddingModels: embeddingModels,
-          settings: settings,
-        ),
-      );
+      await _repository.updateActiveProviderId(event.providerId);
+      await _toSaveSuccessProvider(currentState, emit);
     } catch (e, st) {
       _notification.add(ErrorOccurredEvent(type: ErrType.loadSettings, error: e, stackTrace: st));
       emit(currentState.copyWith());
@@ -169,38 +181,14 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     emit(SettingsLoadingState());
 
     try {
-      final provider = await _repository.saveProvider(
+      await _repository.saveProvider(
         id: event.id,
         name: event.name,
         url: event.url,
         key: event.key,
         additionalArgs: event.additionalArgs,
       );
-      if (event.id == null) {
-        final settings = await _repository.updateActiveProviderId(provider.id);
-        _client.clearCache();
-        final (models, visionModels, embeddingModels, success) = await _getModels(settings);
-        emit(
-          SettingsProviderSaveSuccess(
-            models: models,
-            visionModels: visionModels,
-            embeddingModels: embeddingModels,
-            settings: settings,
-          ),
-        );
-        statusBloc.add(ProviderChangedEvent(success));
-        emit(
-          currentState.copyWith(
-            models: models,
-            visionModels: visionModels,
-            embeddingModels: embeddingModels,
-            settings: settings,
-            providers: await _repository.getAllProviders(),
-          ),
-        );
-      } else {
-        emit(currentState.copyWith(providers: await _repository.getAllProviders()));
-      }
+      await _toSaveSuccessProvider(currentState, emit);
     } catch (e, st) {
       _notification.add(ErrorOccurredEvent(type: ErrType.save, error: e, stackTrace: st));
       emit(currentState.copyWith());
@@ -214,47 +202,60 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
     try {
       await _repository.deleteProvider(event.providerId);
-      final settings = await _repository.getSettings();
-      _client.clearCache();
-      final (models, visionModels, embeddingModels, success) = await _getModels(settings);
-      emit(
-        SettingsProviderSaveSuccess(
-          models: models,
-          visionModels: visionModels,
-          embeddingModels: embeddingModels,
-          settings: settings,
-        ),
-      );
-      statusBloc.add(ProviderChangedEvent(success));
-      emit(
-        currentState.copyWith(
-          models: models,
-          visionModels: visionModels,
-          embeddingModels: embeddingModels,
-          settings: settings,
-          providers: await _repository.getAllProviders(),
-        ),
-      );
+      await _toSaveSuccessProvider(currentState, emit);
     } catch (e, st) {
       _notification.add(ErrorOccurredEvent(type: ErrType.remove, error: e, stackTrace: st));
       emit(currentState.copyWith());
     }
   }
 
+  Future<void> _toSaveSuccessProvider(
+    SettingsLoadedState currentState,
+    Emitter<SettingsState> emit,
+  ) async {
+    final settings = await _repository.getSettings();
+    final activeModels = await _repository.clearModels(settings);
+    _client.clearCache();
+    final (models, visionModels, embeddingModels, success) = await _getModels(settings);
+    emit(
+      SettingsProviderSaveSuccess(
+        models: models,
+        visionModels: visionModels,
+        embeddingModels: embeddingModels,
+        settings: settings,
+        activeModels: activeModels,
+      ),
+    );
+    statusBloc.add(ProviderChangedEvent(success));
+    final providers = await _repository.getAllProviders();
+    emit(
+      currentState.copyWith(
+        models: models,
+        visionModels: visionModels,
+        embeddingModels: embeddingModels,
+        settings: settings,
+        providers: providers,
+        activeModels: activeModels,
+      ),
+    );
+  }
+
   Future<(List<ModelInfo>, List<ModelInfo>, List<ModelInfo>, bool)> _getModels(
     SettingsBase settings,
   ) async {
-    final (models, success) = await _client.fetchModels(settings);
+    final (models, success) = await _client.fetchModels(
+      settings.provider,
+    ); // TODO: Different providers
     final (visionModels, _) = success
-        ? await _client.fetchVisionModels(settings)
+        ? await _client.fetchVisionModels(settings.provider)
         : ([ModelInfo(name: _client.defaultVisionModel, info: "???")], false);
     final (embeddingModels, _) = success
-        ? await _client.fetchEmbeddingModels(settings)
+        ? await _client.fetchEmbeddingModels(settings.provider)
         : ([ModelInfo(name: _client.defaultEmbeddingModel, info: "???")], false);
     return (models, visionModels, embeddingModels, success);
   }
 
-  Future<void> _rebuildAllEmbeddings(SettingsBase settings) async {
+  Future<void> _rebuildAllEmbeddings(SettingsBase settings, Model model) async {
     var delay = 2;
     final retryDelay = 15;
 
@@ -280,6 +281,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
               final List<List<double>> embeddings = await _client.getEmbeddings(
                 texts: texts,
                 settings: settings,
+                model: model,
               );
 
               return _BatchResult(lorebook.id, embeddings);

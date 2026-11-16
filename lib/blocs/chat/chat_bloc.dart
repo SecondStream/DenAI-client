@@ -133,7 +133,9 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     if (text != null) {
       emit(ChatRecordSuccessState(text: text));
     } else {
-      _notification.add(ErrorOccurredEvent(type: ErrType.recognize, error: AppException('Recognize error')));
+      _notification.add(
+        ErrorOccurredEvent(type: ErrType.recognize, error: AppException('Recognize error')),
+      );
     }
     emit(currentState.copyWith(isRecognizing: false));
   }
@@ -429,10 +431,16 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     var imageError = false;
     try {
       if (imageFile != null && imagePath != null) {
+        final model = await _settingsRepository.getActiveModel(ModelType.vision, settings);
         final Uint8List imageBytes = await imageFile.readAsBytes();
         final String base64Image = base64Encode(imageBytes);
-        final imageDescription =
-            '${MessageTags.imgXmlStart}${await _client.describeImage(base64Image: base64Image, prompt: DefaultSettings.describeImagePrompt, settings: settings)}${MessageTags.imgXmlEnd}';
+        final description = await _client.describeImage(
+          base64Image: base64Image,
+          prompt: DefaultSettings.describeImagePrompt,
+          model: model,
+        );
+
+        final imageDescription = '${MessageTags.imgXmlStart}$description${MessageTags.imgXmlEnd}';
         if (text.contains(MessageTags.img)) {
           text = text.replaceAll(MessageTags.img, imageDescription);
         } else {
@@ -462,12 +470,14 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     );
 
     final messages = await _getMessages(chat, systemContent, settings, text, loreActive);
+    final model = await _settingsRepository.getActiveModel(ModelType.chat, settings);
 
     unawaited(
       _generationService.requestAiResponse(
         chatId: chat.id,
         charId: chat.char.id,
         settings: settings,
+        model: model,
         formattedMessages: messages,
         isNew: true,
         parentId: userMessageId,
@@ -486,8 +496,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
     try {
       final lorebooks = chat.char.lorebooks;
       if (lorebooks.isNotEmpty && text.length >= DefaultSettings.minLenForLore) {
+        final model = await _settingsRepository.getActiveModel(ModelType.embedding, settings);
         String? loreContent;
-        final queryVectors = await _client.getEmbeddings(texts: [text], settings: settings);
+        final queryVectors = await _client.getEmbeddings(
+          texts: [text],
+          settings: settings,
+          model: model,
+        );
         final queryVector = queryVectors[0];
         if (queryVector.isNotEmpty) {
           for (final book in lorebooks) {
@@ -544,11 +559,13 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         ? chat.messages.firstWhere((e) => e.id == message.parentId!).content
         : '';
     final messages = await _getMessages(chat, systemContent, settings, userMessageText, loreActive);
+    final model = await _settingsRepository.getActiveModel(ModelType.chat, settings);
     unawaited(
       _generationService.requestAiResponse(
         chatId: chat.id,
         charId: chat.char.id,
         settings: settings,
+        model: model,
         formattedMessages: messages,
         isNew: false,
         parentId: message.parentId,

@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:den_ai/clients/openai_client.dart';
 import 'package:den_ai/consts/consts.dart';
 import 'package:den_ai/models/message.dart';
+import 'package:den_ai/models/model.dart';
 import 'package:den_ai/models/settings_base.dart';
 import 'package:den_ai/models/stream_message.dart';
 import 'package:den_ai/repositories/chats_repository.dart';
@@ -39,6 +40,7 @@ class ChatGenerationService {
     required int chatId,
     required int charId,
     required SettingsBase settings,
+    required Model model,
     required List<Map<String, String>> formattedMessages,
     required bool isNew,
     required int? parentId,
@@ -80,6 +82,7 @@ class ChatGenerationService {
 
     final Stream<String> tokenStream = _client.sendMessage(
       settings: settings,
+      model: model,
       messages: formattedMessages,
     );
 
@@ -139,6 +142,13 @@ class ChatGenerationService {
               status: MessageStatus.completed,
             ),
           );
+          unawaited(
+            checkAndRunBackgroundSummarize(
+              chatId: chatId,
+              settings: settings,
+              model: model, // TODO: Maybe other model.
+            ),
+          );
         } catch (e) {
           await _rollbackAiAnswer(
             parentId: parentId,
@@ -173,6 +183,7 @@ class ChatGenerationService {
   Future<void> checkAndRunBackgroundSummarize({
     required int chatId,
     required SettingsBase settings,
+    required Model model,
   }) async {
     try {
       final chat = await _repository.getChatById(chatId);
@@ -251,6 +262,7 @@ class ChatGenerationService {
 
         final Stream<String> summaryStream = _client.sendMessage(
           settings: settings,
+          model: model,
           messages: [
             {"role": "system", "content": summarizePrompt},
           ],

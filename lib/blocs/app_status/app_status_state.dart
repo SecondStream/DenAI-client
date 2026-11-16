@@ -13,10 +13,12 @@ class AppStatusSuccessState extends AppStatusState {
   final bool embeddingModelAvailable;
   final bool visionModelAvailable;
   final bool providerAvailable;
+  final int code;
   AppStatusSuccessState({
     required this.chatModelAvailable,
     required this.embeddingModelAvailable,
     required this.visionModelAvailable,
     required this.providerAvailable,
+    this.code = Consts.normalCode,
   });
 }

@@ -25,6 +25,10 @@ class Provider {
       additionalArgs: data.additionalArgs,
     );
   }
+
+  Provider copy() {
+    return Provider._(id: id, name: name, url: url, key: key, additionalArgs: additionalArgs);
+  }
 }
 
 class ProviderIn {

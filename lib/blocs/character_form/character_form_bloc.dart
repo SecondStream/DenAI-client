@@ -107,7 +107,12 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
 
             if (entryTexts.isNotEmpty) {
               final settings = await _settingsRepository.getSettings();
-              embeddings = await _client.getEmbeddings(texts: entryTexts, settings: settings);
+              final model = await _settingsRepository.getActiveModel(ModelType.embedding, settings);
+              embeddings = await _client.getEmbeddings(
+                texts: entryTexts,
+                settings: settings,
+                model: model,
+              );
             }
 
             final Lorebook newBook = await _loreRepository.saveLorebook(
@@ -200,7 +205,9 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
       await _repository.deleteCharacter(event.id);
       emit(CharacterDeleteSuccessState());
     } catch (e, st) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.removeCharacter, error: e, stackTrace: st));
+      _notification.add(
+        ErrorOccurredEvent(type: ErrType.removeCharacter, error: e, stackTrace: st),
+      );
       emit(currentState.copy());
     }
   }
@@ -241,9 +248,13 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
       try {
         final userCard = await _userCardRepository.getDefaultUserCard();
         if (userCard != null) creatorName = userCard.name;
-      } catch(_){}
+      } catch (_) {}
 
-      final res = await CharacterCardTool.exportCard(character: character, avatarBytes: avatar, userNickname: creatorName);
+      final res = await CharacterCardTool.exportCard(
+        character: character,
+        avatarBytes: avatar,
+        userNickname: creatorName,
+      );
 
       emit(
         CharacterFormExportCardSucessState(
@@ -255,7 +266,9 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
 
       emit(currentState.copy());
     } catch (e, st) {
-      _notification.add(ErrorOccurredEvent(type: ErrType.exportCharacter, error: e, stackTrace: st));
+      _notification.add(
+        ErrorOccurredEvent(type: ErrType.exportCharacter, error: e, stackTrace: st),
+      );
       emit(currentState.copy());
     }
   }

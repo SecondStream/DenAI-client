@@ -10,6 +10,7 @@ import 'package:den_ai/models/models.dart';
 import 'package:den_ai/widgets/app_drawer.dart';
 import 'package:den_ai/widgets/dialogs/confirmation_dialog.dart';
 import 'package:den_ai/widgets/dialogs/edit_provider_dialog.dart';
+import 'package:den_ai/widgets/model_selector.dart';
 import 'package:den_ai/widgets/status_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,6 +18,30 @@ import 'package:den_ai/blocs/settings/settings_bloc.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:get_it/get_it.dart';
 import 'package:url_launcher/url_launcher.dart';
+
+class ModelView {
+  final ModelType type;
+  final String name;
+  final bool handInputName;
+
+  const ModelView({required this.type, required this.name, this.handInputName = false});
+
+  factory ModelView.fromModel(Model model) {
+    return ModelView(type: model.type, name: model.name, handInputName: model.handInputName);
+  }
+
+  factory ModelView.fromInfo(ModelType type, ModelInfo model) {
+    return ModelView(type: type, name: model.name, handInputName: false);
+  }
+
+  ModelView copyWith({String? name, bool? handInputName}) {
+    return ModelView(
+      type: type,
+      name: name ?? this.name,
+      handInputName: handInputName ?? this.handInputName,
+    );
+  }
+}
 
 class SettingsScreen extends StatefulWidget {
   const SettingsScreen({super.key});
@@ -27,10 +52,9 @@ class SettingsScreen extends StatefulWidget {
 
 class _SettingsScreenState extends State<SettingsScreen> {
   final _formKey = GlobalKey<FormState>();
-  UniqueKey _dropdownKey = UniqueKey();
-  String? _selectedModel;
-  String? _selectedVisionModel;
-  String? _selectedEmbeddingModel;
+  late ModelView _selectedModel;
+  late ModelView _selectedVisionModel;
+  late ModelView _selectedEmbeddingModel;
   String? _selectedTokenizer;
 
   double _maxContext = 8192;
@@ -38,6 +62,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   double _minP = 0.05;
   double _topP = 0.9;
   double _repeatPenalty = 1.1;
+  bool _embeddingEnabled = true;
 
   late final TextEditingController _systemPromptController;
   late final TextEditingController _templateController;
@@ -57,7 +82,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
     super.dispose();
   }
 
-  void _initializeFields(SettingsBase settings) {
+  void _initializeFields(SettingsBase settings, ActiveModels models) {
     if (_isInitialized) return;
     _selectedTokenizer = settings.tokenizerPath;
     _maxContext = settings.maxContextTokens.toDouble();
@@ -67,29 +92,36 @@ class _SettingsScreenState extends State<SettingsScreen> {
     _repeatPenalty = settings.repeatPenalty;
     _systemPromptController.text = settings.globalSystemPrompt;
     _templateController.text = settings.template;
-    _reInitializeModels(settings);
+    _embeddingEnabled = settings.embeddingEnabled;
+    _reInitializeModels(models);
     _isInitialized = true;
   }
 
-  void _reInitializeModels(SettingsBase settings) {
-    _selectedModel = settings.modelName;
-    _selectedVisionModel = settings.visionModelName;
-    _selectedEmbeddingModel = settings.embeddingModelName;
+  void _reInitializeModels(ActiveModels models) {
+    _selectedModel = ModelView.fromModel(models.chat);
+    _selectedVisionModel = ModelView.fromModel(models.vision);
+    _selectedEmbeddingModel = ModelView.fromModel(models.embedding);
   }
 
   void _providerChanged(SettingsProviderSaveSuccess state) {
-    _reInitializeModels(state.settings);
+    _reInitializeModels(state.activeModels);
   }
 
   void _checkModels(SettingsLoadedState state) {
-    if (state.models.indexWhere((m) => m.name == _selectedModel) == -1) {
-      _selectedModel = state.models.first.name;
+    if (!_selectedModel.handInputName &&
+        state.models.indexWhere((m) => m.name == _selectedModel.name) == -1) {
+      _selectedModel = ModelView.fromInfo(ModelType.chat, state.models.first);
     }
-    if (state.visionModels.indexWhere((m) => m.name == _selectedVisionModel) == -1) {
-      _selectedVisionModel = state.visionModels.first.name;
+    if (!_selectedVisionModel.handInputName &&
+        state.visionModels.indexWhere((m) => m.name == _selectedVisionModel.name) == -1) {
+      _selectedVisionModel = ModelView.fromInfo(ModelType.vision, state.visionModels.first);
     }
-    if (state.embeddingModels.indexWhere((m) => m.name == _selectedEmbeddingModel) == -1) {
-      _selectedEmbeddingModel = state.embeddingModels.first.name;
+    if (!_selectedEmbeddingModel.handInputName &&
+        state.embeddingModels.indexWhere((m) => m.name == _selectedEmbeddingModel.name) == -1) {
+      _selectedEmbeddingModel = ModelView.fromInfo(
+        ModelType.embedding,
+        state.embeddingModels.first,
+      );
     }
   }
 
@@ -146,7 +178,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
             final provider = state.providers.firstWhere((e) => e.id == state.settings.provider.id);
 
-            _initializeFields(state.settings);
+            _initializeFields(state.settings, state.activeModels);
             _checkModels(state);
 
             return Padding(
@@ -234,7 +266,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           const SizedBox(height: 16),
 
                           _buildDropdownModels(
-                            theme,
                             label: loc.labelMainModel,
                             value: _selectedModel,
                             items: state.models,
@@ -242,21 +273,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
 
                           _buildDropdownModels(
-                            theme,
                             label: loc.labelVisionModel,
                             value: _selectedVisionModel,
                             items: state.visionModels,
                             onChanged: (v) => setState(() => _selectedVisionModel = v),
                           ),
 
-                          _buildDropdownModels(
-                            theme,
-                            key: _dropdownKey,
-                            label: loc.labelEmbeddingModel,
-                            value: _selectedEmbeddingModel,
-                            items: state.embeddingModels,
-                            onChanged: (v) => setState(() => _selectedEmbeddingModel = v),
+                          Container(
+                            margin: const EdgeInsets.only(bottom: 16),
+                            padding: const EdgeInsets.only(left: 8),
+                            // decoration: BoxDecoration(
+                            //   color: theme.cardColor,
+                            //   borderRadius: BorderRadius.circular(12),
+                            // ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    loc.useEmbeddingsLabel,
+                                    textAlign: TextAlign.end,
+                                    style: theme.textTheme.titleMedium?.copyWith(
+                                      color: theme.colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(width: 12),
+                                Switch(
+                                  value: _embeddingEnabled,
+                                  onChanged: (val) => setState(() => _embeddingEnabled = val),
+                                ),
+                              ],
+                            ),
                           ),
+                          if (_embeddingEnabled)
+                            _buildDropdownModels(
+                              label: loc.labelEmbeddingModel,
+                              value: _selectedEmbeddingModel,
+                              items: state.embeddingModels,
+                              onChanged: (v) => setState(() => _selectedEmbeddingModel = v),
+                            ),
 
                           _buildDropdownTokenizers(
                             theme,
@@ -485,69 +542,13 @@ class _SettingsScreenState extends State<SettingsScreen> {
     );
   }
 
-  Widget _buildDropdownModels(
-    ThemeData theme, {
-    UniqueKey? key,
+  Widget _buildDropdownModels({
     required String label,
-    required String? value,
+    required ModelView value,
     required List<ModelInfo> items,
-    required ValueChanged<String?> onChanged,
+    required ValueChanged<ModelView> onChanged,
   }) {
-    final List<String> itemNames = items.map((e) => e.name).toList();
-
-    final String? currentValue = itemNames.contains(value)
-        ? value
-        : (itemNames.isNotEmpty ? itemNames.first : null);
-
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: DropdownButtonFormField<String>(
-        key: key,
-        initialValue: currentValue,
-        onChanged: onChanged,
-        isExpanded: true,
-        style: const TextStyle(color: Colors.white, fontSize: 14),
-        decoration: InputDecoration(
-          labelText: label,
-          fillColor: theme.cardColor,
-          filled: true,
-          border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: BorderSide.none,
-          ),
-        ),
-        dropdownColor: theme.cardColor,
-
-        items: items.map((m) {
-          return DropdownMenuItem<String>(
-            value: m.name,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Expanded(
-                  child: Text(
-                    m.name,
-                    style: const TextStyle(fontWeight: FontWeight.w500),
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                // const SizedBox(width: 12),
-                // Text(
-                //   m.info,
-                //   style: TextStyle(
-                //     color: theme.colorScheme.primary.withValues(alpha: 0.7),
-                //     fontSize: 12,
-                //     fontWeight: FontWeight.bold,
-                //   ),
-                //   overflow: TextOverflow.ellipsis,
-                // ),
-              ],
-            ),
-          );
-        }).toList(),
-      ),
-    );
+    return ModelSelector(modelView: value, items: items, label: label, onChanged: onChanged);
   }
 
   Widget _buildSliderRow(
@@ -628,36 +629,38 @@ class _SettingsScreenState extends State<SettingsScreen> {
     SettingsLoadedState state,
   ) async {
     if (_formKey.currentState!.validate()) {
-      if (state.settings.embeddingModelName != _selectedEmbeddingModel) {
+      // TODO: Different providers
+      if ((state.activeModels.embedding.name != _selectedEmbeddingModel.name &&
+              _embeddingEnabled) ||
+          state.settings.embeddingEnabled != _embeddingEnabled) {
         final bool hasFiles = await LoreVectorStorage.hasVectorFiles();
         if (!context.mounted) return;
 
         if (hasFiles) {
-          final bool? confirm = await ConfirmationDialog.open(
-            context,
-            loc.confirmMessageTitle,
-            loc.confirmMessageText,
-          );
+          final title = state.settings.embeddingEnabled != _embeddingEnabled
+              ? loc.confirmEmbeddingsTitle
+              : loc.confirmMessageTitle;
+          final message = state.settings.embeddingEnabled != _embeddingEnabled
+              ? _embeddingEnabled
+                    ? loc.confirmEmbeddingsEnable
+                    : loc.confirmEmbeddingsDisable
+              : loc.confirmMessageText;
+          final bool? confirm = await ConfirmationDialog.open(context, title, message);
 
           if (confirm != true) {
-            final index = state.embeddingModels.indexWhere(
-              (m) => m.name == state.settings.embeddingModelName,
-            );
-            if (index >= 0) {
-              setState(() {
-                _selectedEmbeddingModel = state.embeddingModels[index].name;
-                _dropdownKey = UniqueKey();
-              });
-            }
+            setState(() {
+              _selectedEmbeddingModel = ModelView.fromModel(state.activeModels.embedding);
+            });
+
             return;
           }
         }
       }
 
       final updatedSettings = SettingsBase(
-        modelName: _selectedModel!,
-        visionModelName: _selectedVisionModel!,
-        embeddingModelName: _selectedEmbeddingModel!,
+        modelName: _selectedModel.name,
+        visionModelName: _selectedVisionModel.name,
+        embeddingModelName: _selectedEmbeddingModel.name,
         tokenizerPath: _selectedTokenizer!,
         maxContextTokens: _maxContext.toInt(),
         temperature: _temperature,
@@ -667,9 +670,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
         globalSystemPrompt: _systemPromptController.text.trim(),
         template: _templateController.text.trim(),
         provider: state.settings.provider,
+        embeddingEnabled: _embeddingEnabled,
       );
       if (context.mounted) {
-        context.read<SettingsBloc>().add(SaveSettingsEvent(updatedSettings));
+        context.read<SettingsBloc>().add(
+          SaveSettingsEvent(
+            updatedSettings,
+            _selectedModel,
+            _selectedVisionModel,
+            _selectedEmbeddingModel,
+          ),
+        );
       }
     }
   }

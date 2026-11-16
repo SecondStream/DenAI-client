@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/common/exceptions.dart';
-import 'package:den_ai/models/model_info.dart';
-import 'package:den_ai/models/settings_base.dart';
+import 'package:den_ai/models/models.dart';
+import 'package:den_ai/repositories/provider/interceptor.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 
@@ -38,9 +38,10 @@ class OpenAIClient {
 
   Stream<String> sendMessage({
     required SettingsBase settings,
+    required Model model,
     required List<Map<String, String>> messages,
   }) async* {
-    final Map<String, dynamic> payload = _getPayload(settings, messages);
+    final Map<String, dynamic> payload = _getPayload(settings, model, messages);
 
     if (kDebugMode) {
       print('PAYLOAD: $payload');
@@ -55,15 +56,21 @@ class OpenAIClient {
     for (int attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         final response = await dio.post<ResponseBody>(
-          '${settings.provider.url.replaceAll(RegExp(r'/$'), '')}$urlChat',
+          '${model.provider.url.replaceAll(RegExp(r'/$'), '')}$urlChat',
           data: payload,
           options: Options(
-            headers: _getHeaders(settings.provider.key),
+            headers: _getHeaders(model.provider.key),
             responseType: ResponseType.stream,
+            validateStatus: (_) => true,
           ),
         );
 
         if (response.statusCode != 200) {
+          var error = '';
+          if (response.data != null) {
+            error = await utf8.decodeStream(response.data!.stream);
+          }
+          AppLogger.warn('${response.statusCode} | $error | ${model.provider.url}');
           throw Exception("OpenRouter error ${response.statusCode}");
         }
 
@@ -143,14 +150,15 @@ class OpenAIClient {
   Future<List<List<double>>> getEmbeddings({
     required List<String> texts,
     required SettingsBase settings,
+    required Model model,
   }) async {
     if (texts.isEmpty) return const [];
 
     try {
       final response = await dio.post(
-        '${settings.provider.url.replaceAll(RegExp(r'/$'), '')}$urlEmbeddings',
-        options: Options(headers: _getHeaders(settings.provider.key)),
-        data: {'model': settings.embeddingModelName, 'input': texts},
+        '${model.provider.url.replaceAll(RegExp(r'/$'), '')}$urlEmbeddings',
+        options: Options(headers: _getHeaders(model.provider.key)),
+        data: {'model': model.name, 'input': texts},
       );
 
       if (response.statusCode == 200 && response.data != null) {
@@ -177,14 +185,14 @@ class OpenAIClient {
   Future<String> describeImage({
     required String base64Image,
     required String prompt,
-    required SettingsBase settings,
+    required Model model,
   }) async {
     try {
       final response = await dio.post(
-        '${settings.provider.url.replaceAll(RegExp(r'/$'), '')}$urlChat',
-        options: Options(headers: _getHeaders(settings.provider.key)),
+        '${model.provider.url.replaceAll(RegExp(r'/$'), '')}$urlChat',
+        options: Options(headers: _getHeaders(model.provider.key)),
         data: {
-          'model': settings.visionModelName,
+          'model': model.name,
           'messages': [
             {
               'role': 'user',
@@ -214,15 +222,15 @@ class OpenAIClient {
     return '';
   }
 
-  Future<List<dynamic>> _getRemoteModels(SettingsBase settings) async {
-    final String openrouterUrl =
-        '${settings.provider.url.replaceAll(RegExp(r'/$'), '')}$urlModels?output_modalities=all';
+  Future<List<dynamic>> _getRemoteModels(Provider provider) async {
+    final String providerUrl =
+        '${provider.url.replaceAll(RegExp(r'/$'), '')}$urlModels?output_modalities=all';
 
     try {
       final response = await dio.get(
-        openrouterUrl,
+        providerUrl,
         options: Options(
-          headers: _getHeaders(settings.provider.key),
+          headers: _getHeaders(provider.key),
           sendTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),
         ),
@@ -232,7 +240,8 @@ class OpenAIClient {
         final data = response.data as Map<String, dynamic>;
         return data["data"] as List<dynamic>? ?? const [];
       } else {
-        throw Exception("Provider error ${response.statusCode}: ${response.data}");
+        AppLogger.warn("Provider error ${response.statusCode}: ${response.data}");
+        throw AppException("Provider error ${response.statusCode}: ${response.data}", response.statusCode);
       }
     } catch (e) {
       rethrow;
@@ -241,9 +250,9 @@ class OpenAIClient {
 
   void clearCache() => cachedModelsList = null;
 
-  Future<Set<String>> fetchAllModelNames(SettingsBase settings) async {
+  Future<Set<String>> fetchAllModelNames(Provider provider) async {
     if (cachedModelsList == null || cachedModelsList!.isEmpty) {
-      cachedModelsList = await _getRemoteModels(settings);
+      cachedModelsList = await _getRemoteModels(provider);
     }
 
     final Set<String> result = {};
@@ -256,10 +265,10 @@ class OpenAIClient {
     return result;
   }
 
-  Future<(List<ModelInfo>, bool)> fetchModels(SettingsBase settings, {bool vision = false}) async {
+  Future<(List<ModelInfo>, bool)> fetchModels(Provider provider, {bool vision = false}) async {
     try {
       if (cachedModelsList == null || cachedModelsList!.isEmpty) {
-        cachedModelsList = await _getRemoteModels(settings);
+        cachedModelsList = await _getRemoteModels(provider);
       }
 
       final List<ModelInfo> result = <ModelInfo>[];
@@ -329,14 +338,14 @@ class OpenAIClient {
     return ([ModelInfo(name: !vision ? defaultModel : defaultVisionModel, info: "???")], false);
   }
 
-  Future<(List<ModelInfo>, bool)> fetchVisionModels(SettingsBase settings) async {
-    return await fetchModels(settings, vision: true);
+  Future<(List<ModelInfo>, bool)> fetchVisionModels(Provider provider) async {
+    return await fetchModels(provider, vision: true);
   }
 
-  Future<(List<ModelInfo>, bool)> fetchEmbeddingModels(SettingsBase settings) async {
+  Future<(List<ModelInfo>, bool)> fetchEmbeddingModels(Provider provider) async {
     try {
       if (cachedModelsList == null || cachedModelsList!.isEmpty) {
-        cachedModelsList = await _getRemoteModels(settings);
+        cachedModelsList = await _getRemoteModels(provider);
       }
 
       final List<ModelInfo> result = <ModelInfo>[];
@@ -414,9 +423,9 @@ class OpenAIClient {
     return ([ModelInfo(name: defaultEmbeddingModel, info: "? ctx")], false);
   }
 
-  Map<String, dynamic> _getPayload(SettingsBase settings, List<Map<String, String>> messages) {
+  Map<String, dynamic> _getPayload(SettingsBase settings, Model model, List<Map<String, String>> messages) {
     final basePayload = {
-      "model": settings.modelName,
+      "model": model.name,
       "messages": messages,
       "stream": true,
       "temperature": double.parse(settings.temperature.toStringAsFixed(2)),
@@ -425,7 +434,7 @@ class OpenAIClient {
       "frequency_penalty": double.parse((settings.repeatPenalty - 1.0).toStringAsFixed(2)),
     };
 
-    final String extraJson = settings.provider.additionalArgs.trim();
+    final String extraJson = model.provider.additionalArgs.trim();
     if (extraJson.isNotEmpty) {
       try {
         final extraParams = jsonDecode(extraJson) as Map<String, dynamic>;

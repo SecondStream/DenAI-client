@@ -2,6 +2,8 @@ class Consts {
   static const chatTmp = -99;
   static const greetingTmp = -99;
   static const messageTmp = -2;
+  static const normalCode = 200;
+  static const notFoundCode = 404;
 }
 
 class MessageTags {

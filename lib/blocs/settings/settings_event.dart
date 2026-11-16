@@ -6,7 +6,10 @@ class LoadAllSettingsEvent extends SettingsEvent {}
 
 class SaveSettingsEvent extends SettingsEvent {
   final SettingsBase settings;
-  SaveSettingsEvent(this.settings);
+  final ModelView model;
+  final ModelView modelVision;
+  final ModelView modelEmbedding;
+  SaveSettingsEvent(this.settings, this.model, this.modelVision, this.modelEmbedding);
 }
 
 class SaveProviderEvent extends SettingsEvent {

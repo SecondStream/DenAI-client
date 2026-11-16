@@ -18,12 +18,14 @@ class SettingsProviderSaveSuccess extends SettingsState {
   final List<ModelInfo> visionModels;
   final List<ModelInfo> embeddingModels;
   final SettingsBase settings;
+  final ActiveModels activeModels;
 
   SettingsProviderSaveSuccess({
     required this.models,
     required this.visionModels,
     required this.embeddingModels,
     required this.settings,
+    required this.activeModels
   });
 }
 
@@ -34,6 +36,7 @@ class SettingsLoadedState extends SettingsState {
   final List<TokenizerInfo> tokenizers;
   final List<Provider> providers;
   final SettingsBase settings;
+  final ActiveModels activeModels;
 
   SettingsLoadedState({
     required this.models,
@@ -42,6 +45,7 @@ class SettingsLoadedState extends SettingsState {
     required this.tokenizers,
     required this.settings,
     required this.providers,
+    required this.activeModels
   });
 
   SettingsLoadedState copyWith({
@@ -51,14 +55,16 @@ class SettingsLoadedState extends SettingsState {
     List<TokenizerInfo>? tokenizers,
     SettingsBase? settings,
     List<Provider>? providers,
+    ActiveModels? activeModels,
   }) {
     return SettingsLoadedState(
       models: models ?? this.models.toList(),
       visionModels: models ?? this.visionModels.toList(),
       embeddingModels: embeddingModels ?? this.embeddingModels.toList(),
       tokenizers: tokenizers ?? this.tokenizers.toList(),
-      settings: settings ?? this.settings,
+      settings: settings ?? this.settings.copy(),
       providers: providers ?? this.providers.toList(),
+      activeModels: activeModels ?? this.activeModels.copyWith(),
     );
   }
 }

@@ -1,9 +1,8 @@
 import 'package:den_ai/consts/consts.dart';
-import 'package:den_ai/models/provider.dart';
-import 'package:den_ai/models/settings_base.dart';
 import 'package:den_ai/repositories/base_repository.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:den_ai/models/models.dart';
 import 'database.dart';
 
 class SettingsRepository extends BaseRepository {
@@ -67,6 +66,7 @@ class SettingsRepository extends BaseRepository {
       globalSystemPrompt: Value(settings.globalSystemPrompt),
       template: Value(settings.template),
       providerId: Value(settings.provider.id),
+      embeddingEnabled: Value(settings.embeddingEnabled),
     );
 
     await (db.update(
@@ -147,5 +147,83 @@ class SettingsRepository extends BaseRepository {
       await (db.delete(db.providers)..where((tbl) => tbl.id.equals(providerId))).go();
     });
     await _storage.delete(key: 'provider_$providerId');
+  }
+
+  Future<void> updateModel(ModelType type, String name, int? providerId, bool handInputName) async {
+    await db
+        .into(db.models)
+        .insertOnConflictUpdate(
+          ModelsCompanion(
+            type: Value(type),
+            name: Value(name),
+            providerId: providerId != null ? Value(providerId) : const Value.absent(),
+            handInputName: Value(handInputName),
+          ),
+        );
+  }
+
+  Future<void> clearModel(ModelType type) async {
+    await (db.delete(db.models)..where((t) => t.type.equalsValue(type))).go();
+  }
+
+  Future<ActiveModels> clearModels(SettingsBase settings) async {
+    await Future.wait([
+      clearModel(ModelType.chat),
+      clearModel(ModelType.vision),
+      clearModel(ModelType.embedding),
+    ]);
+
+    return getActiveModels(settings);
+  }
+
+  Future<ActiveModels> getActiveModels(SettingsBase settings) async {
+    final results = await Future.wait([
+      getActiveModel(ModelType.chat, settings),
+      getActiveModel(ModelType.vision, settings),
+      getActiveModel(ModelType.embedding, settings),
+    ]);
+
+    return ActiveModels(
+      chat: results[0],
+      vision: results[1],
+      embedding: results[2],
+    );
+  }
+
+
+  Future<Model> getActiveModel(ModelType type, SettingsBase settings) async {
+    final modelData = await (db.select(
+      db.models,
+    )..where((t) => t.type.equalsValue(type))).getSingleOrNull();
+
+    final providerId = modelData?.providerId;
+
+    final providerData = providerId != null
+        ? await (db.select(db.providers)..where((p) => p.id.equals(providerId))).getSingle()
+        : null;
+
+    late Provider provider;
+    if (providerData != null) {
+      final key = await _storage.read(key: 'provider_${providerData.id}');
+      provider = Provider.fromDb(providerData, key ?? '');
+    } else {
+      provider = settings.provider;
+    }
+
+    if (modelData == null) {
+      final fallbackName = switch (type) {
+        ModelType.chat => settings.modelName,
+        ModelType.vision => settings.visionModelName,
+        ModelType.embedding => settings.embeddingModelName,
+      };
+
+      return Model.fromDb(
+        ModelData(type: type, name: fallbackName, providerId: provider.id, handInputName: false),
+        provider,
+        isFallback: true,
+      );
+    }
+
+    return Model.fromDb(modelData, provider);
   }
 }

@@ -3687,6 +3687,21 @@ class $SettingsTableTable extends SettingsTable
         type: DriftSqlType.string,
         requiredDuringInsert: true,
       );
+  static const VerificationMeta _embeddingEnabledMeta = const VerificationMeta(
+    'embeddingEnabled',
+  );
+  @override
+  late final GeneratedColumn<bool> embeddingEnabled = GeneratedColumn<bool>(
+    'embedding_enabled',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("embedding_enabled" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
   static const VerificationMeta _tokenizerPathMeta = const VerificationMeta(
     'tokenizerPath',
   );
@@ -3791,6 +3806,7 @@ class $SettingsTableTable extends SettingsTable
     modelName,
     visionModelName,
     embeddingModelName,
+    embeddingEnabled,
     tokenizerPath,
     maxContextTokens,
     temperature,
@@ -3845,6 +3861,15 @@ class $SettingsTableTable extends SettingsTable
       );
     } else if (isInserting) {
       context.missing(_embeddingModelNameMeta);
+    }
+    if (data.containsKey('embedding_enabled')) {
+      context.handle(
+        _embeddingEnabledMeta,
+        embeddingEnabled.isAcceptableOrUnknown(
+          data['embedding_enabled']!,
+          _embeddingEnabledMeta,
+        ),
+      );
     }
     if (data.containsKey('tokenizer_path')) {
       context.handle(
@@ -3958,6 +3983,10 @@ class $SettingsTableTable extends SettingsTable
         DriftSqlType.string,
         data['${effectivePrefix}embedding_model_name'],
       )!,
+      embeddingEnabled: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}embedding_enabled'],
+      )!,
       tokenizerPath: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}tokenizer_path'],
@@ -4008,6 +4037,7 @@ class SettingsData extends DataClass implements Insertable<SettingsData> {
   final String modelName;
   final String visionModelName;
   final String embeddingModelName;
+  final bool embeddingEnabled;
   final String tokenizerPath;
   final int maxContextTokens;
   final double temperature;
@@ -4022,6 +4052,7 @@ class SettingsData extends DataClass implements Insertable<SettingsData> {
     required this.modelName,
     required this.visionModelName,
     required this.embeddingModelName,
+    required this.embeddingEnabled,
     required this.tokenizerPath,
     required this.maxContextTokens,
     required this.temperature,
@@ -4039,6 +4070,7 @@ class SettingsData extends DataClass implements Insertable<SettingsData> {
     map['model_name'] = Variable<String>(modelName);
     map['vision_model_name'] = Variable<String>(visionModelName);
     map['embedding_model_name'] = Variable<String>(embeddingModelName);
+    map['embedding_enabled'] = Variable<bool>(embeddingEnabled);
     map['tokenizer_path'] = Variable<String>(tokenizerPath);
     map['max_context_tokens'] = Variable<int>(maxContextTokens);
     map['temperature'] = Variable<double>(temperature);
@@ -4057,6 +4089,7 @@ class SettingsData extends DataClass implements Insertable<SettingsData> {
       modelName: Value(modelName),
       visionModelName: Value(visionModelName),
       embeddingModelName: Value(embeddingModelName),
+      embeddingEnabled: Value(embeddingEnabled),
       tokenizerPath: Value(tokenizerPath),
       maxContextTokens: Value(maxContextTokens),
       temperature: Value(temperature),
@@ -4081,6 +4114,7 @@ class SettingsData extends DataClass implements Insertable<SettingsData> {
       embeddingModelName: serializer.fromJson<String>(
         json['embeddingModelName'],
       ),
+      embeddingEnabled: serializer.fromJson<bool>(json['embeddingEnabled']),
       tokenizerPath: serializer.fromJson<String>(json['tokenizerPath']),
       maxContextTokens: serializer.fromJson<int>(json['maxContextTokens']),
       temperature: serializer.fromJson<double>(json['temperature']),
@@ -4102,6 +4136,7 @@ class SettingsData extends DataClass implements Insertable<SettingsData> {
       'modelName': serializer.toJson<String>(modelName),
       'visionModelName': serializer.toJson<String>(visionModelName),
       'embeddingModelName': serializer.toJson<String>(embeddingModelName),
+      'embeddingEnabled': serializer.toJson<bool>(embeddingEnabled),
       'tokenizerPath': serializer.toJson<String>(tokenizerPath),
       'maxContextTokens': serializer.toJson<int>(maxContextTokens),
       'temperature': serializer.toJson<double>(temperature),
@@ -4119,6 +4154,7 @@ class SettingsData extends DataClass implements Insertable<SettingsData> {
     String? modelName,
     String? visionModelName,
     String? embeddingModelName,
+    bool? embeddingEnabled,
     String? tokenizerPath,
     int? maxContextTokens,
     double? temperature,
@@ -4133,6 +4169,7 @@ class SettingsData extends DataClass implements Insertable<SettingsData> {
     modelName: modelName ?? this.modelName,
     visionModelName: visionModelName ?? this.visionModelName,
     embeddingModelName: embeddingModelName ?? this.embeddingModelName,
+    embeddingEnabled: embeddingEnabled ?? this.embeddingEnabled,
     tokenizerPath: tokenizerPath ?? this.tokenizerPath,
     maxContextTokens: maxContextTokens ?? this.maxContextTokens,
     temperature: temperature ?? this.temperature,
@@ -4153,6 +4190,9 @@ class SettingsData extends DataClass implements Insertable<SettingsData> {
       embeddingModelName: data.embeddingModelName.present
           ? data.embeddingModelName.value
           : this.embeddingModelName,
+      embeddingEnabled: data.embeddingEnabled.present
+          ? data.embeddingEnabled.value
+          : this.embeddingEnabled,
       tokenizerPath: data.tokenizerPath.present
           ? data.tokenizerPath.value
           : this.tokenizerPath,
@@ -4184,6 +4224,7 @@ class SettingsData extends DataClass implements Insertable<SettingsData> {
           ..write('modelName: $modelName, ')
           ..write('visionModelName: $visionModelName, ')
           ..write('embeddingModelName: $embeddingModelName, ')
+          ..write('embeddingEnabled: $embeddingEnabled, ')
           ..write('tokenizerPath: $tokenizerPath, ')
           ..write('maxContextTokens: $maxContextTokens, ')
           ..write('temperature: $temperature, ')
@@ -4203,6 +4244,7 @@ class SettingsData extends DataClass implements Insertable<SettingsData> {
     modelName,
     visionModelName,
     embeddingModelName,
+    embeddingEnabled,
     tokenizerPath,
     maxContextTokens,
     temperature,
@@ -4221,6 +4263,7 @@ class SettingsData extends DataClass implements Insertable<SettingsData> {
           other.modelName == this.modelName &&
           other.visionModelName == this.visionModelName &&
           other.embeddingModelName == this.embeddingModelName &&
+          other.embeddingEnabled == this.embeddingEnabled &&
           other.tokenizerPath == this.tokenizerPath &&
           other.maxContextTokens == this.maxContextTokens &&
           other.temperature == this.temperature &&
@@ -4237,6 +4280,7 @@ class SettingsTableCompanion extends UpdateCompanion<SettingsData> {
   final Value<String> modelName;
   final Value<String> visionModelName;
   final Value<String> embeddingModelName;
+  final Value<bool> embeddingEnabled;
   final Value<String> tokenizerPath;
   final Value<int> maxContextTokens;
   final Value<double> temperature;
@@ -4251,6 +4295,7 @@ class SettingsTableCompanion extends UpdateCompanion<SettingsData> {
     this.modelName = const Value.absent(),
     this.visionModelName = const Value.absent(),
     this.embeddingModelName = const Value.absent(),
+    this.embeddingEnabled = const Value.absent(),
     this.tokenizerPath = const Value.absent(),
     this.maxContextTokens = const Value.absent(),
     this.temperature = const Value.absent(),
@@ -4266,6 +4311,7 @@ class SettingsTableCompanion extends UpdateCompanion<SettingsData> {
     required String modelName,
     required String visionModelName,
     required String embeddingModelName,
+    this.embeddingEnabled = const Value.absent(),
     required String tokenizerPath,
     required int maxContextTokens,
     required double temperature,
@@ -4292,6 +4338,7 @@ class SettingsTableCompanion extends UpdateCompanion<SettingsData> {
     Expression<String>? modelName,
     Expression<String>? visionModelName,
     Expression<String>? embeddingModelName,
+    Expression<bool>? embeddingEnabled,
     Expression<String>? tokenizerPath,
     Expression<int>? maxContextTokens,
     Expression<double>? temperature,
@@ -4308,6 +4355,7 @@ class SettingsTableCompanion extends UpdateCompanion<SettingsData> {
       if (visionModelName != null) 'vision_model_name': visionModelName,
       if (embeddingModelName != null)
         'embedding_model_name': embeddingModelName,
+      if (embeddingEnabled != null) 'embedding_enabled': embeddingEnabled,
       if (tokenizerPath != null) 'tokenizer_path': tokenizerPath,
       if (maxContextTokens != null) 'max_context_tokens': maxContextTokens,
       if (temperature != null) 'temperature': temperature,
@@ -4326,6 +4374,7 @@ class SettingsTableCompanion extends UpdateCompanion<SettingsData> {
     Value<String>? modelName,
     Value<String>? visionModelName,
     Value<String>? embeddingModelName,
+    Value<bool>? embeddingEnabled,
     Value<String>? tokenizerPath,
     Value<int>? maxContextTokens,
     Value<double>? temperature,
@@ -4341,6 +4390,7 @@ class SettingsTableCompanion extends UpdateCompanion<SettingsData> {
       modelName: modelName ?? this.modelName,
       visionModelName: visionModelName ?? this.visionModelName,
       embeddingModelName: embeddingModelName ?? this.embeddingModelName,
+      embeddingEnabled: embeddingEnabled ?? this.embeddingEnabled,
       tokenizerPath: tokenizerPath ?? this.tokenizerPath,
       maxContextTokens: maxContextTokens ?? this.maxContextTokens,
       temperature: temperature ?? this.temperature,
@@ -4367,6 +4417,9 @@ class SettingsTableCompanion extends UpdateCompanion<SettingsData> {
     }
     if (embeddingModelName.present) {
       map['embedding_model_name'] = Variable<String>(embeddingModelName.value);
+    }
+    if (embeddingEnabled.present) {
+      map['embedding_enabled'] = Variable<bool>(embeddingEnabled.value);
     }
     if (tokenizerPath.present) {
       map['tokenizer_path'] = Variable<String>(tokenizerPath.value);
@@ -4405,6 +4458,7 @@ class SettingsTableCompanion extends UpdateCompanion<SettingsData> {
           ..write('modelName: $modelName, ')
           ..write('visionModelName: $visionModelName, ')
           ..write('embeddingModelName: $embeddingModelName, ')
+          ..write('embeddingEnabled: $embeddingEnabled, ')
           ..write('tokenizerPath: $tokenizerPath, ')
           ..write('maxContextTokens: $maxContextTokens, ')
           ..write('temperature: $temperature, ')
@@ -4414,6 +4468,333 @@ class SettingsTableCompanion extends UpdateCompanion<SettingsData> {
           ..write('globalSystemPrompt: $globalSystemPrompt, ')
           ..write('template: $template, ')
           ..write('providerId: $providerId')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ModelsTable extends Models with TableInfo<$ModelsTable, ModelData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ModelsTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<ModelType, String> type =
+      GeneratedColumn<String>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<ModelType>($ModelsTable.$convertertype);
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _providerIdMeta = const VerificationMeta(
+    'providerId',
+  );
+  @override
+  late final GeneratedColumn<int> providerId = GeneratedColumn<int>(
+    'provider_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES providers (id) ON DELETE SET NULL',
+    ),
+  );
+  static const VerificationMeta _handInputNameMeta = const VerificationMeta(
+    'handInputName',
+  );
+  @override
+  late final GeneratedColumn<bool> handInputName = GeneratedColumn<bool>(
+    'hand_input_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("hand_input_name" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [type, name, providerId, handInputName];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'models';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ModelData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('provider_id')) {
+      context.handle(
+        _providerIdMeta,
+        providerId.isAcceptableOrUnknown(data['provider_id']!, _providerIdMeta),
+      );
+    }
+    if (data.containsKey('hand_input_name')) {
+      context.handle(
+        _handInputNameMeta,
+        handInputName.isAcceptableOrUnknown(
+          data['hand_input_name']!,
+          _handInputNameMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {type};
+  @override
+  ModelData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ModelData(
+      type: $ModelsTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      providerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}provider_id'],
+      ),
+      handInputName: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}hand_input_name'],
+      )!,
+    );
+  }
+
+  @override
+  $ModelsTable createAlias(String alias) {
+    return $ModelsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<ModelType, String, String> $convertertype =
+      const EnumNameConverter<ModelType>(ModelType.values);
+}
+
+class ModelData extends DataClass implements Insertable<ModelData> {
+  final ModelType type;
+  final String name;
+  final int? providerId;
+  final bool handInputName;
+  const ModelData({
+    required this.type,
+    required this.name,
+    this.providerId,
+    required this.handInputName,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['type'] = Variable<String>($ModelsTable.$convertertype.toSql(type));
+    }
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || providerId != null) {
+      map['provider_id'] = Variable<int>(providerId);
+    }
+    map['hand_input_name'] = Variable<bool>(handInputName);
+    return map;
+  }
+
+  ModelsCompanion toCompanion(bool nullToAbsent) {
+    return ModelsCompanion(
+      type: Value(type),
+      name: Value(name),
+      providerId: providerId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(providerId),
+      handInputName: Value(handInputName),
+    );
+  }
+
+  factory ModelData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ModelData(
+      type: $ModelsTable.$convertertype.fromJson(
+        serializer.fromJson<String>(json['type']),
+      ),
+      name: serializer.fromJson<String>(json['name']),
+      providerId: serializer.fromJson<int?>(json['providerId']),
+      handInputName: serializer.fromJson<bool>(json['handInputName']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'type': serializer.toJson<String>(
+        $ModelsTable.$convertertype.toJson(type),
+      ),
+      'name': serializer.toJson<String>(name),
+      'providerId': serializer.toJson<int?>(providerId),
+      'handInputName': serializer.toJson<bool>(handInputName),
+    };
+  }
+
+  ModelData copyWith({
+    ModelType? type,
+    String? name,
+    Value<int?> providerId = const Value.absent(),
+    bool? handInputName,
+  }) => ModelData(
+    type: type ?? this.type,
+    name: name ?? this.name,
+    providerId: providerId.present ? providerId.value : this.providerId,
+    handInputName: handInputName ?? this.handInputName,
+  );
+  ModelData copyWithCompanion(ModelsCompanion data) {
+    return ModelData(
+      type: data.type.present ? data.type.value : this.type,
+      name: data.name.present ? data.name.value : this.name,
+      providerId: data.providerId.present
+          ? data.providerId.value
+          : this.providerId,
+      handInputName: data.handInputName.present
+          ? data.handInputName.value
+          : this.handInputName,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ModelData(')
+          ..write('type: $type, ')
+          ..write('name: $name, ')
+          ..write('providerId: $providerId, ')
+          ..write('handInputName: $handInputName')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(type, name, providerId, handInputName);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ModelData &&
+          other.type == this.type &&
+          other.name == this.name &&
+          other.providerId == this.providerId &&
+          other.handInputName == this.handInputName);
+}
+
+class ModelsCompanion extends UpdateCompanion<ModelData> {
+  final Value<ModelType> type;
+  final Value<String> name;
+  final Value<int?> providerId;
+  final Value<bool> handInputName;
+  final Value<int> rowid;
+  const ModelsCompanion({
+    this.type = const Value.absent(),
+    this.name = const Value.absent(),
+    this.providerId = const Value.absent(),
+    this.handInputName = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ModelsCompanion.insert({
+    required ModelType type,
+    required String name,
+    this.providerId = const Value.absent(),
+    this.handInputName = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : type = Value(type),
+       name = Value(name);
+  static Insertable<ModelData> custom({
+    Expression<String>? type,
+    Expression<String>? name,
+    Expression<int>? providerId,
+    Expression<bool>? handInputName,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (type != null) 'type': type,
+      if (name != null) 'name': name,
+      if (providerId != null) 'provider_id': providerId,
+      if (handInputName != null) 'hand_input_name': handInputName,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ModelsCompanion copyWith({
+    Value<ModelType>? type,
+    Value<String>? name,
+    Value<int?>? providerId,
+    Value<bool>? handInputName,
+    Value<int>? rowid,
+  }) {
+    return ModelsCompanion(
+      type: type ?? this.type,
+      name: name ?? this.name,
+      providerId: providerId ?? this.providerId,
+      handInputName: handInputName ?? this.handInputName,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (type.present) {
+      map['type'] = Variable<String>(
+        $ModelsTable.$convertertype.toSql(type.value),
+      );
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (providerId.present) {
+      map['provider_id'] = Variable<int>(providerId.value);
+    }
+    if (handInputName.present) {
+      map['hand_input_name'] = Variable<bool>(handInputName.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ModelsCompanion(')
+          ..write('type: $type, ')
+          ..write('name: $name, ')
+          ..write('providerId: $providerId, ')
+          ..write('handInputName: $handInputName, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -4432,6 +4813,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SummariesTable summaries = $SummariesTable(this);
   late final $ProvidersTable providers = $ProvidersTable(this);
   late final $SettingsTableTable settingsTable = $SettingsTableTable(this);
+  late final $ModelsTable models = $ModelsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4447,6 +4829,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     summaries,
     providers,
     settingsTable,
+    models,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -4498,6 +4881,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('summaries', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'providers',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('models', kind: UpdateKind.update)],
     ),
   ]);
 }
@@ -7738,6 +8128,25 @@ final class $$ProvidersTableReferences
       manager.$state.copyWith(prefetchedData: cache),
     );
   }
+
+  static MultiTypedResultKey<$ModelsTable, List<ModelData>> _modelsRefsTable(
+    _$AppDatabase db,
+  ) => MultiTypedResultKey.fromTable(
+    db.models,
+    aliasName: 'providers__id__models__provider_id',
+  );
+
+  $$ModelsTableProcessedTableManager get modelsRefs {
+    final manager = $$ModelsTableTableManager(
+      $_db,
+      $_db.models,
+    ).filter((f) => f.providerId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_modelsRefsTable($_db));
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
 }
 
 class $$ProvidersTableFilterComposer
@@ -7785,6 +8194,31 @@ class $$ProvidersTableFilterComposer
           }) => $$SettingsTableTableFilterComposer(
             $db: $db,
             $table: $db.settingsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+
+  Expression<bool> modelsRefs(
+    Expression<bool> Function($$ModelsTableFilterComposer f) f,
+  ) {
+    final $$ModelsTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.models,
+      getReferencedColumn: (t) => t.providerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ModelsTableFilterComposer(
+            $db: $db,
+            $table: $db.models,
             $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
             joinBuilder: joinBuilder,
             $removeJoinBuilderFromRootComposer:
@@ -7872,6 +8306,31 @@ class $$ProvidersTableAnnotationComposer
     );
     return f(composer);
   }
+
+  Expression<T> modelsRefs<T extends Object>(
+    Expression<T> Function($$ModelsTableAnnotationComposer a) f,
+  ) {
+    final $$ModelsTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.models,
+      getReferencedColumn: (t) => t.providerId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ModelsTableAnnotationComposer(
+            $db: $db,
+            $table: $db.models,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
 }
 
 class $$ProvidersTableTableManager
@@ -7887,7 +8346,7 @@ class $$ProvidersTableTableManager
           $$ProvidersTableUpdateCompanionBuilder,
           (ProviderData, $$ProvidersTableReferences),
           ProviderData,
-          PrefetchHooks Function({bool settingsTableRefs})
+          PrefetchHooks Function({bool settingsTableRefs, bool modelsRefs})
         > {
   $$ProvidersTableTableManager(_$AppDatabase db, $ProvidersTable table)
     : super(
@@ -7932,39 +8391,61 @@ class $$ProvidersTableTableManager
                 ),
               )
               .toList(),
-          prefetchHooksCallback: ({settingsTableRefs = false}) {
-            return PrefetchHooks(
-              db: db,
-              explicitlyWatchedTables: [
-                if (settingsTableRefs) db.settingsTable,
-              ],
-              addJoins: null,
-              getPrefetchedDataCallback: (items) async {
-                return [
-                  if (settingsTableRefs)
-                    await $_getPrefetchedDataByColumns<
-                      ProviderData,
-                      $ProvidersTable,
-                      SettingsData,
-                      $SettingsTableTable
-                    >(
-                      currentTable: table,
-                      referencedTable: $$ProvidersTableReferences
-                          ._settingsTableRefsTable(db),
-                      managerFromTypedResult: (p0) =>
-                          $$ProvidersTableReferences(
-                            db,
-                            table,
-                            p0,
-                          ).settingsTableRefs,
-                      currentColumn: 'id',
-                      referencedColumn: 'provider_id',
-                      typedResults: items,
-                    ),
-                ];
+          prefetchHooksCallback:
+              ({settingsTableRefs = false, modelsRefs = false}) {
+                return PrefetchHooks(
+                  db: db,
+                  explicitlyWatchedTables: [
+                    if (settingsTableRefs) db.settingsTable,
+                    if (modelsRefs) db.models,
+                  ],
+                  addJoins: null,
+                  getPrefetchedDataCallback: (items) async {
+                    return [
+                      if (settingsTableRefs)
+                        await $_getPrefetchedDataByColumns<
+                          ProviderData,
+                          $ProvidersTable,
+                          SettingsData,
+                          $SettingsTableTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ProvidersTableReferences
+                              ._settingsTableRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ProvidersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).settingsTableRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'provider_id',
+                          typedResults: items,
+                        ),
+                      if (modelsRefs)
+                        await $_getPrefetchedDataByColumns<
+                          ProviderData,
+                          $ProvidersTable,
+                          ModelData,
+                          $ModelsTable
+                        >(
+                          currentTable: table,
+                          referencedTable: $$ProvidersTableReferences
+                              ._modelsRefsTable(db),
+                          managerFromTypedResult: (p0) =>
+                              $$ProvidersTableReferences(
+                                db,
+                                table,
+                                p0,
+                              ).modelsRefs,
+                          currentColumn: 'id',
+                          referencedColumn: 'provider_id',
+                          typedResults: items,
+                        ),
+                    ];
+                  },
+                );
               },
-            );
-          },
         ),
       );
 }
@@ -7981,7 +8462,7 @@ typedef $$ProvidersTableProcessedTableManager =
       $$ProvidersTableUpdateCompanionBuilder,
       (ProviderData, $$ProvidersTableReferences),
       ProviderData,
-      PrefetchHooks Function({bool settingsTableRefs})
+      PrefetchHooks Function({bool settingsTableRefs, bool modelsRefs})
     >;
 typedef $$SettingsTableTableCreateCompanionBuilder =
     SettingsTableCompanion Function({
@@ -7989,6 +8470,7 @@ typedef $$SettingsTableTableCreateCompanionBuilder =
       required String modelName,
       required String visionModelName,
       required String embeddingModelName,
+      Value<bool> embeddingEnabled,
       required String tokenizerPath,
       required int maxContextTokens,
       required double temperature,
@@ -8005,6 +8487,7 @@ typedef $$SettingsTableTableUpdateCompanionBuilder =
       Value<String> modelName,
       Value<String> visionModelName,
       Value<String> embeddingModelName,
+      Value<bool> embeddingEnabled,
       Value<String> tokenizerPath,
       Value<int> maxContextTokens,
       Value<double> temperature,
@@ -8068,6 +8551,11 @@ class $$SettingsTableTableFilterComposer
 
   ColumnFilters<String> get embeddingModelName => $composableBuilder(
     column: $table.embeddingModelName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get embeddingEnabled => $composableBuilder(
+    column: $table.embeddingEnabled,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -8164,6 +8652,11 @@ class $$SettingsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<bool> get embeddingEnabled => $composableBuilder(
+    column: $table.embeddingEnabled,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get tokenizerPath => $composableBuilder(
     column: $table.tokenizerPath,
     builder: (column) => ColumnOrderings(column),
@@ -8250,6 +8743,11 @@ class $$SettingsTableTableAnnotationComposer
 
   GeneratedColumn<String> get embeddingModelName => $composableBuilder(
     column: $table.embeddingModelName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get embeddingEnabled => $composableBuilder(
+    column: $table.embeddingEnabled,
     builder: (column) => column,
   );
 
@@ -8343,6 +8841,7 @@ class $$SettingsTableTableTableManager
                 Value<String> modelName = const Value.absent(),
                 Value<String> visionModelName = const Value.absent(),
                 Value<String> embeddingModelName = const Value.absent(),
+                Value<bool> embeddingEnabled = const Value.absent(),
                 Value<String> tokenizerPath = const Value.absent(),
                 Value<int> maxContextTokens = const Value.absent(),
                 Value<double> temperature = const Value.absent(),
@@ -8357,6 +8856,7 @@ class $$SettingsTableTableTableManager
                 modelName: modelName,
                 visionModelName: visionModelName,
                 embeddingModelName: embeddingModelName,
+                embeddingEnabled: embeddingEnabled,
                 tokenizerPath: tokenizerPath,
                 maxContextTokens: maxContextTokens,
                 temperature: temperature,
@@ -8373,6 +8873,7 @@ class $$SettingsTableTableTableManager
                 required String modelName,
                 required String visionModelName,
                 required String embeddingModelName,
+                Value<bool> embeddingEnabled = const Value.absent(),
                 required String tokenizerPath,
                 required int maxContextTokens,
                 required double temperature,
@@ -8387,6 +8888,7 @@ class $$SettingsTableTableTableManager
                 modelName: modelName,
                 visionModelName: visionModelName,
                 embeddingModelName: embeddingModelName,
+                embeddingEnabled: embeddingEnabled,
                 tokenizerPath: tokenizerPath,
                 maxContextTokens: maxContextTokens,
                 temperature: temperature,
@@ -8464,6 +8966,307 @@ typedef $$SettingsTableTableProcessedTableManager =
       SettingsData,
       PrefetchHooks Function({bool providerId})
     >;
+typedef $$ModelsTableCreateCompanionBuilder =
+    ModelsCompanion Function({
+      required ModelType type,
+      required String name,
+      Value<int?> providerId,
+      Value<bool> handInputName,
+      Value<int> rowid,
+    });
+typedef $$ModelsTableUpdateCompanionBuilder =
+    ModelsCompanion Function({
+      Value<ModelType> type,
+      Value<String> name,
+      Value<int?> providerId,
+      Value<bool> handInputName,
+      Value<int> rowid,
+    });
+
+final class $$ModelsTableReferences
+    extends BaseReferences<_$AppDatabase, $ModelsTable, ModelData> {
+  $$ModelsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static $ProvidersTable _providerIdTable(_$AppDatabase db) =>
+      db.providers.createAlias('models__provider_id__providers__id');
+
+  $$ProvidersTableProcessedTableManager? get providerId {
+    final $_column = $_itemColumn<int>('provider_id');
+    if ($_column == null) return null;
+    final manager = $$ProvidersTableTableManager(
+      $_db,
+      $_db.providers,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_providerIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ModelsTableFilterComposer
+    extends Composer<_$AppDatabase, $ModelsTable> {
+  $$ModelsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<ModelType, ModelType, String> get type =>
+      $composableBuilder(
+        column: $table.type,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get handInputName => $composableBuilder(
+    column: $table.handInputName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ProvidersTableFilterComposer get providerId {
+    final $$ProvidersTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.providerId,
+      referencedTable: $db.providers,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProvidersTableFilterComposer(
+            $db: $db,
+            $table: $db.providers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ModelsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ModelsTable> {
+  $$ModelsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get handInputName => $composableBuilder(
+    column: $table.handInputName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ProvidersTableOrderingComposer get providerId {
+    final $$ProvidersTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.providerId,
+      referencedTable: $db.providers,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProvidersTableOrderingComposer(
+            $db: $db,
+            $table: $db.providers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ModelsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ModelsTable> {
+  $$ModelsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<ModelType, String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<bool> get handInputName => $composableBuilder(
+    column: $table.handInputName,
+    builder: (column) => column,
+  );
+
+  $$ProvidersTableAnnotationComposer get providerId {
+    final $$ProvidersTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.providerId,
+      referencedTable: $db.providers,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProvidersTableAnnotationComposer(
+            $db: $db,
+            $table: $db.providers,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ModelsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ModelsTable,
+          ModelData,
+          $$ModelsTableFilterComposer,
+          $$ModelsTableOrderingComposer,
+          $$ModelsTableAnnotationComposer,
+          $$ModelsTableCreateCompanionBuilder,
+          $$ModelsTableUpdateCompanionBuilder,
+          (ModelData, $$ModelsTableReferences),
+          ModelData,
+          PrefetchHooks Function({bool providerId})
+        > {
+  $$ModelsTableTableManager(_$AppDatabase db, $ModelsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ModelsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ModelsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ModelsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<ModelType> type = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<int?> providerId = const Value.absent(),
+                Value<bool> handInputName = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ModelsCompanion(
+                type: type,
+                name: name,
+                providerId: providerId,
+                handInputName: handInputName,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required ModelType type,
+                required String name,
+                Value<int?> providerId = const Value.absent(),
+                Value<bool> handInputName = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ModelsCompanion.insert(
+                type: type,
+                name: name,
+                providerId: providerId,
+                handInputName: handInputName,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ModelsTable, ModelData>(table),
+                  $$ModelsTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({providerId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (providerId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.providerId,
+                                referencedTable: $$ModelsTableReferences
+                                    ._providerIdTable(db),
+                                referencedColumn: $$ModelsTableReferences
+                                    ._providerIdTable(db)
+                                    .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ModelsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ModelsTable,
+      ModelData,
+      $$ModelsTableFilterComposer,
+      $$ModelsTableOrderingComposer,
+      $$ModelsTableAnnotationComposer,
+      $$ModelsTableCreateCompanionBuilder,
+      $$ModelsTableUpdateCompanionBuilder,
+      (ModelData, $$ModelsTableReferences),
+      ModelData,
+      PrefetchHooks Function({bool providerId})
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -8488,4 +9291,6 @@ class $AppDatabaseManager {
       $$ProvidersTableTableManager(_db, _db.providers);
   $$SettingsTableTableTableManager get settingsTable =>
       $$SettingsTableTableTableManager(_db, _db.settingsTable);
+  $$ModelsTableTableManager get models =>
+      $$ModelsTableTableManager(_db, _db.models);
 }

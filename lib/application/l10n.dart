@@ -168,6 +168,16 @@ class AppLocalization {
       'confirm_message_title': 'Confirm model change',
       'confirm_message_text':
           'If you change the model, your lorebooks will be completely rebuilt.\nThis will take some time—approximately 1 second per lorebook—though this duration may increase if the provider returns an error.\nAdditionally, if you are using a paid API, this process may incur costs. Continue?',
+      'confirm_embeddings_enable':
+          'You have enabled the embedding model. Lorebooks will be rebuilt.\nThis will take some time—approximately 1 second per lorebook—though it may take longer if the provider returns an error.\nAdditionally, if you are using a paid API, this may incur costs. Continue?',
+      'confirm_embeddings_disable':
+          'You are disabling the embedding model.\nLorebooks will not function until it is re-enabled.\nOnce re-enabled, all lorebooks will be rebuilt. Continue?',
+      'confirm_embeddings_title': 'Changing embedding settings',
+      'use_embeddings_label': 'Use embeddings (for lorebooks)',
+      'model_name_hint': 'Enter model name',
+      'to_models_list': 'Back to list',
+      'to_model_manual': 'Enter manually',
+
       // --- Экраны книг ---
       'lorebooks': 'Lorebooks',
       'lorebooks_title': 'Lorebooks',
@@ -400,6 +410,15 @@ class AppLocalization {
       'confirm_message_title': 'Подтвердите смену модели',
       'confirm_message_text':
           'Если вы измените модель, ваши лорбуки будут полностью перестроены.\n Это займет некоторое время: ~1c на лорбук, но может быть увеличено, если провайдер выдаст ошибку.\n А также может потратить средства, если вы используете платное API. Продолжить?',
+      'confirm_embeddings_enable':
+          'Вы включили эмбеддинг модель. Лорбуки будут перестроены.\nЭто займет некоторое время: ~1c на лорбук, но может быть увеличено, если провайдер выдаст ошибку.\n А также может потратить средства, если вы используете платное API. Продолжить?',
+      'confirm_embeddings_disable':
+          'Вы выключаете эмбеддинг модель.\n Лорбуки работать не будут до повторного включения.\n После включения все лорбуки будут перестроены. Продолжить?',
+      'confirm_embeddings_title': 'Изменение настроек эмбеддингов',
+      'use_embeddings_label': 'Использовать эмбеддининги (для лорбуков)',
+      'model_name_hint': 'Введите название модели',
+      'to_models_list': 'Вернуться к списку',
+      'to_model_manual': 'Ввести вручную',
 
       // --- Экраны книг ---
       'lorebooks': 'Книги знаний',
@@ -675,6 +694,17 @@ class AppLocalization {
       _localizedValues[locale.languageCode]?['confirm_message_title'] ?? empty;
   String get confirmMessageText =>
       _localizedValues[locale.languageCode]?['confirm_message_text'] ?? empty;
+  String get confirmEmbeddingsEnable =>
+      _localizedValues[locale.languageCode]?['confirm_embeddings_enable'] ?? empty;
+  String get confirmEmbeddingsDisable =>
+      _localizedValues[locale.languageCode]?['confirm_embeddings_disable'] ?? empty;
+  String get confirmEmbeddingsTitle =>
+      _localizedValues[locale.languageCode]?['confirm_embeddings_title'] ?? empty;
+  String get useEmbeddingsLabel =>
+      _localizedValues[locale.languageCode]?['use_embeddings_label'] ?? empty;
+  String get modelNameHint => _localizedValues[locale.languageCode]?['model_name_hint'] ?? empty;
+  String get toModelsList => _localizedValues[locale.languageCode]?['to_models_list'] ?? empty;
+  String get toModelManual => _localizedValues[locale.languageCode]?['to_model_manual'] ?? empty;
 
   String get cropAvatarTitle =>
       _localizedValues[locale.languageCode]?['crop_avatar_title'] ?? empty;
@@ -769,8 +799,10 @@ class AppLocalization {
   String get voiceMale => _localizedValues[locale.languageCode]?['voice_male'] ?? empty;
   String get voiceFemale => _localizedValues[locale.languageCode]?['voice_female'] ?? empty;
   String get voiceMaleLabel => _localizedValues[locale.languageCode]?['voice_male_label'] ?? empty;
-  String get voiceFemaleLabel => _localizedValues[locale.languageCode]?['voice_female_label'] ?? empty;
-  String get voiceSettingsHint => _localizedValues[locale.languageCode]?['voice_settings_hint'] ?? empty;
+  String get voiceFemaleLabel =>
+      _localizedValues[locale.languageCode]?['voice_female_label'] ?? empty;
+  String get voiceSettingsHint =>
+      _localizedValues[locale.languageCode]?['voice_settings_hint'] ?? empty;
 
   String getError(ErrType type, [Object? exception]) {
     switch (type) {

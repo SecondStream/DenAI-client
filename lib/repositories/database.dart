@@ -19,13 +19,15 @@ part 'database.g.dart';
     Chats,
     Summaries,
     SettingsTable,
+    Providers,
+    Models,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -44,6 +46,10 @@ class AppDatabase extends _$AppDatabase {
               },
               from2To3: (m, schema) async {
                 await m.addColumn(schema.chats, schema.chats.voice);
+              },
+              from3To4: (m, schema) async {
+                await m.createTable(schema.models);
+                await m.addColumn(schema.settingsTable, schema.settingsTable.embeddingEnabled);
               },
             ),
           );

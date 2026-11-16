@@ -3,6 +3,9 @@ import 'dart:async';
 import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/clients/openai_client.dart';
+import 'package:den_ai/consts/consts.dart';
+import 'package:den_ai/models/model.dart';
+import 'package:den_ai/repositories/provider/interceptor.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
 import 'package:den_ai/tools/file_tool.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -59,24 +62,30 @@ class AppStatusBloc extends Bloc<AppStatusEvent, AppStatusState> {
     emit(AppStatusLoadingState());
     try {
       final settings = await _repository.getSettings();
-      final models = await _client.fetchAllModelNames(settings);
+      final models = await _client.fetchAllModelNames(settings.provider); // TODO: Different providers
+      final chatModel = await _repository.getActiveModel(ModelType.chat, settings);
+      final visionModel = await _repository.getActiveModel(ModelType.vision, settings);
+      final embeddingModel = await _repository.getActiveModel(ModelType.embedding, settings);
       emit(
         AppStatusSuccessState(
-          chatModelAvailable: models.contains(settings.modelName),
-          embeddingModelAvailable: models.contains(settings.embeddingModelName),
-          visionModelAvailable: models.contains(settings.visionModelName),
+          chatModelAvailable: chatModel.handInputName || models.contains(chatModel.name),
+          embeddingModelAvailable: settings.embeddingEnabled && (embeddingModel.handInputName || models.contains(embeddingModel.name)),
+          visionModelAvailable: visionModel.handInputName || models.contains(visionModel.name),
           providerAvailable: true,
         ),
       );
-    } catch (e) {
+    } on AppException catch (e) {
       emit(
         AppStatusSuccessState(
           chatModelAvailable: false,
           embeddingModelAvailable: false,
           visionModelAvailable: false,
           providerAvailable: false,
+          code: e.statusCode ?? 200
         ),
       );
+    } catch (e, st) {
+      AppLogger.error('_checkStatus', error: e, stackTrace: st);
     }
   }
 }
