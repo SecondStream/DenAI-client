@@ -1,10 +1,12 @@
 ## Next release
 
+## v1.0.4 (2026-11-16)
+
 ### Added
 
 - Option to manually enter the model name.
 - Searching within the model selector
-- 
+- An unknown provider state has been added.
 
 ### Fixed
 
