@@ -33,6 +33,7 @@ The answer must contain ONLY a description of the image and not a single word mo
 You are an advanced roleplay story summarizer.
 Task: Update the existing story log summary with the new events from the chat logs provided below.
 Keep the output extremely dense with facts, chronological, and brief. Focus on plot progression, character names, and key choices.
+Be concise; do not include trivial details in the summary.
 Write the summary strictly in English.
 CRITICAL RULES:
 1. Do not include any introductory phrases, greetings, or conclusions (e.g., NO 'Here is the summary...').

@@ -252,7 +252,12 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
 
       _stopNotExitedTTS(messages);
 
-      emit(currentState.copyWith(messages: messages));
+      emit(
+        currentState.copyWith(
+          messages: messages,
+          summary: updatedChat.summaries.lastOrNull?.content ?? '',
+        ),
+      );
     } catch (e, st) {
       _notification.add(ErrorOccurredEvent(type: ErrType.remove, error: e, stackTrace: st));
       emit(currentState.copyWith());
@@ -672,6 +677,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
         emit(
           currentState.copyWith(
             messages: _getChatActiveMV(chat.messages, chat.char, chat.userCard),
+            summary: chat.summaries.lastOrNull?.content ?? '',
             isAiTyping: false,
           ),
         );
@@ -728,6 +734,7 @@ class ChatBloc extends Bloc<ChatEvent, ChatState> {
           messages: _getChatActiveMV(chat.messages, chat.char, chat.userCard),
           isAiTyping: false,
           selectedImageFile: error.imageFile,
+          summary: chat.summaries.lastOrNull?.content ?? '',
         ),
       );
     } catch (e, st) {
