@@ -177,6 +177,10 @@ class AppLocalization {
       'model_name_hint': 'Enter model name',
       'to_models_list': 'Back to list',
       'to_model_manual': 'Enter manually',
+      'select_model': 'Select a model',
+      'not_models': 'No models found',
+      'nothing_found': 'Nothing found',
+      'searching_model': 'Searching for model...',
 
       // --- Экраны книг ---
       'lorebooks': 'Lorebooks',
@@ -419,6 +423,10 @@ class AppLocalization {
       'model_name_hint': 'Введите название модели',
       'to_models_list': 'Вернуться к списку',
       'to_model_manual': 'Ввести вручную',
+      'select_model': 'Выберите модель',
+      'not_models': 'Не найдено моделей',
+      'nothing_found': 'Ничего не найдено',
+      'searching_model': 'Поиск модели...',
 
       // --- Экраны книг ---
       'lorebooks': 'Книги знаний',
@@ -803,6 +811,14 @@ class AppLocalization {
       _localizedValues[locale.languageCode]?['voice_female_label'] ?? empty;
   String get voiceSettingsHint =>
       _localizedValues[locale.languageCode]?['voice_settings_hint'] ?? empty;
+  String get selectModel =>
+      _localizedValues[locale.languageCode]?['select_model'] ?? empty;
+  String get notModels =>
+      _localizedValues[locale.languageCode]?['not_models'] ?? empty;
+  String get nothingFound =>
+      _localizedValues[locale.languageCode]?['nothing_found'] ?? empty;
+  String get searchingModel =>
+      _localizedValues[locale.languageCode]?['searching_model'] ?? empty;
 
   String getError(ErrType type, [Object? exception]) {
     switch (type) {

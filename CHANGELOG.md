@@ -3,6 +3,8 @@
 ### Added
 
 - Option to manually enter the model name.
+- Searching within the model selector
+- 
 
 ### Fixed
 
