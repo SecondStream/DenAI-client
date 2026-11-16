@@ -44,7 +44,7 @@ class AppStatusBloc extends Bloc<AppStatusEvent, AppStatusState> {
     ProviderChangedEvent event,
     Emitter<AppStatusState> emit,
   ) async {
-    if (event.modelsLoadedSuccess) {
+    if (event.modelsLoadedCode == Consts.normalCode) {
       await _checkStatus(emit);
     } else {
       emit(
@@ -53,6 +53,7 @@ class AppStatusBloc extends Bloc<AppStatusEvent, AppStatusState> {
           embeddingModelAvailable: false,
           visionModelAvailable: false,
           providerAvailable: false,
+          code: event.modelsLoadedCode,
         ),
       );
     }
@@ -62,14 +63,18 @@ class AppStatusBloc extends Bloc<AppStatusEvent, AppStatusState> {
     emit(AppStatusLoadingState());
     try {
       final settings = await _repository.getSettings();
-      final models = await _client.fetchAllModelNames(settings.provider); // TODO: Different providers
+      final models = await _client.fetchAllModelNames(
+        settings.provider,
+      ); // TODO: Different providers
       final chatModel = await _repository.getActiveModel(ModelType.chat, settings);
       final visionModel = await _repository.getActiveModel(ModelType.vision, settings);
       final embeddingModel = await _repository.getActiveModel(ModelType.embedding, settings);
       emit(
         AppStatusSuccessState(
           chatModelAvailable: chatModel.handInputName || models.contains(chatModel.name),
-          embeddingModelAvailable: settings.embeddingEnabled && (embeddingModel.handInputName || models.contains(embeddingModel.name)),
+          embeddingModelAvailable:
+              settings.embeddingEnabled &&
+              (embeddingModel.handInputName || models.contains(embeddingModel.name)),
           visionModelAvailable: visionModel.handInputName || models.contains(visionModel.name),
           providerAvailable: true,
         ),
@@ -81,7 +86,7 @@ class AppStatusBloc extends Bloc<AppStatusEvent, AppStatusState> {
           embeddingModelAvailable: false,
           visionModelAvailable: false,
           providerAvailable: false,
-          code: e.statusCode ?? 200
+          code: e.statusCode ?? 200,
         ),
       );
     } catch (e, st) {

@@ -11,6 +11,6 @@ class StatusCheckedEvent extends AppStatusEvent {
 }
 
 class ProviderChangedEvent extends AppStatusEvent {
-  final bool modelsLoadedSuccess;
-  ProviderChangedEvent(this.modelsLoadedSuccess);
+  final int modelsLoadedCode;
+  ProviderChangedEvent(this.modelsLoadedCode);
 }

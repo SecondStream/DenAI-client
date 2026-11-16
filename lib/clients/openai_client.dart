@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:math';
 import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/common/exceptions.dart';
+import 'package:den_ai/consts/consts.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/repositories/provider/interceptor.dart';
 import 'package:dio/dio.dart';
@@ -233,6 +234,7 @@ class OpenAIClient {
           headers: _getHeaders(provider.key),
           sendTimeout: const Duration(seconds: 10),
           receiveTimeout: const Duration(seconds: 10),
+          validateStatus: (_) => true,
         ),
       );
 
@@ -241,7 +243,10 @@ class OpenAIClient {
         return data["data"] as List<dynamic>? ?? const [];
       } else {
         AppLogger.warn("Provider error ${response.statusCode}: ${response.data}");
-        throw AppException("Provider error ${response.statusCode}: ${response.data}", response.statusCode);
+        throw AppException(
+          "Provider error ${response.statusCode}: ${response.data}",
+          response.statusCode,
+        );
       }
     } catch (e) {
       rethrow;
@@ -265,7 +270,7 @@ class OpenAIClient {
     return result;
   }
 
-  Future<(List<ModelInfo>, bool)> fetchModels(Provider provider, {bool vision = false}) async {
+  Future<(List<ModelInfo>, int)> fetchModels(Provider provider, {bool vision = false}) async {
     try {
       if (cachedModelsList == null || cachedModelsList!.isEmpty) {
         cachedModelsList = await _getRemoteModels(provider);
@@ -321,8 +326,7 @@ class OpenAIClient {
           infoStr =
               "${completionCostPerMillion.toStringAsFixed(1)}/M | ${contextLength ~/ 1024}k ctx";
         } else {
-          infoStr =
-              "${completionCostPerMillion.toStringAsFixed(1)}/M";
+          infoStr = "${completionCostPerMillion.toStringAsFixed(1)}/M";
         }
 
         result.add(ModelInfo(name: name, info: infoStr));
@@ -330,19 +334,27 @@ class OpenAIClient {
 
       result.sort((a, b) => a.name.compareTo(b.name));
 
-      if (result.isEmpty && fallbackResult.isNotEmpty) return (fallbackResult, true);
-      if (result.isNotEmpty) return (result, true);
+      if (result.isEmpty && fallbackResult.isNotEmpty) return (fallbackResult, Consts.normalCode);
+      if (result.isNotEmpty) return (result, Consts.normalCode);
       // ignore: empty_catches
-    } catch (e) {}
+    } on AppException catch (e) {
+      return (
+        [ModelInfo(name: !vision ? defaultModel : defaultVisionModel, info: "???")],
+        e.statusCode ?? Consts.unknownCode,
+      );
+    }
 
-    return ([ModelInfo(name: !vision ? defaultModel : defaultVisionModel, info: "???")], false);
+    return (
+      [ModelInfo(name: !vision ? defaultModel : defaultVisionModel, info: "???")],
+      Consts.unknownCode,
+    );
   }
 
-  Future<(List<ModelInfo>, bool)> fetchVisionModels(Provider provider) async {
+  Future<(List<ModelInfo>, int)> fetchVisionModels(Provider provider) async {
     return await fetchModels(provider, vision: true);
   }
 
-  Future<(List<ModelInfo>, bool)> fetchEmbeddingModels(Provider provider) async {
+  Future<(List<ModelInfo>, int)> fetchEmbeddingModels(Provider provider) async {
     try {
       if (cachedModelsList == null || cachedModelsList!.isEmpty) {
         cachedModelsList = await _getRemoteModels(provider);
@@ -399,8 +411,7 @@ class OpenAIClient {
         if (promptCostPerMillion == 0 && completionCostPerMillion == 0 && contextLength > 0) {
           infoStr = "FREE | ${contextLength ~/ 1024}k ctx";
         } else if (contextLength > 0) {
-          infoStr =
-              "${promptCostPerMillion.toStringAsFixed(1)}/M | ${contextLength ~/ 1024}k ctx";
+          infoStr = "${promptCostPerMillion.toStringAsFixed(1)}/M | ${contextLength ~/ 1024}k ctx";
         } else {
           infoStr = "${promptCostPerMillion.toStringAsFixed(1)}/M";
         }
@@ -414,16 +425,22 @@ class OpenAIClient {
         return a.name.compareTo(b.name);
       });
 
-      if (result.isEmpty && fallbackResult.isNotEmpty) return (fallbackResult, true);
-      if (result.isNotEmpty) return (result, true);
+      if (result.isEmpty && fallbackResult.isNotEmpty) return (fallbackResult, Consts.normalCode);
+      if (result.isNotEmpty) return (result, Consts.normalCode);
 
       // ignore: empty_catches
-    } catch (e) {}
+    } on AppException catch (e) {
+      return ([ModelInfo(name: defaultEmbeddingModel, info: "? ctx")], e.statusCode ?? Consts.unknownCode);
+    }
 
-    return ([ModelInfo(name: defaultEmbeddingModel, info: "? ctx")], false);
+    return ([ModelInfo(name: defaultEmbeddingModel, info: "? ctx")], Consts.unknownCode);
   }
 
-  Map<String, dynamic> _getPayload(SettingsBase settings, Model model, List<Map<String, String>> messages) {
+  Map<String, dynamic> _getPayload(
+    SettingsBase settings,
+    Model model,
+    List<Map<String, String>> messages,
+  ) {
     final basePayload = {
       "model": model.name,
       "messages": messages,

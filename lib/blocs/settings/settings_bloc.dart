@@ -7,6 +7,7 @@ import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/blocs/app_status/app_status_bloc.dart';
 import 'package:den_ai/blocs/notify/notify_bloc.dart';
 import 'package:den_ai/clients/openai_client.dart';
+import 'package:den_ai/consts/consts.dart';
 import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/repositories/lorebooks_repository.dart';
@@ -216,7 +217,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     final settings = await _repository.getSettings();
     final activeModels = await _repository.clearModels(settings);
     _client.clearCache();
-    final (models, visionModels, embeddingModels, success) = await _getModels(settings);
+    final (models, visionModels, embeddingModels, code) = await _getModels(settings);
     emit(
       SettingsProviderSaveSuccess(
         models: models,
@@ -226,7 +227,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         activeModels: activeModels,
       ),
     );
-    statusBloc.add(ProviderChangedEvent(success));
+    statusBloc.add(ProviderChangedEvent(code));
     final providers = await _repository.getAllProviders();
     emit(
       currentState.copyWith(
@@ -240,19 +241,19 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     );
   }
 
-  Future<(List<ModelInfo>, List<ModelInfo>, List<ModelInfo>, bool)> _getModels(
+  Future<(List<ModelInfo>, List<ModelInfo>, List<ModelInfo>, int)> _getModels(
     SettingsBase settings,
   ) async {
-    final (models, success) = await _client.fetchModels(
+    final (models, code) = await _client.fetchModels(
       settings.provider,
     ); // TODO: Different providers
-    final (visionModels, _) = success
+    final (visionModels, _) = code == Consts.normalCode
         ? await _client.fetchVisionModels(settings.provider)
         : ([ModelInfo(name: _client.defaultVisionModel, info: "???")], false);
-    final (embeddingModels, _) = success
+    final (embeddingModels, _) = code == Consts.normalCode
         ? await _client.fetchEmbeddingModels(settings.provider)
         : ([ModelInfo(name: _client.defaultEmbeddingModel, info: "???")], false);
-    return (models, visionModels, embeddingModels, success);
+    return (models, visionModels, embeddingModels, code);
   }
 
   Future<void> _rebuildAllEmbeddings(SettingsBase settings, Model model) async {

@@ -4,6 +4,7 @@ class Consts {
   static const messageTmp = -2;
   static const normalCode = 200;
   static const notFoundCode = 404;
+  static const unknownCode = 520;
 }
 
 class MessageTags {
