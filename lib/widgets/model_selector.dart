@@ -56,7 +56,9 @@ class ModelSelector extends StatelessWidget {
               icon: const Icon(Icons.close, size: 20),
               tooltip: loc.toModelsList,
               onPressed: () {
-                final fallbackName = itemNames.isNotEmpty ? itemNames.first : '';
+                final fallbackName = itemNames.contains(modelView.name)
+                    ? modelView.name
+                    : (itemNames.isNotEmpty ? itemNames.first : null);
                 onChanged(modelView.copyWith(name: fallbackName, handInputName: false));
               },
             ),
@@ -97,7 +99,7 @@ class ModelSelector extends StatelessWidget {
                   ),
                   tooltip: loc.toModelManual,
                   onPressed: () {
-                    onChanged(modelView.copyWith(name: '', handInputName: true));
+                    onChanged(modelView.copyWith(name: currentValue ?? '', handInputName: true));
                   },
                 ),
               ],
