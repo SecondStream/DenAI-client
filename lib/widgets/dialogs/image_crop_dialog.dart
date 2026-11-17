@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:den_ai/models/models.dart';
@@ -7,12 +9,14 @@ class AvatarClipperDialog extends StatefulWidget {
   final ImageProvider imageProvider;
   final CropData? initialCrop;
   final VoidCallback? onFilePickRequested;
+  final bool showDragHandle;
 
   const AvatarClipperDialog({
     super.key,
     required this.imageProvider,
     this.initialCrop,
     this.onFilePickRequested,
+    this.showDragHandle = false,
   });
 
   static Future<CropData?> open(
@@ -21,15 +25,37 @@ class AvatarClipperDialog extends StatefulWidget {
     CropData? initialCrop,
     VoidCallback? onFilePickRequested,
   }) {
-    return showDialog<CropData>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AvatarClipperDialog(
-        imageProvider: provider,
-        initialCrop: initialCrop,
-        onFilePickRequested: onFilePickRequested,
-      ),
-    );
+    final isDesktop = MediaQuery.of(context).size.width > 550;
+    final theme = Theme.of(context);
+    return isDesktop
+        ? showDialog<CropData>(
+            context: context,
+            barrierDismissible: false,
+            builder: (context) => Dialog(
+              backgroundColor: theme.scaffoldBackgroundColor,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: SizedBox(
+                width: 382,
+                child: AvatarClipperDialog(
+                  imageProvider: provider,
+                  initialCrop: initialCrop,
+                  onFilePickRequested: onFilePickRequested,
+                ),
+              ),
+            ),
+          )
+        : showModalBottomSheet<CropData>(
+            context: context,
+            backgroundColor: theme.scaffoldBackgroundColor,
+            isScrollControlled: true,
+            useSafeArea: true,
+            builder: (context) => AvatarClipperDialog(
+              imageProvider: provider,
+              initialCrop: initialCrop,
+              onFilePickRequested: onFilePickRequested,
+              showDragHandle: true,
+            ),
+          );
   }
 
   @override
@@ -49,10 +75,17 @@ class _AvatarClipperDialogState extends State<AvatarClipperDialog> {
   void initState() {
     super.initState();
     _currentProvider = widget.imageProvider;
-    _initializeContainerSize(widget.initialCrop);
   }
 
-  void _initializeContainerSize(CropData? savedCrop) {
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isSizeInitialized) {
+      _initializeContainerSize(widget.initialCrop, MediaQuery.of(context).size.width);
+    }
+  }
+
+  void _initializeContainerSize(CropData? savedCrop, double screenWith) {
     _currentProvider
         .resolve(const ImageConfiguration())
         .addListener(
@@ -64,7 +97,7 @@ class _AvatarClipperDialogState extends State<AvatarClipperDialog> {
             final double aspect = imgWidth / imgHeight;
 
             setState(() {
-              const double maxSize = 350.0;
+              double maxSize = min(350, screenWith - 32);
 
               if (aspect > 1.0) {
                 _boxWidth = maxSize;
@@ -96,37 +129,38 @@ class _AvatarClipperDialogState extends State<AvatarClipperDialog> {
     final loc = AppLocalization.of(context);
 
     if (!_isSizeInitialized) {
-      return const AlertDialog(
-        backgroundColor: Colors.transparent,
-        content: Center(child: CircularProgressIndicator()),
-      );
+      return Center(child: CircularProgressIndicator());
     }
 
     final double maxAllowedCropSize = _boxWidth < _boxHeight ? _boxWidth : _boxHeight;
 
-    return AlertDialog(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      title: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Text(loc.cropAvatarTitle, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-          if (widget.onFilePickRequested != null)
-            Tooltip(
-              message: loc.replaceAvatarHint,
-              child: IconButton(
-                icon: Icon(Icons.photo_library, color: theme.colorScheme.primary, size: 22),
-                onPressed: () {
-                  context.pop();
-                  widget.onFilePickRequested!();
-                },
-              ),
-            ),
-        ],
-      ),
-      content: Column(
+    return SafeArea(
+      child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          if (widget.showDragHandle)
+            Container(
+              margin: const EdgeInsets.only(top: 10, bottom: 8),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            )
+          else
+            const SizedBox(height: 16),
+          Padding(
+            padding: EdgeInsetsGeometry.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Icon(Icons.photo_library_outlined, color: theme.colorScheme.primary, size: 22),
+                const SizedBox(width: 10),
+                Text(loc.cropAvatarTitle, style: TextStyle(fontSize: 20, color: Colors.white)),
+              ],
+            ),
+          ),
+          SizedBox(height: 12),
           Container(
             width: _boxWidth,
             height: _boxHeight,
@@ -166,42 +200,66 @@ class _AvatarClipperDialogState extends State<AvatarClipperDialog> {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          Slider(
-            value: _cropSize.clamp(40.0, maxAllowedCropSize),
-            min: 40.0,
-            max: maxAllowedCropSize,
-            onChanged: (value) {
-              setState(() {
-                _cropSize = value;
-                final radius = _cropSize / 2;
-                double newX = _circleCenter.dx.clamp(radius, _boxWidth - radius);
-                double newY = _circleCenter.dy.clamp(radius, _boxHeight - radius);
-                _circleCenter = Offset(newX, newY);
-              });
-            },
+          Padding(
+            padding: EdgeInsetsGeometry.all(16),
+            child: Column(
+              children: [
+                Slider(
+                  value: _cropSize.clamp(40.0, maxAllowedCropSize),
+                  min: 40.0,
+                  max: maxAllowedCropSize,
+                  onChanged: (value) {
+                    setState(() {
+                      _cropSize = value;
+                      final radius = _cropSize / 2;
+                      double newX = _circleCenter.dx.clamp(radius, _boxWidth - radius);
+                      double newY = _circleCenter.dy.clamp(radius, _boxHeight - radius);
+                      _circleCenter = Offset(newX, newY);
+                    });
+                  },
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: () {
+                        context.pop();
+                        widget.onFilePickRequested!();
+                      },
+                      child: Text('Заменить'),
+                    ),
+                    Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        TextButton(
+                          onPressed: () => context.pop(),
+                          child: Text(loc.cancel, style: TextStyle(color: theme.hintColor)),
+                        ),
+                        const SizedBox(width: 12),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: theme.colorScheme.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                          ),
+                          onPressed: _submitCrop,
+                          child: Text(
+                            loc.ready,
+                            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),
-      actions: [
-        TextButton(
-          onPressed: () => context.pop(),
-          child: Text(loc.cancel, style: TextStyle(color: theme.hintColor)),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: theme.colorScheme.primary,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          ),
-          onPressed: _submitCrop,
-          child: Text(
-            loc.ready,
-            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
-        ),
-      ],
     );
   }
 

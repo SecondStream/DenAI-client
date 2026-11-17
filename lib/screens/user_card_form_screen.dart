@@ -123,10 +123,6 @@ class _UserCardFormScreenState extends PersonaFormScreenState<UserCardFormScreen
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.red.shade400,
                                   side: BorderSide(color: Colors.red.shade400, width: 1.5),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
                                 ),
                                 icon: const Icon(Icons.delete_outline, size: 22),
                                 label: Text(

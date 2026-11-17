@@ -123,7 +123,7 @@ class _VoiceSettingsContentState extends State<VoiceSettingsContent> {
                   SizedBox(width: 10),
                   Text(
                     loc.voiceSettings,
-                    style: TextStyle(fontSize: 22, color: Colors.white),
+                    style: TextStyle(fontSize: 20, color: Colors.white),
                   ),
                 ],
               ),

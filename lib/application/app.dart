@@ -118,6 +118,12 @@ class ChatApp extends StatelessWidget {
             ),
           ),
         ),
+        outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(
+          padding: EdgeInsets.symmetric(vertical: isDesktop ? 16 : 12),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+        )),
 
         sliderTheme: SliderThemeData(
             overlayShape: SliderComponentShape.noOverlay,

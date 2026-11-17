@@ -110,7 +110,7 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                 const SizedBox(width: 10),
                 Text(
                   widget.provider == null ? loc.providerAdding : loc.providerEditing,
-                  style: TextStyle(fontSize: 22, color: Colors.white),
+                  style: TextStyle(fontSize: 20, color: Colors.white),
                 ),
               ],
             ),

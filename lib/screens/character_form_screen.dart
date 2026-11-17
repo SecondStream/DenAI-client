@@ -121,7 +121,9 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
       )..add(InitCharacterFormEvent(widget.characterId)),
       child: Scaffold(
         appBar: AppBar(
-          title: Text(widget.characterId != null ? loc.characterFormTitleEdit : loc.characterFormTitleCreate),
+          title: Text(
+            widget.characterId != null ? loc.characterFormTitleEdit : loc.characterFormTitleCreate,
+          ),
           actions: [
             IconButton(
               icon: const Icon(Icons.help_outline, size: 28),
@@ -177,7 +179,9 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                               children: [
                                 Text(
                                   loc.backgroundLabel,
-                                  style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor),
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.hintColor,
+                                  ),
                                 ),
                                 const SizedBox(height: 8),
                                 InkWell(
@@ -201,20 +205,25 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                               ],
                             ),
                           ),
-                          const SizedBox(width: 24),
-                          _buildImportButton(context, loc, theme),
-                          const SizedBox(width: 24),
-                          _buildExportButton(context, loc, theme, state.character?.id),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
+                      Row(
+                        children: [
+                          Expanded(child: _buildImportButton(context, loc, theme)),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildExportButton(context, loc, theme, state.character?.id),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),
-
                       _buildTextField(
                         controller: _nameController,
                         label: loc.charNameLabel,
                         hint: loc.charNameHint,
                         minLines: 1,
-                        maxLines: 1,
+                        maxLines: 15,
                         validator: (v) => v!.trim().isEmpty ? loc.validationCharName : null,
                       ),
                       _buildTextField(
@@ -222,36 +231,42 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                         label: loc.greetingLabel,
                         hint: loc.greetingHint,
                         minLines: 4,
+                        maxLines: 15,
                       ),
                       _buildTextField(
                         controller: _appearanceController,
                         label: loc.appearanceLabel,
                         hint: loc.appearanceHint,
                         minLines: 4,
+                        maxLines: 15,
                       ),
                       _buildTextField(
                         controller: _personalityController,
                         label: loc.personalityLabel,
                         hint: loc.personalityHint,
                         minLines: 4,
+                        maxLines: 15,
                       ),
                       _buildTextField(
                         controller: _scenarioController,
                         label: loc.scenarioLabel,
                         hint: loc.scenarioHint,
                         minLines: 4,
+                        maxLines: 15,
                       ),
                       _buildTextField(
                         controller: _promptController,
                         label: loc.promptLabel,
                         hint: loc.promptHint,
                         minLines: 3,
+                        maxLines: 10,
                       ),
                       _buildTextField(
                         controller: _notesController,
                         label: loc.notesLabel,
                         hint: loc.notesHint,
                         minLines: 3,
+                        maxLines: 10,
                       ),
 
                       _buildLorebookButton(context, loc, theme, state.allLorebooks),
@@ -267,10 +282,6 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                                 style: OutlinedButton.styleFrom(
                                   foregroundColor: Colors.red.shade400,
                                   side: BorderSide(color: Colors.red.shade400, width: 1.5),
-                                  padding: const EdgeInsets.symmetric(vertical: 16),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
                                 ),
                                 icon: const Icon(Icons.delete_outline, size: 22),
                                 label: Text(
@@ -322,70 +333,62 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
   }
 
   Widget _buildImportButton(BuildContext context, AppLocalization loc, ThemeData theme) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(loc.import, style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor)),
-        const SizedBox(height: 8),
-        InkWell(
-          onTap: () => _pickCard(context),
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            height: 120,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            child: Container(
-              alignment: Alignment.center,
-              padding: EdgeInsets.all(20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.person_pin_rounded, size: 32, color: theme.hintColor),
-                  const SizedBox(height: 4),
-                  Text(loc.imortExt, style: TextStyle(color: theme.hintColor, fontSize: 12)),
-                ],
+    return InkWell(
+      onTap: () => _pickCard(context),
+      borderRadius: BorderRadius.circular(12),
+      child: Ink(
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8,
+          children: [
+            const Icon(Icons.person_pin_rounded, size: 20, color: Colors.grey),
+            Text(
+              loc.import,
+              style: TextStyle(
+                color: Colors.grey.shade500,
+                fontSize: theme.textTheme.bodySmall?.fontSize,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
   Widget _buildExportButton(BuildContext context, AppLocalization loc, ThemeData theme, int? id) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(loc.export, style: theme.textTheme.bodySmall?.copyWith(color: theme.hintColor)),
-        const SizedBox(height: 8),
-        InkWell(
-          onTap: () => _exportCard(context, loc, id),
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            height: 120,
-            decoration: BoxDecoration(
-              color: theme.colorScheme.primary.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            clipBehavior: Clip.antiAliasWithSaveLayer,
-            child: Container(
-              alignment: Alignment.center,
-              padding: EdgeInsets.all(20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.output, size: 32, color: theme.hintColor),
-                  const SizedBox(height: 4),
-                  Text(loc.exportExt, style: TextStyle(color: theme.hintColor, fontSize: 12)),
-                ],
+    return InkWell(
+      onTap: () => _exportCard(context, loc, id),
+      borderRadius: BorderRadius.circular(12),
+      child: Ink(
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          spacing: 8,
+          children: [
+            const Icon(Icons.output, size: 20, color: Colors.grey),
+            Text(
+              loc.export,
+              style: TextStyle(
+                color: Colors.grey.shade500,
+                fontSize: theme.textTheme.bodySmall?.fontSize,
+                fontWeight: FontWeight.w500,
               ),
             ),
-          ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
