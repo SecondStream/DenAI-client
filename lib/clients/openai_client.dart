@@ -342,7 +342,7 @@ class OpenAIClient {
         [ModelInfo(name: !vision ? defaultModel : defaultVisionModel, info: "???")],
         e.statusCode ?? Consts.unknownCode,
       );
-    }
+    } catch (_) {}
 
     return (
       [ModelInfo(name: !vision ? defaultModel : defaultVisionModel, info: "???")],
@@ -431,7 +431,7 @@ class OpenAIClient {
       // ignore: empty_catches
     } on AppException catch (e) {
       return ([ModelInfo(name: defaultEmbeddingModel, info: "? ctx")], e.statusCode ?? Consts.unknownCode);
-    }
+    } catch (_) {}
 
     return ([ModelInfo(name: defaultEmbeddingModel, info: "? ctx")], Consts.unknownCode);
   }
