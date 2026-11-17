@@ -38,7 +38,7 @@ class SettingsRepository extends BaseRepository {
         visionModelName: 'google/gemma-4-31b-it',
         embeddingModelName: 'baai/bge-m3',
         tokenizerPath: 'assets/tokenizers/gemma4.json',
-        maxContextTokens: 4096,
+        maxContextTokens: 8192,
         temperature: 0.7,
         minP: 0.05,
         topP: 0.9,

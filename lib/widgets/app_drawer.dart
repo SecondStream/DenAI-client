@@ -20,10 +20,13 @@ class AppDrawer extends StatelessWidget {
     final theme = Theme.of(context);
     final currentRoute = ModalRoute.of(context)?.settings.name;
     final loc = AppLocalization.of(context);
+    final size = MediaQuery.of(context).size;
+    print(size);
 
     return BlocProvider<DrawerBloc>(
       create: (context) => DrawerBloc(GetIt.instance.get())..add(DrawerShownEvent()),
       child: Drawer(
+        width: 280,
         backgroundColor: theme.scaffoldBackgroundColor,
         child: Column(
           children: [
@@ -103,14 +106,14 @@ class AppDrawer extends StatelessWidget {
                 final file = await AppLogger.getLogFileForExport();
                 if (file != null) {
                   final path = await FileTool.getSaveLogPath(loc);
-                  if(path != null) file.copy(path);
+                  if (path != null) file.copy(path);
                 }
               },
-              child:
-            Text(
-              AppConfig.of(context).version,
-              style: TextStyle(color: theme.hintColor, fontSize: 11),
-            ),),
+              child: Text(
+                AppConfig.of(context).version,
+                style: TextStyle(color: theme.hintColor, fontSize: 11),
+              ),
+            ),
             SizedBox(height: 20),
           ],
         ),
@@ -119,7 +122,7 @@ class AppDrawer extends StatelessWidget {
   }
 
   Widget _buildLogo(BuildContext context, ThemeData theme) {
-    return Image.asset(AppImages.logo, width: 150);
+    return Image.asset(AppImages.logo, width: 80);
   }
 
   Widget _buildUserCard(BuildContext context, ThemeData theme, UserCard? card) {

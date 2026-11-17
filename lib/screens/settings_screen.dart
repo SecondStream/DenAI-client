@@ -181,291 +181,284 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _initializeFields(state.settings, state.activeModels);
             _checkModels(state);
 
-            return Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Form(
-                key: _formKey,
+            final isMobile = MediaQuery.of(context).size.width < 550;
+
+            final leftColumnWidgets = [
+              SizedBox.shrink(),
+              _buildSectionTitle(theme, loc.apiProvider),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDropdownProviders(
+                      theme,
+                      label: loc.labelProvider,
+                      value: state.settings.provider.id,
+                      items: state.providers,
+                      onChanged: (v) {
+                        if (v != null && v != state.settings.provider.id) {
+                          context.read<SettingsBloc>().add(UpdateProviderEvent(providerId: v));
+                        }
+                      },
+                    ),
+                  ),
+                  SizedBox(width: 10),
+                  StatusButton(),
+                ],
+              ),
+              Row(
+                mainAxisSize: MainAxisSize.max,
+                spacing: 16,
+                children: [
+                  Flexible(
+                    fit: FlexFit.tight,
+                    flex: 1,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.edit, size: 22),
+                      label: Text(
+                        loc.change,
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () => _openEditProvider(context, provider),
+                    ),
+                  ),
+                  Flexible(
+                    fit: FlexFit.tight,
+                    flex: 1,
+                    child: ElevatedButton.icon(
+                      icon: const Icon(Icons.api, size: 22),
+                      label: Text(
+                        loc.apiProviderAdd,
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                      onPressed: () => _openEditProvider(context, null),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 30),
+              _buildSectionTitle(theme, loc.sectionOllamaTokenizer),
+              const SizedBox(height: 16),
+
+              _buildDropdownModels(
+                label: loc.labelMainModel,
+                value: _selectedModel,
+                items: state.models,
+                onChanged: (v) => setState(() => _selectedModel = v),
+              ),
+
+              _buildDropdownModels(
+                label: loc.labelVisionModel,
+                value: _selectedVisionModel,
+                items: state.visionModels,
+                onChanged: (v) => setState(() => _selectedVisionModel = v),
+              ),
+
+              Container(
+                margin: const EdgeInsets.only(bottom: 16),
+                padding: const EdgeInsets.only(left: 8),
+                // decoration: BoxDecoration(
+                //   color: theme.cardColor,
+                //   borderRadius: BorderRadius.circular(12),
+                // ),
                 child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildSectionTitle(theme, loc.apiProvider),
-                          const SizedBox(height: 16),
-                          Row(
-                            children: [
-                              Expanded(
-                                child: _buildDropdownProviders(
-                                  theme,
-                                  label: loc.labelProvider,
-                                  value: state.settings.provider.id,
-                                  items: state.providers,
-                                  onChanged: (v) {
-                                    if (v != null && v != state.settings.provider.id) {
-                                      context.read<SettingsBloc>().add(
-                                        UpdateProviderEvent(providerId: v),
-                                      );
-                                    }
-                                  },
-                                ),
-                              ),
-                              SizedBox(width: 10),
-                              StatusButton(),
-                            ],
-                          ),
-                          Row(
-                            mainAxisSize: MainAxisSize.max,
-                            spacing: 16,
-                            children: [
-                              Flexible(
-                                fit: FlexFit.tight,
-                                flex: 8,
-                                child: ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: theme.colorScheme.primary,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 18),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  icon: const Icon(Icons.edit, size: 22),
-                                  label: Text(
-                                    loc.change,
-                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                                  ),
-                                  onPressed: () => _openEditProvider(context, provider),
-                                ),
-                              ),
-                              Flexible(
-                                fit: FlexFit.tight,
-                                flex: 15,
-                                child: ElevatedButton.icon(
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: theme.colorScheme.primary,
-                                    foregroundColor: Colors.white,
-                                    padding: const EdgeInsets.symmetric(vertical: 18),
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  icon: const Icon(Icons.api, size: 22),
-                                  label: Text(
-                                    loc.apiProviderAdd,
-                                    style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                                  ),
-                                  onPressed: () => _openEditProvider(context, null),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 30),
-                          _buildSectionTitle(theme, loc.sectionOllamaTokenizer),
-                          const SizedBox(height: 16),
-
-                          _buildDropdownModels(
-                            label: loc.labelMainModel,
-                            value: _selectedModel,
-                            items: state.models,
-                            onChanged: (v) => setState(() => _selectedModel = v),
-                          ),
-
-                          _buildDropdownModels(
-                            label: loc.labelVisionModel,
-                            value: _selectedVisionModel,
-                            items: state.visionModels,
-                            onChanged: (v) => setState(() => _selectedVisionModel = v),
-                          ),
-
-                          Container(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            padding: const EdgeInsets.only(left: 8),
-                            // decoration: BoxDecoration(
-                            //   color: theme.cardColor,
-                            //   borderRadius: BorderRadius.circular(12),
-                            // ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    loc.useEmbeddingsLabel,
-                                    textAlign: TextAlign.end,
-                                    style: theme.textTheme.titleMedium?.copyWith(
-                                      color: theme.colorScheme.primary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(width: 12),
-                                Switch(
-                                  value: _embeddingEnabled,
-                                  onChanged: (val) => setState(() => _embeddingEnabled = val),
-                                ),
-                              ],
-                            ),
-                          ),
-                          if (_embeddingEnabled)
-                            _buildDropdownModels(
-                              label: loc.labelEmbeddingModel,
-                              value: _selectedEmbeddingModel,
-                              items: state.embeddingModels,
-                              onChanged: (v) => setState(() => _selectedEmbeddingModel = v),
-                            ),
-
-                          _buildDropdownTokenizers(
-                            theme,
-                            label: loc.labelTokenizer,
-                            value: _selectedTokenizer,
-                            items: state.tokenizers,
-                            onChanged: (v) => setState(() => _selectedTokenizer = v),
-                          ),
-
-                          const SizedBox(height: 16),
-                          _buildSectionTitle(theme, loc.sectionContextWindow),
-
-                          _buildSliderRow(
-                            theme,
-                            label: loc.labelContextLimit,
-                            value: _maxContext,
-                            min: 2048,
-                            max: 131072,
-                            divisions: 126,
-                            displayValue: loc.contextSize(_maxContext.toInt()),
-                            onChanged: (v) => setState(() => _maxContext = v),
-                          ),
-                          Spacer(),
-
-                          // const SizedBox(height: 16),
-                          // _buildSectionTitle(theme, loc.sectionSystemTemplate),
-                          // const SizedBox(height: 12),
-                          // Expanded(
-                          //   child: TextField(
-                          //     controller: _templateController,
-                          //     maxLines: null,
-                          //     expands: true,
-                          //     style: const TextStyle(
-                          //       fontSize: 14,
-                          //       height: 1.4,
-                          //       color: Colors.white,
-                          //     ),
-                          //     textAlignVertical: TextAlignVertical.top,
-                          //     decoration: InputDecoration(
-                          //       hintText: loc.hintSystemTemplate,
-                          //       fillColor: theme.cardColor,
-                          //       filled: true,
-                          //       border: OutlineInputBorder(
-                          //         borderRadius: BorderRadius.circular(12),
-                          //         borderSide: BorderSide.none,
-                          //       ),
-                          //       contentPadding: const EdgeInsets.all(16),
-                          //     ),
-                          //   ),
-                          // ),
-                        ],
+                      child: Text(
+                        loc.useEmbeddingsLabel,
+                        textAlign: TextAlign.end,
+                        style: theme.textTheme.titleMedium?.copyWith(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-
-                    const SizedBox(width: 40),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          _buildSectionTitle(theme, loc.sectionSamplingParams),
-                          const SizedBox(height: 12),
-                          _buildSliderRow(
-                            theme,
-                            label: loc.labelTemperature,
-                            value: _temperature,
-                            min: 0.1,
-                            max: 2.0,
-                            divisions: 19,
-                            displayValue: _temperature.toStringAsFixed(2),
-                            onChanged: (v) => setState(() => _temperature = v),
-                          ),
-                          // _buildSliderRow(
-                          //   theme,
-                          //   label: loc.labelMinP,
-                          //   value: _minP,
-                          //   min: 0.01,
-                          //   max: 0.5,
-                          //   divisions: 49,
-                          //   displayValue: _minP.toStringAsFixed(2),
-                          //   onChanged: (v) => setState(() => _minP = v),
-                          // ),
-                          _buildSliderRow(
-                            theme,
-                            label: loc.labelTopP,
-                            value: _topP,
-                            min: 0.1,
-                            max: 1.0,
-                            divisions: 9,
-                            displayValue: _topP.toStringAsFixed(2),
-                            onChanged: (v) => setState(() => _topP = v),
-                          ),
-                          _buildSliderRow(
-                            theme,
-                            label: loc.labelRepeatPenalty,
-                            value: _repeatPenalty,
-                            min: 1.0,
-                            max: 1.5,
-                            divisions: 50,
-                            displayValue: _repeatPenalty.toStringAsFixed(2),
-                            onChanged: (v) => setState(() => _repeatPenalty = v),
-                          ),
-
-                          const SizedBox(height: 16),
-                          _buildSectionTitle(theme, loc.sectionSystemPrompt),
-                          const SizedBox(height: 12),
-                          Expanded(
-                            child: TextField(
-                              controller: _systemPromptController,
-                              maxLines: null,
-                              expands: true,
-                              style: const TextStyle(
-                                fontSize: 14,
-                                height: 1.4,
-                                color: Colors.white,
-                              ),
-                              textAlignVertical: TextAlignVertical.top,
-                              decoration: InputDecoration(
-                                hintText: loc.hintSystemPrompt,
-                                fillColor: theme.cardColor,
-                                filled: true,
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                  borderSide: BorderSide.none,
-                                ),
-                                contentPadding: const EdgeInsets.all(16),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton.icon(
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: theme.colorScheme.primary,
-                              foregroundColor: Colors.white,
-                              padding: const EdgeInsets.symmetric(vertical: 18),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                            ),
-                            icon: const Icon(Icons.save_as, size: 22),
-                            label: Text(
-                              loc.buttonSettingsSaved,
-                              style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
-                            ),
-                            onPressed: () => _saveSettings(context, loc, state),
-                          ),
-                        ],
-                      ),
+                    SizedBox(width: 12),
+                    Switch(
+                      value: _embeddingEnabled,
+                      onChanged: (val) => setState(() => _embeddingEnabled = val),
                     ),
                   ],
                 ),
               ),
+              if (_embeddingEnabled)
+                _buildDropdownModels(
+                  label: loc.labelEmbeddingModel,
+                  value: _selectedEmbeddingModel,
+                  items: state.embeddingModels,
+                  onChanged: (v) => setState(() => _selectedEmbeddingModel = v),
+                ),
+
+              _buildDropdownTokenizers(
+                theme,
+                label: loc.labelTokenizer,
+                value: _selectedTokenizer,
+                items: state.tokenizers,
+                onChanged: (v) => setState(() => _selectedTokenizer = v),
+              ),
+
+              const SizedBox(height: 16),
+              _buildSectionTitle(theme, loc.sectionContextWindow),
+
+              _buildSliderRow(
+                theme,
+                label: loc.labelContextLimit,
+                value: _maxContext,
+                min: 2048,
+                max: 131072,
+                divisions: 126,
+                displayValue: loc.contextSize(_maxContext.toInt()),
+                onChanged: (v) => setState(() => _maxContext = v),
+              ),
+              // Spacer(),
+
+              // const SizedBox(height: 16),
+              // _buildSectionTitle(theme, loc.sectionSystemTemplate),
+              // const SizedBox(height: 12),
+              // Expanded(
+              //   child: TextField(
+              //     controller: _templateController,
+              //     maxLines: null,
+              //     expands: true,
+              //     style: const TextStyle(
+              //       fontSize: 14,
+              //       height: 1.4,
+              //       color: Colors.white,
+              //     ),
+              //     textAlignVertical: TextAlignVertical.top,
+              //     decoration: InputDecoration(
+              //       hintText: loc.hintSystemTemplate,
+              //       fillColor: theme.cardColor,
+              //       filled: true,
+              //       border: OutlineInputBorder(
+              //         borderRadius: BorderRadius.circular(12),
+              //         borderSide: BorderSide.none,
+              //       ),
+              //       contentPadding: const EdgeInsets.all(16),
+              //     ),
+              //   ),
+              // ),
+            ];
+
+            final promptField = TextField(
+              controller: _systemPromptController,
+              maxLines: null,
+              minLines: isMobile ? 6 : null,
+              expands: !isMobile,
+              style: const TextStyle(fontSize: 14, height: 1.4, color: Colors.white),
+              textAlignVertical: TextAlignVertical.top,
+              decoration: InputDecoration(
+                hintText: loc.hintSystemPrompt,
+                fillColor: theme.cardColor,
+                filled: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: const EdgeInsets.all(16),
+              ),
             );
+
+            final rightColumnWidgets = [
+              SizedBox.shrink(),
+              _buildSectionTitle(theme, loc.sectionSamplingParams),
+              const SizedBox(height: 12),
+              _buildSliderRow(
+                theme,
+                label: loc.labelTemperature,
+                value: _temperature,
+                min: 0.1,
+                max: 2.0,
+                divisions: 19,
+                displayValue: _temperature.toStringAsFixed(2),
+                onChanged: (v) => setState(() => _temperature = v),
+              ),
+              // _buildSliderRow(
+              //   theme,
+              //   label: loc.labelMinP,
+              //   value: _minP,
+              //   min: 0.01,
+              //   max: 0.5,
+              //   divisions: 49,
+              //   displayValue: _minP.toStringAsFixed(2),
+              //   onChanged: (v) => setState(() => _minP = v),
+              // ),
+              _buildSliderRow(
+                theme,
+                label: loc.labelTopP,
+                value: _topP,
+                min: 0.1,
+                max: 1.0,
+                divisions: 9,
+                displayValue: _topP.toStringAsFixed(2),
+                onChanged: (v) => setState(() => _topP = v),
+              ),
+              _buildSliderRow(
+                theme,
+                label: loc.labelRepeatPenalty,
+                value: _repeatPenalty,
+                min: 1.0,
+                max: 1.5,
+                divisions: 50,
+                displayValue: _repeatPenalty.toStringAsFixed(2),
+                onChanged: (v) => setState(() => _repeatPenalty = v),
+              ),
+
+              const SizedBox(height: 16),
+              _buildSectionTitle(theme, loc.sectionSystemPrompt),
+              const SizedBox(height: 12),
+              isMobile ? promptField : Expanded(child: promptField),
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.save_as, size: 22),
+                label: Text(
+                  loc.buttonSettingsSaved,
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () => _saveSettings(context, loc, state),
+              ),
+            ];
+
+            return isMobile
+                ? SingleChildScrollView(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          ...leftColumnWidgets,
+                          const SizedBox(height: 32),
+                          ...rightColumnWidgets,
+                        ],
+                      ),
+                    ),
+                  )
+                : Padding(
+                    padding: const EdgeInsets.all(24.0),
+                    child: Form(
+                      key: _formKey,
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: leftColumnWidgets,
+                            ),
+                          ),
+                          const SizedBox(width: 40),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: rightColumnWidgets,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
           },
         ),
       ),
@@ -580,7 +573,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               ),
             ],
           ),
-          Slider(value: value, min: min, max: max, divisions: divisions, onChanged: onChanged),
+          Padding(
+            padding: EdgeInsetsGeometry.symmetric(vertical: 12),
+            child: Slider(
+              value: value,
+              min: min,
+              max: max,
+              divisions: divisions,
+              onChanged: onChanged,
+            ),
+          ),
         ],
       ),
     );

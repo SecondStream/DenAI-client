@@ -289,14 +289,6 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                           Expanded(
                             flex: 2,
                             child: ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: theme.colorScheme.primary,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 16),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
                               onPressed: () => _submitForm(context, state.character?.id),
                               child: Text(
                                 isEditing ? loc.saveButton : loc.charCreateButton,

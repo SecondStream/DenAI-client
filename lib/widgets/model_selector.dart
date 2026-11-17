@@ -145,6 +145,7 @@ class ModelSelector extends StatelessWidget {
         : await showModalBottomSheet<String>(
             context: context,
             isScrollControlled: true,
+            useSafeArea: true,
             backgroundColor: Theme.of(context).scaffoldBackgroundColor,
             shape: const RoundedRectangleBorder(
               borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
@@ -213,7 +214,7 @@ class _ModelSearchBodyState extends State<_ModelSearchBody> {
       children: [
         if (widget.showDragHandle)
           Container(
-            margin: const EdgeInsets.only(top: 10, bottom: 4),
+            margin: const EdgeInsets.only(top: 10, bottom: 8),
             width: 36,
             height: 4,
             decoration: BoxDecoration(
@@ -222,30 +223,39 @@ class _ModelSearchBodyState extends State<_ModelSearchBody> {
             ),
           )
         else
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                widget.title,
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+              Icon(
+                Icons.webhook,
+                color: theme.colorScheme.primary,
+                size: 22,
               ),
-              Text(
-                '${filtered.length} / ${widget.items.length}',
-                style: const TextStyle(fontSize: 12, color: Colors.white54),
-              ),
+              const SizedBox(width: 10),
+              Expanded(child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    widget.title,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
+                  ),
+                  Text(
+                    '${filtered.length} / ${widget.items.length}',
+                    style: const TextStyle(fontSize: 12, color: Colors.white54),
+                  ),
+                ],
+              ),)
             ],
           ),
         ),
         const SizedBox(height: 12),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          padding: const EdgeInsets.symmetric(horizontal: 20),
           child: TextField(
             controller: _searchController,
             style: const TextStyle(color: Colors.white, fontSize: 14),
@@ -281,7 +291,7 @@ class _ModelSearchBodyState extends State<_ModelSearchBody> {
               : ListView.builder(
                   controller: ScrollController(initialScrollOffset: index * 44),
                   clipBehavior: Clip.hardEdge,
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
                   itemCount: filtered.length,
                   itemExtent: 44,
                   itemBuilder: (context, index) {

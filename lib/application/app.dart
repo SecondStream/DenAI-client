@@ -12,6 +12,8 @@ class ChatApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+    final isDesktop = size.width > 550;
     return MaterialApp(
       title: 'DenAI',
       debugShowCheckedModeBanner: false,
@@ -106,6 +108,20 @@ class ChatApp extends StatelessWidget {
             ),
           ),
         ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.indigo.shade400,
+            foregroundColor: Colors.white,
+            padding: EdgeInsets.symmetric(vertical: isDesktop ? 16 : 12),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+        ),
+
+        sliderTheme: SliderThemeData(
+            overlayShape: SliderComponentShape.noOverlay,
+        )
       ),
 
       supportedLocales: const [Locale('en'), Locale('ru')],

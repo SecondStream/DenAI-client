@@ -189,7 +189,12 @@ class _AvatarClipperDialogState extends State<AvatarClipperDialog> {
           child: Text(loc.cancel, style: TextStyle(color: theme.hintColor)),
         ),
         ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: theme.colorScheme.primary),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: theme.colorScheme.primary,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          ),
           onPressed: _submitCrop,
           child: Text(
             loc.ready,

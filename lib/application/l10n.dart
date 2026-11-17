@@ -173,7 +173,7 @@ class AppLocalization {
       'confirm_embeddings_disable':
           'You are disabling the embedding model.\nLorebooks will not function until it is re-enabled.\nOnce re-enabled, all lorebooks will be rebuilt. Continue?',
       'confirm_embeddings_title': 'Changing embedding settings',
-      'use_embeddings_label': 'Use embeddings (for lorebooks)',
+      'use_embeddings_label': 'Use embeddings',
       'model_name_hint': 'Enter model name',
       'to_models_list': 'Back to list',
       'to_model_manual': 'Enter manually',
@@ -222,7 +222,7 @@ class AppLocalization {
       'export_label': 'Character card',
 
       'api_provider': 'API Provider',
-      'api_provider_add': 'Add provider',
+      'api_provider_add': 'Add',
       'provider_adding': 'Adding a provider',
       'provider_editing': 'Editing a provider',
       'provider_name_label': 'Name',
@@ -419,7 +419,7 @@ class AppLocalization {
       'confirm_embeddings_disable':
           'Вы выключаете эмбеддинг модель.\n Лорбуки работать не будут до повторного включения.\n После включения все лорбуки будут перестроены. Продолжить?',
       'confirm_embeddings_title': 'Изменение настроек эмбеддингов',
-      'use_embeddings_label': 'Использовать эмбеддинги (для лорбуков)',
+      'use_embeddings_label': 'Использовать эмбеддинги',
       'model_name_hint': 'Введите название модели',
       'to_models_list': 'Вернуться к списку',
       'to_model_manual': 'Ввести вручную',
@@ -468,7 +468,7 @@ class AppLocalization {
       'export_label': 'Карточка персонажа',
 
       'api_provider': 'Провайдер API',
-      'api_provider_add': 'Добавить провайдер',
+      'api_provider_add': 'Добавить',
       'provider_adding': 'Добавление провайдера',
       'provider_editing': 'Изменение провайдера',
       'provider_name_label': 'Название',
