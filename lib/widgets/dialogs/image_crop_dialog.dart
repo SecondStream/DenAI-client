@@ -228,7 +228,7 @@ class _AvatarClipperDialogState extends State<AvatarClipperDialog> {
                         context.pop();
                         widget.onFilePickRequested!();
                       },
-                      child: Text('Заменить'),
+                      child: Text(loc.replaceAvatar),
                     ),
                     Row(
                       mainAxisSize: MainAxisSize.min,

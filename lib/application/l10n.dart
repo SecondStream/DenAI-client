@@ -67,6 +67,7 @@ class AppLocalization {
       'select_chat': 'Select Chat',
       'change_role_button': 'Change Role',
       'select_role_button': 'Select Role',
+      'no_role': 'Without a role',
       'write_something': 'Write something...',
       'select_role_text': 'Select a role',
       'no_roles_text': 'You have no created roles yet.',
@@ -213,7 +214,7 @@ class AppLocalization {
 
       // --- Окна ---
       'crop_avatar_title': 'Setting up an avatar',
-      'replace_avatar_hint': 'Change your avatar image',
+      'replace_avatar': 'Replace',
 
       'export': 'Export',
       'import': 'Import',
@@ -314,6 +315,7 @@ class AppLocalization {
       'select_chat': 'Выберите чат',
       'change_role_button': 'Сменить роль',
       'select_role_button': 'Выбрать роль',
+      'no_role': 'Без роли',
       'write_something': 'Напишите что-нибудь...',
       'select_role_text': 'Выберите роль',
       'no_roles_text': 'У вас еще нет созданных ролей.',
@@ -459,7 +461,7 @@ class AppLocalization {
 
       // --- Окна ---
       'crop_avatar_title': 'Настройка аватара',
-      'replace_avatar_hint': 'Заменить изображение аватара',
+      'replace_avatar': 'Заменить',
 
       'export': 'Экспорт',
       'import': 'Импорт',
@@ -637,6 +639,8 @@ class AppLocalization {
       _localizedValues[locale.languageCode]?['change_role_button'] ?? empty;
   String get selectRoleButton =>
       _localizedValues[locale.languageCode]?['select_role_button'] ?? empty;
+  String get noRole =>
+      _localizedValues[locale.languageCode]?['no_role'] ?? empty;
   String get writeSomething => _localizedValues[locale.languageCode]?['write_something'] ?? empty;
   String get selectRoleText => _localizedValues[locale.languageCode]?['select_role_text'] ?? empty;
   String get noRolesText => _localizedValues[locale.languageCode]?['no_roles_text'] ?? empty;
@@ -716,8 +720,8 @@ class AppLocalization {
 
   String get cropAvatarTitle =>
       _localizedValues[locale.languageCode]?['crop_avatar_title'] ?? empty;
-  String get replaceAvatarHint =>
-      _localizedValues[locale.languageCode]?['replace_avatar_hint'] ?? empty;
+  String get replaceAvatar =>
+      _localizedValues[locale.languageCode]?['replace_avatar'] ?? empty;
   String get lorebooks => _localizedValues[locale.languageCode]?['lorebooks'] ?? empty;
   String get lorebooksTitle => _localizedValues[locale.languageCode]?['lorebooks_title'] ?? empty;
   String get noLorebooksMessage =>

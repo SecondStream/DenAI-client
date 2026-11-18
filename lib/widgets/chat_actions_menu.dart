@@ -1,3 +1,4 @@
+import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/widgets/persona_avatar.dart';
 import 'package:flutter/material.dart';
 
@@ -22,6 +23,7 @@ class ChatActionsMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final loc = AppLocalization.of(context);
 
     return MenuAnchor(
       alignmentOffset: const Offset(8, 15),
@@ -53,7 +55,7 @@ class ChatActionsMenu extends StatelessWidget {
               const SizedBox(width: 10),
               Flexible(
                 child: Text(
-                  userCard?.name ?? 'Без роли',
+                  userCard?.name ?? loc.noRole,
                   style: theme.textTheme.titleSmall,
                   overflow: TextOverflow.ellipsis,
                 ),
