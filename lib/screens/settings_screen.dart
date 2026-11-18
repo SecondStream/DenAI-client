@@ -336,7 +336,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               //         borderRadius: BorderRadius.circular(12),
               //         borderSide: BorderSide.none,
               //       ),
-              //       contentPadding: const EdgeInsets.all(16),
+              //       contentPadding: const EdgeInsets.all(12),
               //     ),
               //   ),
               // ),
@@ -357,7 +357,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide.none,
                 ),
-                contentPadding: const EdgeInsets.all(16),
+                contentPadding: const EdgeInsets.all(12),
               ),
             );
 

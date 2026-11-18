@@ -198,8 +198,8 @@ class AppLocalization {
       'no_lorebook_entries':
           'This lorebook doesn\'t have any entries yet.\nTap the \'+\' in the top-right corner to create a new one.',
       'lorebook_entry_number': '#',
-      'title_add_lorebook_entry': 'Registering Knowledge Book Entry',
-      'title_edit_lorebook_entry': 'Editing Knowledge Book Entry',
+      'title_add_lorebook_entry': 'Adding an entry',
+      'title_edit_lorebook_entry': 'Editing an entry',
       'lore_hint_title': '',
       'lore_hint_content': 'Description, facts, historical data, and information...',
       'lore_error_title_empty': 'Enter the knowledge book entry title',
@@ -456,8 +456,8 @@ class AppLocalization {
       'no_lorebook_entries':
           'В этой книге еще нет записей.\nНажмите \'+\' в верхнем правом углу, чтобы создать новую.',
       'lorebook_entry_number': '#',
-      'title_add_lorebook_entry': 'Регистрация записи в книге знаний',
-      'title_edit_lorebook_entry': 'Редактирование записи в книге знаний',
+      'title_add_lorebook_entry': 'Добавление записи',
+      'title_edit_lorebook_entry': 'Редактирование записи',
       'lore_hint_title': '',
       'lore_hint_content': 'Описание, факты, исторические справки и информация...',
       'lore_error_title_empty': 'Введите название записи',
