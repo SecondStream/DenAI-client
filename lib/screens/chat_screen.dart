@@ -198,7 +198,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     onPressed: isActionsBlocked
                         ? null
                         : () {
-                            _showSummaryEditDialog(context, loc, state.summary);
+                            _showSummaryEditDialog(context, loc, state.summary, isDesktop);
                           },
                   ),
                 ),
@@ -380,7 +380,9 @@ class _ChatScreenState extends State<ChatScreen> {
       messageWidget = UserMessage(
         message: message,
         card: user,
-        onEditMessage: isTyping ? null : (_) => _showEditMessageDialog(context, loc, message),
+        onEditMessage: isTyping
+            ? null
+            : (_) => _showEditMessageDialog(context, loc, message, isDesktop),
         onDeleteMessage: isTyping ? null : (messageId) => _onDeleteMessage(context, loc, messageId),
         isDesktop: isDesktop,
       );
@@ -390,7 +392,9 @@ class _ChatScreenState extends State<ChatScreen> {
         message: message,
         isThinking: isTyping,
         player: _ttsPlayerService,
-        onEditMessage: isTyping ? null : (_) => _showEditMessageDialog(context, loc, message),
+        onEditMessage: isTyping
+            ? null
+            : (_) => _showEditMessageDialog(context, loc, message, isDesktop),
 
         onSwitchMessage: isRegeneratinonActive
             ? (messageId, direction) {
@@ -438,6 +442,7 @@ class _ChatScreenState extends State<ChatScreen> {
     BuildContext context,
     AppLocalization loc,
     String currentSummary,
+    bool isDesktop,
   ) async {
     final chatBloc = context.read<ChatBloc>();
     final newText = await TextEditDialog.open(
@@ -447,6 +452,7 @@ class _ChatScreenState extends State<ChatScreen> {
       description: loc.historySubtitle,
       hint: loc.emptyHistory,
       icon: Icons.auto_stories,
+      isDesktop: isDesktop,
     );
     if (newText != null && newText != currentSummary.trim()) {
       chatBloc.add(UpdateChatSummaryEvent(newSummary: newText));
@@ -464,7 +470,12 @@ class _ChatScreenState extends State<ChatScreen> {
     }
   }
 
-  void _showEditMessageDialog(BuildContext context, AppLocalization loc, Message message) async {
+  void _showEditMessageDialog(
+    BuildContext context,
+    AppLocalization loc,
+    Message message,
+    bool isDesktop,
+  ) async {
     final chatBloc = context.read<ChatBloc>();
 
     String editableContent = message.content;
@@ -488,6 +499,7 @@ class _ChatScreenState extends State<ChatScreen> {
       editableContent,
       title: loc.editText,
       icon: Icons.edit_note,
+      isDesktop: isDesktop,
     );
 
     if (newText != null && newText.isNotEmpty && newText != editableContent) {

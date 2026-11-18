@@ -8,6 +8,7 @@ class TextEditDialog extends StatefulWidget {
   final String? description;
   final String? hint;
   final IconData? icon;
+  final bool showDragHandle;
 
   const TextEditDialog({
     super.key,
@@ -16,6 +17,7 @@ class TextEditDialog extends StatefulWidget {
     this.description,
     this.hint,
     this.icon,
+    this.showDragHandle = false,
   });
   @override
   State<StatefulWidget> createState() => _TextEditDialogState();
@@ -27,17 +29,49 @@ class TextEditDialog extends StatefulWidget {
     String? description,
     String? hint,
     IconData? icon,
+    bool isDesktop = true,
   }) {
-    return showDialog(
-      context: context,
-      builder: (context) => TextEditDialog(
-        initText: text,
-        title: title,
-        description: description,
-        hint: hint,
-        icon: icon,
-      ),
-    );
+    return isDesktop
+        ? showDialog(
+            context: context,
+            builder: (context) => Dialog(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: SizedBox(
+                width: 600,
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20),
+                  child: TextEditDialog(
+                    initText: text,
+                    title: title,
+                    description: description,
+                    hint: hint,
+                    icon: icon,
+                  ),
+                ),
+              ),
+            ),
+          )
+        : showModalBottomSheet<String>(
+            context: context,
+            isScrollControlled: true,
+            useSafeArea: true,
+            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+            shape: const RoundedRectangleBorder(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            ),
+            builder: (ctx) => Padding(
+              padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
+              child: TextEditDialog(
+                initText: text,
+                title: title,
+                description: description,
+                hint: hint,
+                icon: icon,
+                showDragHandle: true,
+              ),
+            ),
+          );
   }
 }
 
@@ -53,26 +87,35 @@ class _TextEditDialogState extends State<TextEditDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
-    return AlertDialog(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      title: widget.title != null
-          ? Row(
-              children: [
-                if (widget.icon != null) ...[
-                  Icon(widget.icon, color: theme.colorScheme.primary, size: 22),
-                  const SizedBox(width: 10),
-                ],
-                Text(widget.title!),
-              ],
-            )
-          : null,
-      content: SizedBox(
-        width: 600,
+    return SafeArea(
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (widget.description != null) ...[
+            if (widget.showDragHandle)
+              Container(
+                margin: const EdgeInsets.only(top: 10, bottom: 8),
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+            if (widget.title != null) ...[
+              Row(
+                children: [
+                  if (widget.icon != null) ...[
+                    Icon(widget.icon, color: theme.colorScheme.primary, size: 22),
+                    const SizedBox(width: 10),
+                  ],
+                  Text(widget.title!, style: TextStyle(fontSize: 20, color: Colors.white)),
+                ],
+              ),
+              const SizedBox(height: 12),
+            ],
+            if (widget.description != null && !widget.showDragHandle) ...[
               Text(
                 widget.description!,
                 style: TextStyle(color: theme.hintColor, fontSize: 13, height: 1.3),
@@ -83,8 +126,8 @@ class _TextEditDialogState extends State<TextEditDialog> {
             Flexible(
               child: TextField(
                 controller: _controller,
-                maxLines: 15,
-                minLines: 10,
+                maxLines: widget.showDragHandle ? null : 15,
+                minLines: widget.showDragHandle ? 5 : 10,
                 keyboardType: TextInputType.multiline,
                 style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
                 decoration: InputDecoration(
@@ -99,29 +142,33 @@ class _TextEditDialogState extends State<TextEditDialog> {
                 ),
               ),
             ),
+            const SizedBox(height: 16),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TextButton(
+                  onPressed: () => context.pop(),
+                  child: Text(
+                    loc.cancel,
+                    style: TextStyle(color: theme.hintColor, fontWeight: FontWeight.bold),
+                  ),
+                ),
+                SizedBox(width: 8),
+                ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: theme.colorScheme.primary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                  ),
+                  onPressed: () => context.pop(_controller.text.trim()),
+                  child: Text(loc.save, style: TextStyle(fontWeight: FontWeight.bold)),
+                ),
+              ],
+            ),
           ],
         ),
       ),
-      actionsPadding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
-      actions: [
-        TextButton(
-          onPressed: () => context.pop(),
-          child: Text(
-            loc.cancel,
-            style: TextStyle(color: theme.hintColor, fontWeight: FontWeight.bold),
-          ),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: theme.colorScheme.primary,
-            foregroundColor: Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          ),
-          onPressed: () => context.pop(_controller.text.trim()),
-          child: Text(loc.save, style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-      ],
     );
   }
 }

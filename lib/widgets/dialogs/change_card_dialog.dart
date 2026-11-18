@@ -15,6 +15,8 @@ class ChangeCardDialog extends StatelessWidget {
         ? showDialog(
             context: context,
             builder: (context) => Dialog(
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: Padding(
                 padding: EdgeInsets.only(bottom: 20),
                 child: SizedBox(width: 500, child: ChangeCardDialog(bloc: bloc)),
