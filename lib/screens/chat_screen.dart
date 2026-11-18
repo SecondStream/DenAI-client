@@ -336,7 +336,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     Positioned(
                       top: isDesktop ? -6 : -10,
                       right: isDesktop ? -6 : null,
-                      left: isDesktop ? null : -10 ,
+                      left: isDesktop ? null : -10,
                       child: InkWell(
                         onTap: () {
                           context.read<ChatBloc>().add(SelectImageEvent(null));
@@ -347,7 +347,11 @@ class _ChatScreenState extends State<ChatScreen> {
                             color: Colors.black87.withValues(alpha: .5),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.close, size: isDesktop ? 12 : 20, color: Colors.white),
+                          child: Icon(
+                            Icons.close,
+                            size: isDesktop ? 12 : 20,
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
                       ),
                     ),
@@ -534,11 +538,11 @@ class _ChatScreenState extends State<ChatScreen> {
       child: Container(
         padding: isDesktop
             ? const EdgeInsets.all(12)
-            : const EdgeInsets.only(top: 12, right: 12, bottom: 12),
+            : const EdgeInsets.only(top: 12, bottom: 12),
         color: theme.appBarTheme.backgroundColor,
         child: SafeArea(
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               if (isDesktop) ...[
                 Tooltip(
@@ -616,30 +620,34 @@ class _ChatScreenState extends State<ChatScreen> {
                         contentPadding: isDesktop
                             ? EdgeInsets.symmetric(horizontal: 16, vertical: 10)
                             : EdgeInsets.all(6),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            (currentText.isNotEmpty || !AppEnv.isFull) && !isRecording
-                                ? Icons.send
-                                : isRecording
-                                ? Icons.stop
-                                : Icons.mic,
-                            color: isBlocked || !chatAv
-                                ? theme.hintColor
-                                : theme.colorScheme.primary,
-                          ),
-                          onPressed: (isBlocked || !chatAv) && !isRecording
-                              ? null
-                              : () => isRecording
-                                    ? _recording(context)
-                                    : (currentText.isNotEmpty || !AppEnv.isFull)
-                                    ? _sendMessage(context, status)
-                                    : _recording(context),
-                        ),
                       ),
                       onSubmitted: (text) => isBlocked ? null : _sendMessage(context, status),
                     ),
                   ),
                 ),
+              ),
+              IconButton(
+                icon: Icon(
+                  (currentText.isNotEmpty || !AppEnv.isFull) && !isRecording
+                      ? Icons.send
+                      : isRecording
+                      ? Icons.stop
+                      : Icons.mic,
+                  color: (isBlocked || !chatAv) && !isRecording
+                      ? theme.hintColor
+                      : theme.colorScheme.primary,
+                ),
+                onPressed: (isBlocked || !chatAv) && !isRecording
+                    ? null
+                    : () {
+                  if (isRecording) {
+                    _recording(context);
+                  } else if (currentText.isNotEmpty || !AppEnv.isFull) {
+                    _sendMessage(context, status);
+                  } else {
+                    _recording(context);
+                  }
+                },
               ),
             ],
           ),
