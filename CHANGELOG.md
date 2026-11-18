@@ -1,5 +1,13 @@
 ## Next release
 
+### Added
+
+- Deletion confirmation windows
+
+### Fixed
+
+- Position of the attached image
+
 ## v1.0.4 (2026-11-16)
 
 ### Added
