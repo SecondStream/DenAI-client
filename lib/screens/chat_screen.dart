@@ -31,6 +31,7 @@ import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:path/path.dart' as p;
 
 import '../widgets/chat_actions_menu.dart';
+import '../widgets/dialogs/change_card_dialog.dart';
 
 class ChatScreenArgs {
   final int? chatId;
@@ -535,7 +536,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 child: InkWell(
                   onTap: isBlocked
                       ? null
-                      : () => _showChangeCardDialog(context, loc, availableCards),
+                      : () => _showChangeCardDialog(context, loc, availableCards, isDesktop),
                   borderRadius: BorderRadius.circular(22),
                   child: PersonaAvatar(userCard, size: isDesktop ? 50 : 30),
                 ),
@@ -546,7 +547,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 isBlocked: isBlocked,
                 roleButtonText: hasUserCard ? loc.changeRoleButton : loc.selectRoleButton,
                 attachImageText: loc.attachImage,
-                onChangeRole: () => _showChangeCardDialog(context, loc, availableCards),
+                onChangeRole: () => _showChangeCardDialog(context, loc, availableCards, isDesktop),
                 onAttachImage: () => _pickImage(context),
               ),
             SizedBox(width: isDesktop ? 20 : 0),
@@ -653,70 +654,12 @@ class _ChatScreenState extends State<ChatScreen> {
     BuildContext context,
     AppLocalization loc,
     List<UserCard>? availableCards,
-  ) {
-    final theme = Theme.of(context);
+    bool isDesktop,
+  ) async {
     final chatBloc = context.read<ChatBloc>();
 
     if (availableCards == null) chatBloc.add(RequestUserCardsForDialogEvent());
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          backgroundColor: theme.scaffoldBackgroundColor,
-          title: Text(loc.selectRoleText, textAlign: TextAlign.center),
-          content: SizedBox(
-            width: 400,
-            child: BlocBuilder<ChatBloc, ChatState>(
-              bloc: chatBloc,
-              builder: (context, dialogState) {
-                if (dialogState is! ChatLoadedState) return const SizedBox();
-
-                final cards = dialogState.availableCards;
-                if (cards == null) {
-                  return const SizedBox(
-                    height: 100,
-                    child: Center(child: CircularProgressIndicator()),
-                  );
-                }
-
-                if (cards.isEmpty) {
-                  return Padding(
-                    padding: EdgeInsets.symmetric(vertical: 24),
-                    child: Text(loc.noRolesText, textAlign: TextAlign.center),
-                  );
-                }
-
-                return ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: cards.length,
-                  itemBuilder: (context, index) {
-                    final card = cards[index];
-                    final isCurrent = dialogState.userCard?.id == card.id;
-
-                    return Card(
-                      color: isCurrent
-                          ? theme.colorScheme.primary.withValues(alpha: 0.2)
-                          : theme.cardColor,
-                      child: ListTile(
-                        leading: PersonaAvatar(card, size: 40),
-                        title: Text(card.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        trailing: isCurrent
-                            ? const Icon(Icons.check_circle, color: Colors.green)
-                            : null,
-                        onTap: () {
-                          dialogContext.pop();
-                          chatBloc.add(ChangeUserCardEvent(card.id));
-                        },
-                      ),
-                    );
-                  },
-                );
-              },
-            ),
-          ),
-        );
-      },
-    );
+    await ChangeCardDialog.open(context, chatBloc, isDesktop);
   }
 
   void _showNewChatConfirmationDialog(BuildContext context, AppLocalization loc) async {
