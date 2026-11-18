@@ -53,18 +53,16 @@ class LorebookCard extends StatelessWidget {
                     Positioned(
                       top: 8,
                       right: 8,
-                      child: Tooltip(
-                        message: loc.editPrompts,
-                        child: Material(
-                          color: Colors.black.withValues(alpha: 0.6),
-                          shape: const CircleBorder(),
-                          child: IconButton(
-                            icon: Icon(Icons.edit, color: theme.colorScheme.primary, size: 18),
-                            constraints: const BoxConstraints(),
-                            padding: const EdgeInsets.all(8),
-                            onPressed: () => onEditPressed(lorebook.id),
-                          ),
+                      child: IconButton(
+                        tooltip: loc.editPrompts,
+                        icon: Icon(Icons.edit, color: theme.colorScheme.primary, size: 18),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.black.withValues(alpha: 0.6),
+                          padding: const EdgeInsets.all(8),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
+                        onPressed: () => onEditPressed(lorebook.id),
                       ),
                     ),
                   ],

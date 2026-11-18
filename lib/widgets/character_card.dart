@@ -1,5 +1,6 @@
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/widgets/cropped_avatar.dart';
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ class CharacterCard extends StatelessWidget {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
     final avatarUrl = character.getAvatar(AppConfig.of(context).baseUrl);
+    final isDesktop = context.isDesktop;
     return Card(
       color: theme.cardColor,
       elevation: 4,
@@ -53,39 +55,37 @@ class CharacterCard extends StatelessWidget {
                     Positioned(
                       top: 8,
                       right: 8,
-                      child: Tooltip(
-                        message: loc.editPrompts,
-                        child: Material(
-                          color: Colors.black.withValues(alpha: 0.6),
-                          shape: const CircleBorder(),
-                          child: IconButton(
-                            icon: Icon(Icons.edit, color: theme.colorScheme.primary, size: 18),
-                            constraints: const BoxConstraints(),
-                            padding: const EdgeInsets.all(8),
-                            onPressed: () => onEditPressed(character.id),
-                          ),
+                      child: IconButton(
+                        tooltip: loc.editPrompts,
+                        icon: Icon(Icons.edit, color: theme.colorScheme.primary, size: 18),
+                        style: IconButton.styleFrom(
+                          backgroundColor: Colors.black.withValues(alpha: 0.6),
+                          padding: const EdgeInsets.all(8),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
                         ),
+                        onPressed: () => onEditPressed(character.id),
                       ),
                     ),
                   ],
                 ),
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(12, 12, 12, 12),
+                  padding: EdgeInsets.all(isDesktop ? 12: 8),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         character.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: isDesktop ? 15 : 12),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                        padding: EdgeInsets.symmetric(horizontal: 16, vertical: isDesktop ? 6 : 3),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primary.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(20),
+                          borderRadius: BorderRadius.circular(isDesktop ? 20 : 14),
                         ),
                         child: Text(
                           loc.chat,
