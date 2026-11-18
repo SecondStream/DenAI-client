@@ -3,6 +3,7 @@
 ### Added
 
 - Deletion confirmation windows
+- Converting images to PNG when exporting a card
 
 ### Fixed
 

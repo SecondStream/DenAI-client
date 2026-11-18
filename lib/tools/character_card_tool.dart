@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/models/character_card.dart';
 import 'package:png_chunks_extract/png_chunks_extract.dart' as extract;
@@ -84,7 +85,8 @@ abstract class CharacterCardTool {
 
     if (avatarBytes != null && avatarBytes.isNotEmpty) {
       try {
-        final chunks = extract.extractChunks(avatarBytes);
+        final pngBytes = await _convertToPng(avatarBytes);
+        final chunks = extract.extractChunks(pngBytes);
         final jsonString = jsonEncode(cardV2);
         final base64Str = base64Encode(utf8.encode(jsonString));
         final charaChunk = chunk_text.encode('chara', base64Str);
@@ -175,4 +177,23 @@ abstract class CharacterCardTool {
     }
     return (null, false);
   }
+
+  static Future<Uint8List> _convertToPng(Uint8List inputBytes) async {
+    final ui.Codec codec = await ui.instantiateImageCodec(inputBytes);
+    final ui.FrameInfo frameInfo = await codec.getNextFrame();
+
+    final ByteData? byteData = await frameInfo.image.toByteData(
+      format: ui.ImageByteFormat.png,
+    );
+
+    frameInfo.image.dispose();
+    codec.dispose();
+
+    if (byteData == null) {
+      throw Exception('Didn’t quite reach success)');
+    }
+
+    return byteData.buffer.asUint8List();
+  }
+
 }
