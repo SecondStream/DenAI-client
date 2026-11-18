@@ -4,6 +4,7 @@ import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/blocs/app_status/app_status_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/models/models.dart';
@@ -181,7 +182,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _initializeFields(state.settings, state.activeModels);
             _checkModels(state);
 
-            final isMobile = MediaQuery.of(context).size.width < 550;
+            final isMobile = context.isMobile;
 
             final leftColumnWidgets = [
               SizedBox.shrink(),

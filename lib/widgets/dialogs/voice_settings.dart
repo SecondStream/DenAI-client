@@ -1,5 +1,6 @@
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:flutter/material.dart';
 
 class VoiceOption {
@@ -16,13 +17,11 @@ Future<void> showVoiceSettingsModal(
   required String currentVoiceId,
   required Function(String lang, String voiceId) onSave,
 }) async {
-  final isDesktop = MediaQuery.of(context).size.width > 550;
-  final theme = Theme.of(context);
+  final isDesktop = context.isDesktop;
   if (isDesktop) {
     showDialog(
       context: context,
       builder: (context) => Dialog(
-        backgroundColor: theme.scaffoldBackgroundColor,
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 400),
           child: VoiceSettingsContent(
@@ -38,10 +37,6 @@ Future<void> showVoiceSettingsModal(
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: theme.scaffoldBackgroundColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
       builder: (context) => SafeArea(
         child: VoiceSettingsContent(
           initialLanguage: currentLanguage,

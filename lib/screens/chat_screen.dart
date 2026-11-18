@@ -5,6 +5,7 @@ import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/application/routes.dart';
+import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/services/tts_player_service.dart';
 import 'package:den_ai/tools/audio_record_tool.dart';
@@ -98,7 +99,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
     final status = AppStatus.of(context);
-    final isDesktop = MediaQuery.of(context).size.width > 550;
+    final isDesktop = context.isDesktop;
     return BlocProvider<ChatBloc>(
       create: (context) => ChatBloc(
         GetIt.instance.get(),

@@ -19,7 +19,6 @@ class ConfirmationDialog extends StatelessWidget {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
     return AlertDialog(
-      backgroundColor: theme.scaffoldBackgroundColor,
       title: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         textBaseline: TextBaseline.alphabetic,

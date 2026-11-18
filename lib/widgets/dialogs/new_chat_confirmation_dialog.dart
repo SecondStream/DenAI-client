@@ -14,12 +14,12 @@ class NewChatConfirmationDialog extends StatefulWidget {
   static Future<NewChatConfirmationDialogResult?> open(BuildContext context) {
     return showDialog<NewChatConfirmationDialogResult>(
       context: context,
-      builder: (context) => NewChatConfirmationDialog(),
+      builder: (context) => const NewChatConfirmationDialog(),
     );
   }
 
   @override
-  State<StatefulWidget> createState() => _NewChatConfirmationDialogState();
+  State<NewChatConfirmationDialog> createState() => _NewChatConfirmationDialogState();
 }
 
 class _NewChatConfirmationDialogState extends State<NewChatConfirmationDialog> {
@@ -29,52 +29,105 @@ class _NewChatConfirmationDialogState extends State<NewChatConfirmationDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
-    return AlertDialog(
-      backgroundColor: theme.scaffoldBackgroundColor,
-      title: Text(loc.startNewChat, textAlign: TextAlign.center),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 10),
-            child: Text(loc.confirmNewChat, style: TextStyle(color: Colors.white70)),
+
+    return Dialog(
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 380),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                loc.startNewChat,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 10),
+
+              Text(
+                loc.confirmNewChat,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: Colors.white70,
+                ),
+              ),
+              const SizedBox(height: 16),
+
+              InkWell(
+                onTap: () => setState(() => _deleteCurrent = !_deleteCurrent),
+                borderRadius: BorderRadius.circular(10),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          loc.deleteChat,
+                          style: theme.textTheme.bodyMedium,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Switch(
+                        value: _deleteCurrent,
+                        activeThumbColor: theme.colorScheme.primary,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        onChanged: (value) {
+                          setState(() => _deleteCurrent = value);
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => context.pop(),
+                    style: TextButton.styleFrom(
+                      minimumSize: const Size(88, 40),
+                      // shape: RoundedRectangleBorder(
+                      //   borderRadius: BorderRadius.circular(8),
+                      // ),
+                    ),
+                    child: Text(
+                      loc.no,
+                      style: TextStyle(
+                        color: theme.hintColor,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: theme.colorScheme.primary,
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(88, 40),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                    ),
+                    onPressed: () => context.pop(
+                      NewChatConfirmationDialogResult(deleteCurrent: _deleteCurrent),
+                    ),
+                    child: Text(
+                      loc.yes,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          SwitchListTile(
-            title: Text(loc.deleteChat),
-            value: _deleteCurrent,
-            activeThumbColor: theme.colorScheme.primary,
-            contentPadding: EdgeInsets.symmetric(horizontal: 10),
-            onChanged: (bool value) {
-              setState(() {
-                _deleteCurrent = value;
-              });
-            },
-          ),
-        ],
+        ),
       ),
-      actions: [
-        TextButton(
-          onPressed: () => context.pop(),
-          style: TextButton.styleFrom(minimumSize: Size(100, 40)),
-          child: Text(
-            loc.no,
-            style: TextStyle(color: theme.hintColor, fontWeight: FontWeight.bold),
-          ),
-        ),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: theme.colorScheme.primary,
-            foregroundColor: Colors.white,
-            minimumSize: Size(100, 40),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          ),
-          onPressed: () =>
-              context.pop(NewChatConfirmationDialogResult(deleteCurrent: _deleteCurrent)),
-          child: Text(loc.yes, style: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-      ],
     );
   }
 }

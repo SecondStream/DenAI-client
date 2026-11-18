@@ -52,7 +52,6 @@ class _LoreEntryDialogState extends State<LoreEntryDialog> {
     final loc = AppLocalization.of(context);
 
     return AlertDialog(
-      backgroundColor: theme.scaffoldBackgroundColor,
       title: Row(
         children: [
           Icon(

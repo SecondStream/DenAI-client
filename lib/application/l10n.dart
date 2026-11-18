@@ -205,7 +205,7 @@ class AppLocalization {
       'lore_error_title_empty': 'Enter the knowledge book entry title',
       'lore_error_content_empty': 'Fill in the knowledge content',
       'lore_action_delete_entry': 'Delete entry',
-      'lorebook_selection_title': 'Connecting Knowledge Bases',
+      'lorebook_selection_title': 'Connecting Lorebooks',
       'no_lorebooks_warning':
           'No knowledge books have been created in the system yet.\nFirst, create a book in the Knowledge Book Manager.',
       'char_lorebooks': 'Knowledge Bases',
@@ -452,7 +452,7 @@ class AppLocalization {
       'lore_error_title_empty': 'Введите название записи',
       'lore_error_content_empty': 'Заполните контент записи',
       'lore_action_delete_entry': 'Удалить запись',
-      'lorebook_selection_title': 'Подключение баз знаний',
+      'lorebook_selection_title': 'Подключение лорбуков',
       'no_lorebooks_warning':
           'В системе еще не создано ни одной книги знаний.\nСначала создайте книгу в разделе книг знаний.',
       'char_lorebooks': 'Книги знаний',

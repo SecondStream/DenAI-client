@@ -3,24 +3,21 @@ import 'dart:convert';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/consts/consts.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:flutter/material.dart';
 import 'package:den_ai/models/models.dart';
 
 class EditProviderDialog extends StatefulWidget {
   final Provider? provider;
-  final bool showDragHandle;
 
-  const EditProviderDialog({super.key, required this.provider, this.showDragHandle = false});
+  const EditProviderDialog({super.key, required this.provider});
 
   static Future<ProviderIn?> open(BuildContext context, {Provider? provider}) {
-    final size = MediaQuery.of(context).size;
-    final isDesktop = size.width > 550;
+    final isDesktop = context.isDesktop;
     return isDesktop
         ? showDialog<ProviderIn>(
             context: context,
             builder: (context) => Dialog(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: SizedBox(
                 width: 500,
                 child: Padding(
@@ -34,15 +31,10 @@ class EditProviderDialog extends StatefulWidget {
             context: context,
             isScrollControlled: true,
             useSafeArea: true,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
             builder: (ctx) => Padding(
               padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
               child: SizedBox(
-                //height: MediaQuery.of(ctx).size.height * 0.7,
-                child: EditProviderDialog(provider: provider, showDragHandle: true),
+                child: EditProviderDialog(provider: provider),
               ),
             ),
           );
@@ -89,7 +81,7 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (widget.showDragHandle)
+              if (context.isMobile)
                 Container(
                   margin: const EdgeInsets.only(top: 10, bottom: 8),
                   width: 36,

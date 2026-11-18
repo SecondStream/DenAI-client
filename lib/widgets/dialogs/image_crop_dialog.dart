@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:flutter/material.dart';
 
@@ -9,14 +10,12 @@ class AvatarClipperDialog extends StatefulWidget {
   final ImageProvider imageProvider;
   final CropData? initialCrop;
   final VoidCallback? onFilePickRequested;
-  final bool showDragHandle;
 
   const AvatarClipperDialog({
     super.key,
     required this.imageProvider,
     this.initialCrop,
     this.onFilePickRequested,
-    this.showDragHandle = false,
   });
 
   static Future<CropData?> open(
@@ -25,15 +24,12 @@ class AvatarClipperDialog extends StatefulWidget {
     CropData? initialCrop,
     VoidCallback? onFilePickRequested,
   }) {
-    final isDesktop = MediaQuery.of(context).size.width > 550;
-    final theme = Theme.of(context);
+    final isDesktop = context.isDesktop;
     return isDesktop
         ? showDialog<CropData>(
             context: context,
             barrierDismissible: false,
             builder: (context) => Dialog(
-              backgroundColor: theme.scaffoldBackgroundColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: SizedBox(
                 width: 382,
                 child: AvatarClipperDialog(
@@ -46,14 +42,12 @@ class AvatarClipperDialog extends StatefulWidget {
           )
         : showModalBottomSheet<CropData>(
             context: context,
-            backgroundColor: theme.scaffoldBackgroundColor,
             isScrollControlled: true,
             useSafeArea: true,
             builder: (context) => AvatarClipperDialog(
               imageProvider: provider,
               initialCrop: initialCrop,
               onFilePickRequested: onFilePickRequested,
-              showDragHandle: true,
             ),
           );
   }
@@ -138,7 +132,7 @@ class _AvatarClipperDialogState extends State<AvatarClipperDialog> {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          if (widget.showDragHandle)
+          if (context.isMobile)
             Container(
               margin: const EdgeInsets.only(top: 10, bottom: 8),
               width: 36,

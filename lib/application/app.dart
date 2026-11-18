@@ -1,5 +1,6 @@
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/routes.dart';
+import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:den_ai/screens/chat_lists_screen.dart';
 import 'package:den_ai/widgets/notify_widget.dart';
 import 'package:flutter/material.dart';
@@ -12,8 +13,7 @@ class ChatApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-    final isDesktop = size.width > 550;
+    final isDesktop = context.isDesktop;
     return MaterialApp(
       title: 'DenAI',
       debugShowCheckedModeBanner: false,
@@ -31,17 +31,8 @@ class ChatApp extends StatelessWidget {
           surfaceTintColor: Colors.transparent,
           elevation: 0,
           centerTitle: true,
-          titleTextStyle: TextStyle(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
-          shape: Border(
-            bottom: BorderSide(
-              color: Color(0xFF5C62A3),
-              width: 1,
-            ),
-          ),
+          titleTextStyle: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+          shape: Border(bottom: BorderSide(color: Color(0xFF5C62A3), width: 1)),
         ),
 
         colorScheme: ColorScheme.dark(
@@ -68,13 +59,23 @@ class ChatApp extends StatelessWidget {
         ),
 
         dialogTheme: DialogThemeData(
-          backgroundColor: const Color(0xFF212132),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: const Color(0xFF161622),
+          surfaceTintColor: Colors.transparent,
+          insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(color: Color(0xFF5C62A3).withValues(alpha: 0.15)),
+          ),
+        ),
+        bottomSheetTheme: BottomSheetThemeData(
+          backgroundColor: const Color(0xFF161622),
+          shape: const RoundedRectangleBorder(
+            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+          ),
         ),
         switchTheme: SwitchThemeData(
           thumbColor: WidgetStateProperty.resolveWith<Color?>((states) {
             return Colors.indigo.shade400;
-
           }),
           trackColor: WidgetStateProperty.resolveWith<Color?>((states) {
             if (states.contains(WidgetState.selected)) {
@@ -98,9 +99,7 @@ class ChatApp extends StatelessWidget {
             selectedBackgroundColor: Colors.indigo.shade400,
             selectedForegroundColor: Colors.white,
             side: const BorderSide(color: Colors.blue, width: 1.5),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(8),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
             textStyle: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
@@ -113,17 +112,15 @@ class ChatApp extends StatelessWidget {
             backgroundColor: Colors.indigo.shade400,
             foregroundColor: Colors.white,
             padding: EdgeInsets.symmetric(vertical: isDesktop ? 16 : 12),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         ),
-        outlinedButtonTheme: OutlinedButtonThemeData(style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.symmetric(vertical: isDesktop ? 16 : 12),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+        outlinedButtonTheme: OutlinedButtonThemeData(
+          style: OutlinedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: isDesktop ? 16 : 12),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
-        )),
+        ),
       ),
 
       supportedLocales: const [Locale('en'), Locale('ru')],

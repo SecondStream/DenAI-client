@@ -1,4 +1,5 @@
 import 'package:den_ai/application/l10n.dart';
+import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:den_ai/models/model_info.dart';
 import 'package:den_ai/screens/settings_screen.dart';
 import 'package:flutter/material.dart';
@@ -120,14 +121,12 @@ class ModelSelector extends StatelessWidget {
   }
 
   Future<void> _openSearch(BuildContext context, List<String> itemNames) async {
-    final isDesktop = MediaQuery.of(context).size.width > 550;
+    final isDesktop = context.isDesktop;
 
     final selected = isDesktop
         ? await showDialog<String>(
             context: context,
             builder: (ctx) => Dialog(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 480, maxHeight: 750),
                 child: Padding(
@@ -136,7 +135,6 @@ class ModelSelector extends StatelessWidget {
                     title: label,
                     items: itemNames,
                     currentValue: modelView.name,
-                    showDragHandle: false,
                   ),
                 ),
               ),
@@ -146,19 +144,14 @@ class ModelSelector extends StatelessWidget {
             context: context,
             isScrollControlled: true,
             useSafeArea: true,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
             builder: (ctx) => Padding(
               padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-              child: SizedBox(
-                height: MediaQuery.of(ctx).size.height * 0.72,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.75),
                 child: _ModelSearchBody(
                   title: label,
                   items: itemNames,
                   currentValue: modelView.name,
-                  showDragHandle: true,
                 ),
               ),
             ),
@@ -174,13 +167,11 @@ class _ModelSearchBody extends StatefulWidget {
   final String title;
   final List<String> items;
   final String currentValue;
-  final bool showDragHandle;
 
   const _ModelSearchBody({
     required this.title,
     required this.items,
     required this.currentValue,
-    this.showDragHandle = false,
   });
 
   @override
@@ -213,7 +204,7 @@ class _ModelSearchBodyState extends State<_ModelSearchBody> {
     return SafeArea(
       child: Column(
         children: [
-          if (widget.showDragHandle)
+          if (context.isMobile)
             Container(
               margin: const EdgeInsets.only(top: 10, bottom: 8),
               width: 36,

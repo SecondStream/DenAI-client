@@ -1,5 +1,6 @@
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:flutter/material.dart';
 
 class TextEditDialog extends StatefulWidget {
@@ -8,7 +9,6 @@ class TextEditDialog extends StatefulWidget {
   final String? description;
   final String? hint;
   final IconData? icon;
-  final bool showDragHandle;
 
   const TextEditDialog({
     super.key,
@@ -17,7 +17,6 @@ class TextEditDialog extends StatefulWidget {
     this.description,
     this.hint,
     this.icon,
-    this.showDragHandle = false,
   });
   @override
   State<StatefulWidget> createState() => _TextEditDialogState();
@@ -35,8 +34,6 @@ class TextEditDialog extends StatefulWidget {
         ? showDialog(
             context: context,
             builder: (context) => Dialog(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: SizedBox(
                 width: 600,
                 child: Padding(
@@ -56,10 +53,6 @@ class TextEditDialog extends StatefulWidget {
             context: context,
             isScrollControlled: true,
             useSafeArea: true,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
             builder: (ctx) => Padding(
               padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
               child: TextEditDialog(
@@ -68,7 +61,6 @@ class TextEditDialog extends StatefulWidget {
                 description: description,
                 hint: hint,
                 icon: icon,
-                showDragHandle: true,
               ),
             ),
           );
@@ -87,13 +79,14 @@ class _TextEditDialogState extends State<TextEditDialog> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
+    final isMobile = context.isMobile;
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.symmetric(horizontal: 20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (widget.showDragHandle)
+            if (isMobile)
               Container(
                 margin: const EdgeInsets.only(top: 10, bottom: 8),
                 width: 36,
@@ -115,7 +108,7 @@ class _TextEditDialogState extends State<TextEditDialog> {
               ),
               const SizedBox(height: 12),
             ],
-            if (widget.description != null && !widget.showDragHandle) ...[
+            if (widget.description != null && !isMobile) ...[
               Text(
                 widget.description!,
                 style: TextStyle(color: theme.hintColor, fontSize: 13, height: 1.3),
@@ -126,8 +119,8 @@ class _TextEditDialogState extends State<TextEditDialog> {
             Flexible(
               child: TextField(
                 controller: _controller,
-                maxLines: widget.showDragHandle ? null : 15,
-                minLines: widget.showDragHandle ? 5 : 10,
+                maxLines: isMobile ? null : 15,
+                minLines: isMobile ? 5 : 10,
                 keyboardType: TextInputType.multiline,
                 style: const TextStyle(color: Colors.white, fontSize: 14, height: 1.4),
                 decoration: InputDecoration(

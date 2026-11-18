@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:den_ai/application/config.dart';
+import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/widgets/status.dart';
 import 'package:den_ai/blocs/character_form/character_form_bloc.dart';
@@ -402,8 +403,9 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
       onTap: () async {
         final List<int>? result = await LorebooksSelectDialog.open(
           context,
-          allLorebooks,
+            allLorebooks,
           _selectedLorebookIds,
+          context.isDesktop
         );
         if (result != null) {
           setState(() {

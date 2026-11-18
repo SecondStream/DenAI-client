@@ -1,22 +1,20 @@
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/blocs/chat/chat_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
+import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:den_ai/widgets/persona_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 class ChangeCardDialog extends StatelessWidget {
-  final bool showDragHandle;
   final ChatBloc bloc;
-  const ChangeCardDialog({super.key, required this.bloc, this.showDragHandle = false});
+  const ChangeCardDialog({super.key, required this.bloc});
 
   static Future<void> open(BuildContext context, ChatBloc bloc, bool isDesktop) {
     return isDesktop
         ? showDialog(
             context: context,
             builder: (context) => Dialog(
-              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: Padding(
                 padding: EdgeInsets.only(bottom: 20),
                 child: SizedBox(width: 500, child: ChangeCardDialog(bloc: bloc)),
@@ -27,13 +25,9 @@ class ChangeCardDialog extends StatelessWidget {
             context: context,
             isScrollControlled: true,
             useSafeArea: true,
-            backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-            ),
             builder: (ctx) => Padding(
               padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-              child: SizedBox(child: ChangeCardDialog(bloc: bloc, showDragHandle: true)),
+              child: SizedBox(child: ChangeCardDialog(bloc: bloc)),
             ),
           );
   }
@@ -48,7 +42,7 @@ class ChangeCardDialog extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (showDragHandle)
+            if (context.isMobile)
               Container(
                 margin: const EdgeInsets.only(top: 10, bottom: 8),
                 width: 36,
