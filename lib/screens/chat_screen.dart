@@ -525,7 +525,9 @@ class _ChatScreenState extends State<ChatScreen> {
     final currentText = _textController.text;
 
     return Container(
-      padding: isDesktop ? const EdgeInsets.all(12) : const EdgeInsets.only(top: 12, right: 12),
+      padding: isDesktop
+          ? const EdgeInsets.all(12)
+          : const EdgeInsets.only(top: 12, right: 12, bottom: 12),
       color: theme.appBarTheme.backgroundColor,
       child: SafeArea(
         child: Row(
@@ -597,13 +599,13 @@ class _ChatScreenState extends State<ChatScreen> {
                           : (chatAv ? loc.writeSomething : loc.chatUnavailable),
                       fillColor: theme.cardColor,
                       filled: true,
-                      border: const OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(isDesktop ? 20 : 12)),
                         borderSide: BorderSide.none,
                       ),
                       contentPadding: isDesktop
                           ? EdgeInsets.symmetric(horizontal: 16, vertical: 10)
-                          : EdgeInsets.only(left: 6),
+                          : EdgeInsets.all(6),
                       suffixIcon: IconButton(
                         icon: Icon(
                           (currentText.isNotEmpty || !AppEnv.isFull) && !isRecording

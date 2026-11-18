@@ -26,13 +26,10 @@ class LorebooksSelectDialog extends StatefulWidget {
             builder: (context) => Dialog(
               child: ConstrainedBox(
                 constraints: BoxConstraints(maxHeight: 450, maxWidth: 500),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  child: LorebooksSelectDialog(
+                child: LorebooksSelectDialog(
                     allLorebooks: allLorebooks,
                     initialSelectedIds: initialSelectedIds,
                   ),
-                ),
               ),
             ),
           )
@@ -81,7 +78,9 @@ class _LorebooksSelectDialogState extends State<LorebooksSelectDialog> {
                   color: Colors.white24,
                   borderRadius: BorderRadius.circular(2),
                 ),
-              ),
+              )
+            else
+              SizedBox(height: 20),
             Row(
               children: [
                 Icon(Icons.library_books, color: theme.colorScheme.primary, size: 22),
@@ -168,6 +167,7 @@ class _LorebooksSelectDialogState extends State<LorebooksSelectDialog> {
                 ),
               ],
             ),
+            SizedBox(height: 20),
           ],
         ),
       ),

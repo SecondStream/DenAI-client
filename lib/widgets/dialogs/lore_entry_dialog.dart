@@ -26,10 +26,7 @@ class LoreEntryDialog extends StatefulWidget {
             builder: (context) => Dialog(
               child: SizedBox(
                 width: 600,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  child: LoreEntryDialog(bookId: bookId, entry: entry, readonly: readonly),
-                ),
+                child: LoreEntryDialog(bookId: bookId, entry: entry, readonly: readonly),
               ),
             ),
           )
@@ -90,7 +87,9 @@ class _LoreEntryDialogState extends State<LoreEntryDialog> {
                     color: Colors.white24,
                     borderRadius: BorderRadius.circular(2),
                   ),
-                ),
+                )
+              else
+                SizedBox(height: 20),
               Row(
                 children: [
                   Icon(
@@ -212,6 +211,7 @@ class _LoreEntryDialogState extends State<LoreEntryDialog> {
                   ),
                 ],
               ),
+              SizedBox(height: 20),
             ],
           ),
         ),

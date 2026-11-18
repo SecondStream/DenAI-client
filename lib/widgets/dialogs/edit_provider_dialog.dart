@@ -22,10 +22,7 @@ class EditProviderDialog extends StatefulWidget {
             builder: (context) => Dialog(
               child: SizedBox(
                 width: 500,
-                child: Padding(
-                  padding: EdgeInsets.only(bottom: 10),
-                  child: EditProviderDialog(provider: provider),
-                ),
+                child: EditProviderDialog(provider: provider),
               ),
             ),
           )
@@ -273,7 +270,7 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                   ),
                 ],
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 20),
             ],
           ),
         ),

@@ -15,10 +15,7 @@ class ChangeCardDialog extends StatelessWidget {
         ? showDialog(
             context: context,
             builder: (context) => Dialog(
-              child: Padding(
-                padding: EdgeInsets.only(bottom: 20),
-                child: SizedBox(width: 500, child: ChangeCardDialog(bloc: bloc)),
-              ),
+              child: SizedBox(width: 500, child: ChangeCardDialog(bloc: bloc)),
             ),
           )
         : showModalBottomSheet(
@@ -115,6 +112,7 @@ class ChangeCardDialog extends StatelessWidget {
                 );
               },
             ),
+            SizedBox(height: 20),
           ],
         ),
       ),

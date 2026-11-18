@@ -36,16 +36,13 @@ class TextEditDialog extends StatefulWidget {
             builder: (context) => Dialog(
               child: SizedBox(
                 width: 600,
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 20),
-                  child: TextEditDialog(
+                child: TextEditDialog(
                     initText: text,
                     title: title,
                     description: description,
                     hint: hint,
                     icon: icon,
                   ),
-                ),
               ),
             ),
           )
@@ -95,7 +92,9 @@ class _TextEditDialogState extends State<TextEditDialog> {
                   color: Colors.white24,
                   borderRadius: BorderRadius.circular(2),
                 ),
-              ),
+              )
+            else
+              SizedBox(height: 20),
             if (widget.title != null) ...[
               Row(
                 children: [
@@ -159,6 +158,7 @@ class _TextEditDialogState extends State<TextEditDialog> {
                 ),
               ],
             ),
+            SizedBox(height: 20),
           ],
         ),
       ),
