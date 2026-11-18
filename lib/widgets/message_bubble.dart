@@ -15,6 +15,7 @@ class MessageBubble extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isRight = position == MessagePosition.right;
+    final size = MediaQuery.of(context).size;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
@@ -28,7 +29,7 @@ class MessageBubble extends StatelessWidget {
           bottomRight: Radius.circular(isRight ? 0 : 12),
         ),
       ),
-      constraints: BoxConstraints(minWidth: 200, maxWidth: MediaQuery.of(context).size.width * 0.65),
+      constraints: BoxConstraints(minWidth: 200, maxWidth: size.width > 550 ? size.width * .65 : size.width - 40),
       child: GptMarkdown(
         message,
         style: TextStyle(color: isRight ? Colors.white70 : Colors.white, fontSize: 15, height: 1.4),

@@ -210,116 +210,110 @@ class _ModelSearchBodyState extends State<_ModelSearchBody> {
           }).toList();
     var index = filtered.indexOf(widget.currentValue) - 1;
     if (index < 0) index = 0;
-    return Column(
-      children: [
-        if (widget.showDragHandle)
-          Container(
-            margin: const EdgeInsets.only(top: 10, bottom: 8),
-            width: 36,
-            height: 4,
-            decoration: BoxDecoration(
-              color: Colors.white24,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          )
-        else
-          const SizedBox(height: 20),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: Row(
-            children: [
-              Icon(
-                Icons.webhook,
-                color: theme.colorScheme.primary,
-                size: 22,
+    return SafeArea(
+      child: Column(
+        children: [
+          if (widget.showDragHandle)
+            Container(
+              margin: const EdgeInsets.only(top: 10, bottom: 8),
+              width: 36,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.white24,
+                borderRadius: BorderRadius.circular(2),
               ),
-              const SizedBox(width: 10),
-              Expanded(child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    widget.title,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    '${filtered.length} / ${widget.items.length}',
-                    style: const TextStyle(fontSize: 12, color: Colors.white54),
-                  ),
-                ],
-              ),)
-            ],
-          ),
-        ),
-        const SizedBox(height: 12),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          child: TextField(
-            controller: _searchController,
-            style: const TextStyle(color: Colors.white, fontSize: 14),
-            decoration: InputDecoration(
-              hintText: loc.searchingModel,
-              prefixIcon: const Icon(Icons.search, size: 20),
-              suffixIcon: _query.isNotEmpty
-                  ? IconButton(
-                      icon: const Icon(Icons.clear, size: 18),
-                      onPressed: () {
-                        _searchController.clear();
-                        setState(() => _query = '');
-                      },
-                    )
-                  : null,
-              fillColor: theme.cardColor,
-              filled: true,
-              isDense: true,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12),
-                borderSide: BorderSide.none,
-              ),
-            ),
-            onChanged: (v) => setState(() => _query = v),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Expanded(
-          child: filtered.isEmpty
-              ? Center(
-                  child: Text(loc.nothingFound, style: TextStyle(color: Colors.white54)),
-                )
-              : ListView.builder(
-                  controller: ScrollController(initialScrollOffset: index * 44),
-                  clipBehavior: Clip.hardEdge,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
-                  itemCount: filtered.length,
-                  itemExtent: 44,
-                  itemBuilder: (context, index) {
-                    final item = filtered[index];
-                    final isSelected = item == widget.currentValue;
-                    return ListTile(
-                      dense: true,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                      selected: isSelected,
-                      selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.15),
-                      title: Text(
-                        item,
-                        style: TextStyle(
-                          color: isSelected ? theme.colorScheme.primary : Colors.white,
-                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        maxLines: 1,
+            )
+          else
+            const SizedBox(height: 20),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Row(
+              children: [
+                Icon(Icons.webhook, color: theme.colorScheme.primary, size: 22),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(widget.title, style: const TextStyle(fontSize: 20, color: Colors.white)),
+                      Text(
+                        '${filtered.length} / ${widget.items.length}',
+                        style: const TextStyle(fontSize: 12, color: Colors.white54),
                       ),
-                      trailing: isSelected
-                          ? Icon(Icons.check, size: 18, color: theme.colorScheme.primary)
-                          : null,
-                      onTap: () => Navigator.of(context).pop(item),
-                    );
-                  },
+                    ],
+                  ),
                 ),
-        ),
-      ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: TextField(
+              controller: _searchController,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+              decoration: InputDecoration(
+                hintText: loc.searchingModel,
+                prefixIcon: const Icon(Icons.search, size: 20),
+                suffixIcon: _query.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 18),
+                        onPressed: () {
+                          _searchController.clear();
+                          setState(() => _query = '');
+                        },
+                      )
+                    : null,
+                fillColor: theme.cardColor,
+                filled: true,
+                isDense: true,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+              onChanged: (v) => setState(() => _query = v),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Expanded(
+            child: filtered.isEmpty
+                ? Center(
+                    child: Text(loc.nothingFound, style: TextStyle(color: Colors.white54)),
+                  )
+                : ListView.builder(
+                    controller: ScrollController(initialScrollOffset: index * 44),
+                    clipBehavior: Clip.hardEdge,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
+                    itemCount: filtered.length,
+                    itemExtent: 44,
+                    itemBuilder: (context, index) {
+                      final item = filtered[index];
+                      final isSelected = item == widget.currentValue;
+                      return ListTile(
+                        dense: true,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        selected: isSelected,
+                        selectedTileColor: theme.colorScheme.primary.withValues(alpha: 0.15),
+                        title: Text(
+                          item,
+                          style: TextStyle(
+                            color: isSelected ? theme.colorScheme.primary : Colors.white,
+                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          maxLines: 1,
+                        ),
+                        trailing: isSelected
+                            ? Icon(Icons.check, size: 18, color: theme.colorScheme.primary)
+                            : null,
+                        onTap: () => Navigator.of(context).pop(item),
+                      );
+                    },
+                  ),
+          ),
+        ],
+      ),
     );
   }
 }

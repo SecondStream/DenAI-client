@@ -8,6 +8,7 @@ class UserMessage extends StatelessWidget {
   final Message message;
   final Function(Message message)? onEditMessage;
   final Function(int messageId)? onDeleteMessage;
+  final bool isDesktop;
 
   const UserMessage({
     super.key,
@@ -15,11 +16,24 @@ class UserMessage extends StatelessWidget {
     required this.message,
     this.onEditMessage,
     this.onDeleteMessage,
+    this.isDesktop = true,
   });
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final btnConstraints = isDesktop
+        ? BoxConstraints(minWidth: 16, minHeight: 16)
+        : BoxConstraints(minWidth: 36, minHeight: 36);
+    final borderRadius = isDesktop ? 12.0 : 8.0;
+    final shrinkWrap = IconButton.styleFrom(
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      splashFactory: NoSplash.splashFactory,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
+    );
+    final gap = 8.0;
     return Row(
       mainAxisAlignment: MainAxisAlignment.end,
       crossAxisAlignment: CrossAxisAlignment.end,
@@ -34,29 +48,27 @@ class UserMessage extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(borderRadius),
                     ),
                     child: IconButton(
                       icon: Icon(Icons.edit, size: 16, color: theme.hintColor),
-                      constraints: const BoxConstraints(),
-                      padding: const EdgeInsets.all(2),
+                      constraints: btnConstraints,
+                      style: shrinkWrap,
                       onPressed: onEditMessage != null ? () => onEditMessage?.call(message) : null,
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: gap),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                     decoration: BoxDecoration(
                       color: Colors.black.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(borderRadius),
                     ),
                     child: IconButton(
                       icon: Icon(Icons.delete_outline, size: 16, color: Colors.red.shade400),
-                      constraints: const BoxConstraints(),
-                      padding: const EdgeInsets.all(2),
+                      constraints: btnConstraints,
+                      style: shrinkWrap,
                       onPressed: onDeleteMessage != null
                           ? () => onDeleteMessage?.call(message.id)
                           : null,
@@ -67,8 +79,7 @@ class UserMessage extends StatelessWidget {
             ],
           ],
         ),
-        const SizedBox(width: 8),
-        PersonaAvatar(card, size: 55),
+        if (isDesktop) ...[SizedBox(width: gap), PersonaAvatar(card, size: 55)],
       ],
     );
   }

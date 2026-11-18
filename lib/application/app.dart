@@ -124,10 +124,6 @@ class ChatApp extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
           ),
         )),
-
-        sliderTheme: SliderThemeData(
-            overlayShape: SliderComponentShape.noOverlay,
-        )
       ),
 
       supportedLocales: const [Locale('en'), Locale('ru')],

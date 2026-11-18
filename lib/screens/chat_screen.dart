@@ -30,6 +30,8 @@ import 'package:gpt_markdown/custom_widgets/markdown_config.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:path/path.dart' as p;
 
+import '../widgets/chat_actions_menu.dart';
+
 class ChatScreenArgs {
   final int? chatId;
   final int charId;
@@ -95,6 +97,7 @@ class _ChatScreenState extends State<ChatScreen> {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
     final status = AppStatus.of(context);
+    final isDesktop = MediaQuery.of(context).size.width > 550;
     return BlocProvider<ChatBloc>(
       create: (context) => ChatBloc(
         GetIt.instance.get(),
@@ -135,7 +138,26 @@ class _ChatScreenState extends State<ChatScreen> {
           final isActionsBlocked = state is! ChatLoadedState || state.isAiTyping;
           return Scaffold(
             appBar: AppBar(
-              title: Text(state is! ChatLoadedState ? loc.chatTitle : state.char.name),
+              titleSpacing: 0,
+              title: isDesktop
+                  ? Text(
+                      state is! ChatLoadedState ? loc.chatTitle : state.char.name,
+                      style: TextStyle(overflow: TextOverflow.ellipsis),
+                    )
+                  : Row(
+                      children: [
+                        state is ChatLoadedState
+                            ? PersonaAvatar(state.char, size: 35)
+                            : SizedBox.shrink(),
+                        SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            state is! ChatLoadedState ? loc.chatTitle : state.char.name,
+                            style: TextStyle(overflow: TextOverflow.ellipsis),
+                          ),
+                        ),
+                      ],
+                    ),
               actions: [
                 if (AppEnv.isFull)
                   Tooltip(
@@ -192,7 +214,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 ),
               ],
             ),
-            body: _buildBody(context, loc, theme, state, status),
+            body: _buildBody(context, loc, theme, state, status, isDesktop),
           );
         },
       ),
@@ -205,6 +227,7 @@ class _ChatScreenState extends State<ChatScreen> {
     ThemeData theme,
     ChatState state,
     AppStatus status,
+    bool isDesktop,
   ) {
     if (state is ChatLoadingState ||
         (state is ChatErrorState && state.errType == ErrType.sendMessage)) {
@@ -263,6 +286,7 @@ class _ChatScreenState extends State<ChatScreen> {
                           state.isAiTyping,
                           state.messages.last.id == message.id,
                           state.voice,
+                          isDesktop: isDesktop,
                         );
                       },
                     ),
@@ -274,6 +298,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   state.userCard,
                   state.availableCards,
                   state.isAiTyping || (_audioRecordTool != null && _audioRecordTool!.isRecording),
+                  isDesktop,
                 ),
               ],
             ),
@@ -340,8 +365,9 @@ class _ChatScreenState extends State<ChatScreen> {
     UserCard? user,
     bool isTyping,
     bool isLastMessage,
-    String? voice,
-  ) {
+    String? voice, {
+    bool isDesktop = true,
+  }) {
     late Widget messageWidget;
     final isRegeneratinonActive =
         status.chatAvailable &&
@@ -355,6 +381,7 @@ class _ChatScreenState extends State<ChatScreen> {
         card: user,
         onEditMessage: isTyping ? null : (_) => _showEditMessageDialog(context, loc, message),
         onDeleteMessage: isTyping ? null : (messageId) => _onDeleteMessage(context, loc, messageId),
+        isDesktop: isDesktop,
       );
     } else {
       messageWidget = CharacterMessage(
@@ -399,6 +426,7 @@ class _ChatScreenState extends State<ChatScreen> {
                 }
               }
             : null,
+        isDesktop: isDesktop,
       );
     }
 
@@ -472,6 +500,7 @@ class _ChatScreenState extends State<ChatScreen> {
     UserCard? userCard,
     List<UserCard>? availableCards,
     bool isBlocked,
+    bool isDesktop,
   ) {
     final theme = Theme.of(context);
     final hasUserCard = userCard != null;
@@ -479,100 +508,113 @@ class _ChatScreenState extends State<ChatScreen> {
     final imgAv = status.visionAvailable;
     final chatAv = status.chatAvailable;
     final isRecording = _audioRecordTool != null && _audioRecordTool!.isRecording;
+    final currentText = _textController.text;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: isDesktop ? const EdgeInsets.all(12) : const EdgeInsets.only(top: 12, right: 12),
       color: theme.appBarTheme.backgroundColor,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Tooltip(
-            message: isBlocked ? loc.empty : (imgAv ? loc.attachImage : loc.visionUnavailable),
-            child: IconButton(
-              icon: Icon(Icons.attach_file, color: theme.hintColor, size: 22),
-              onPressed: isBlocked || !imgAv ? null : () => _pickImage(context),
-            ),
-          ),
-          const SizedBox(width: 4),
-          if (AppEnv.isFull) ...[
-            Tooltip(
-              message: isBlocked
-                  ? loc.empty
-                  : isRecording
-                  ? loc.recordingStop
-                  : loc.recordingStart,
-              child: IconButton(
-                icon: Icon(isRecording ? Icons.stop : Icons.mic, color: theme.hintColor, size: 22),
-                onPressed: isBlocked && !isRecording ? null : () => _recording(context),
+      child: SafeArea(
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            if (isDesktop) ...[
+              Tooltip(
+                message: isBlocked ? loc.empty : (imgAv ? loc.attachImage : loc.visionUnavailable),
+                child: IconButton(
+                  icon: Icon(Icons.attach_file, color: theme.hintColor, size: 22),
+                  onPressed: isBlocked || !imgAv ? null : () => _pickImage(context),
+                ),
               ),
-            ),
-            const SizedBox(width: 4),
-          ],
-          Tooltip(
-            message: isBlocked
-                ? loc.empty
-                : hasUserCard
-                ? loc.changeRoleButton
-                : loc.selectRoleButton,
-            child: InkWell(
-              onTap: isBlocked ? null : () => _showChangeCardDialog(context, loc, availableCards),
-              borderRadius: BorderRadius.circular(22),
-              child: PersonaAvatar(userCard, size: 50),
-            ),
-          ),
-          const SizedBox(width: 20),
-          Expanded(
-            child: Shortcuts(
-              shortcuts: <ShortcutActivator, Intent>{
-                const SingleActivator(
-                  LogicalKeyboardKey.enter,
-                  shift: false,
-                  control: false,
-                  alt: false,
-                ): const SendMessageIntent(),
-              },
-              child: Actions(
-                actions: <Type, Action<Intent>>{
-                  SendMessageIntent: CallbackAction<SendMessageIntent>(
-                    onInvoke: (SendMessageIntent intent) {
-                      if (!isBlocked) _sendMessage(context, status);
-                      return null;
-                    },
-                  ),
+              const SizedBox(width: 4),
+              Tooltip(
+                message: isBlocked
+                    ? loc.empty
+                    : hasUserCard
+                    ? loc.changeRoleButton
+                    : loc.selectRoleButton,
+                child: InkWell(
+                  onTap: isBlocked
+                      ? null
+                      : () => _showChangeCardDialog(context, loc, availableCards),
+                  borderRadius: BorderRadius.circular(22),
+                  child: PersonaAvatar(userCard, size: isDesktop ? 50 : 30),
+                ),
+              ),
+            ] else
+              ChatActionsMenu(
+                userCard: userCard,
+                isBlocked: isBlocked,
+                roleButtonText: hasUserCard ? loc.changeRoleButton : loc.selectRoleButton,
+                attachImageText: loc.attachImage,
+                onChangeRole: () => _showChangeCardDialog(context, loc, availableCards),
+                onAttachImage: () => _pickImage(context),
+              ),
+            SizedBox(width: isDesktop ? 20 : 0),
+            Expanded(
+              child: Shortcuts(
+                shortcuts: <ShortcutActivator, Intent>{
+                  const SingleActivator(
+                    LogicalKeyboardKey.enter,
+                    shift: false,
+                    control: false,
+                    alt: false,
+                  ): const SendMessageIntent(),
                 },
-                child: TextField(
-                  keyboardType: TextInputType.multiline,
-                  maxLines: null,
-                  controller: _textController,
-                  style: const TextStyle(color: Colors.white),
-                  enabled: !isBlocked && chatAv,
-                  decoration: InputDecoration(
-                    hintText: isBlocked
-                        ? (isRecording ? loc.recordingProcess : loc.characterTyping)
-                        : (chatAv ? loc.writeSomething : loc.chatUnavailable),
-                    fillColor: theme.cardColor,
-                    filled: true,
-                    border: const OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(20)),
-                      borderSide: BorderSide.none,
+                child: Actions(
+                  actions: <Type, Action<Intent>>{
+                    SendMessageIntent: CallbackAction<SendMessageIntent>(
+                      onInvoke: (SendMessageIntent intent) {
+                        if (!isBlocked) _sendMessage(context, status);
+                        return null;
+                      },
                     ),
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                  },
+                  child: TextField(
+                    keyboardType: TextInputType.multiline,
+                    minLines: 1,
+                    maxLines: isDesktop ? null : 4,
+                    controller: _textController,
+                    style: const TextStyle(color: Colors.white),
+                    enabled: !isBlocked && chatAv,
+                    onChanged: (val) => setState(() {}),
+                    decoration: InputDecoration(
+                      hintText: isBlocked
+                          ? (isRecording ? loc.recordingProcess : loc.characterTyping)
+                          : (chatAv ? loc.writeSomething : loc.chatUnavailable),
+                      fillColor: theme.cardColor,
+                      filled: true,
+                      border: const OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(20)),
+                        borderSide: BorderSide.none,
+                      ),
+                      contentPadding: isDesktop
+                          ? EdgeInsets.symmetric(horizontal: 16, vertical: 10)
+                          : EdgeInsets.only(left: 6),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          (currentText.isNotEmpty || !AppEnv.isFull) && !isRecording
+                              ? Icons.send
+                              : isRecording
+                              ? Icons.stop
+                              : Icons.mic,
+                          color: isBlocked || !chatAv ? theme.hintColor : theme.colorScheme.primary,
+                        ),
+                        onPressed: (isBlocked || !chatAv) && !isRecording
+                            ? null
+                            : () => isRecording
+                                  ? _recording(context)
+                                  : (currentText.isNotEmpty || !AppEnv.isFull)
+                                  ? _sendMessage(context, status)
+                                  : _recording(context),
+                      ),
+                    ),
+                    onSubmitted: (text) => isBlocked ? null : _sendMessage(context, status),
                   ),
-                  onSubmitted: (text) => isBlocked ? null : _sendMessage(context, status),
                 ),
               ),
             ),
-          ),
-          const SizedBox(width: 8),
-
-          IconButton(
-            icon: Icon(
-              Icons.send,
-              color: isBlocked || !chatAv ? theme.hintColor : theme.colorScheme.primary,
-            ),
-            onPressed: isBlocked || !chatAv ? null : () => _sendMessage(context, status),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

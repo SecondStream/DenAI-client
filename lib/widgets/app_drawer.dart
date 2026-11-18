@@ -20,8 +20,6 @@ class AppDrawer extends StatelessWidget {
     final theme = Theme.of(context);
     final currentRoute = ModalRoute.of(context)?.settings.name;
     final loc = AppLocalization.of(context);
-    final size = MediaQuery.of(context).size;
-    print(size);
 
     return BlocProvider<DrawerBloc>(
       create: (context) => DrawerBloc(GetIt.instance.get())..add(DrawerShownEvent()),

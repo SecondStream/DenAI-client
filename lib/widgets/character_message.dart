@@ -16,6 +16,7 @@ class CharacterMessage extends StatelessWidget {
   final Function(int messageId, MessageDirection direction)? onSwitchMessage;
   final Function(int messageId)? onRegenerateMessage;
   final Function(int messageId)? onPlayTTS;
+  final bool isDesktop;
 
   const CharacterMessage({
     super.key,
@@ -27,6 +28,7 @@ class CharacterMessage extends StatelessWidget {
     this.onSwitchMessage,
     this.onRegenerateMessage,
     this.onPlayTTS,
+    this.isDesktop = true,
   });
 
   @override
@@ -34,13 +36,25 @@ class CharacterMessage extends StatelessWidget {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
     final player = this.player;
+    final borderRadius = isDesktop ? 12.0 : 8.0;
+    final btnConstraints = isDesktop
+        ? BoxConstraints(minWidth: 16, minHeight: 16)
+        : BoxConstraints(minWidth: 36, minHeight: 36);
+    final shrinkWrap = IconButton.styleFrom(
+      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+      splashFactory: NoSplash.splashFactory,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(borderRadius),
+      ),
+    );
+    final gap = 8.0;
+    final iconSize = isDesktop ? 16.0 : 16.0;
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.end,
       children: [
-        PersonaAvatar(char, size: 55),
-        const SizedBox(width: 8),
+        if (isDesktop) ...[PersonaAvatar(char, size: 55), SizedBox(width: 8)],
         IntrinsicWidth(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,130 +73,153 @@ class CharacterMessage extends StatelessWidget {
               const SizedBox(height: 4),
               Row(
                 mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (message.id > 0) ...[
-                    if (onSwitchMessage != null && message.totalVariants > 1) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: Icon(Icons.arrow_left, size: 20, color: theme.hintColor),
-                              constraints: const BoxConstraints(),
-                              padding: EdgeInsets.zero,
-                              onPressed: onSwitchMessage != null
-                                  ? () => onSwitchMessage?.call(message.id, MessageDirection.left)
-                                  : null,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (message.id > 0) ...[
+                        if (onSwitchMessage != null && message.totalVariants > 1) ...[
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(borderRadius),
                             ),
-                            const SizedBox(width: 4),
-                            Text(
-                              "${message.currentIndex} / ${message.totalVariants}",
-                              style: TextStyle(
-                                color: theme.colorScheme.primary,
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.arrow_left,
+                                    size: iconSize,
+                                    color: theme.hintColor,
+                                  ),
+                                  constraints: btnConstraints,
+                                  style: shrinkWrap,
+                                  onPressed: onSwitchMessage != null
+                                      ? () =>
+                                            onSwitchMessage?.call(message.id, MessageDirection.left)
+                                      : null,
+                                ),
+                                const SizedBox(width: 2),
+                                Text(
+                                  "${message.currentIndex} / ${message.totalVariants}",
+                                  style: TextStyle(
+                                    color: theme.colorScheme.primary,
+                                    fontSize: isDesktop ? 11 : 10,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(width: 2),
+                                IconButton(
+                                  icon: Icon(
+                                    Icons.arrow_right,
+                                    size: iconSize,
+                                    color: theme.hintColor,
+                                  ),
+                                  constraints: btnConstraints,
+                                  style: shrinkWrap,
+                                  onPressed: onSwitchMessage != null
+                                      ? () => onSwitchMessage?.call(
+                                          message.id,
+                                          MessageDirection.right,
+                                        )
+                                      : null,
+                                ),
+                              ],
                             ),
-                            const SizedBox(width: 4),
-                            IconButton(
-                              icon: Icon(Icons.arrow_right, size: 20, color: theme.hintColor),
-                              constraints: const BoxConstraints(),
-                              padding: EdgeInsets.zero,
-                              onPressed: onSwitchMessage != null
-                                  ? () => onSwitchMessage?.call(message.id, MessageDirection.right)
-                                  : null,
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    if (onRegenerateMessage != null) ...[
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withValues(alpha: 0.5),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: IconButton(
-                          icon: Icon(Icons.refresh, size: 16, color: theme.colorScheme.primary),
-                          constraints: const BoxConstraints(),
-                          padding: const EdgeInsets.all(2),
-                          onPressed: () => onRegenerateMessage?.call(message.id),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                    ],
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                      decoration: BoxDecoration(
-                        color: Colors.black.withValues(alpha: 0.5),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: IconButton(
-                        icon: Icon(Icons.edit, size: 16, color: theme.hintColor),
-                        constraints: const BoxConstraints(),
-                        padding: const EdgeInsets.all(2),
-                        onPressed: onEditMessage != null
-                            ? () => onEditMessage?.call(message)
-                            : null,
-                      ),
-                    ),
-                  ],
-                  Spacer(),
-                  if (player != null && (message.id > 0 || message.id == Consts.greetingTmp)) ...[
-                    ValueListenableBuilder<bool>(
-                      valueListenable: player.isAutoEnabled,
-                      builder: (context, value, child) {
-                        return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: value
-                                ? theme.colorScheme.primary.withValues(alpha: 0.5)
-                                : Colors.black.withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(12),
                           ),
-                          child: IconButton(
-                            icon: Icon(
-                              Icons.hdr_auto_rounded,
-                              size: 16,
-                              color: value ? theme.cardColor : theme.hintColor,
+                          SizedBox(width: gap),
+                        ],
+                        if (onRegenerateMessage != null) ...[
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withValues(alpha: 0.5),
+                              borderRadius: BorderRadius.circular(borderRadius),
                             ),
-                            constraints: const BoxConstraints(),
-                            padding: const EdgeInsets.all(2),
-                            onPressed: () => player.changeAutoTts(!value),
+                            child: IconButton(
+                              icon: Icon(Icons.refresh, size: iconSize, color: theme.hintColor),
+                              constraints: btnConstraints,
+                              style: shrinkWrap,
+                              onPressed: () => onRegenerateMessage?.call(message.id),
+                            ),
                           ),
-                        );
-                      },
-                    ),
-                    const SizedBox(width: 8),
-                    ValueListenableBuilder<int?>(
-                      valueListenable: player.activeMessageId,
-                      builder: (context, value, child) {
-                        final isCurrentPlay = value != null && value == message.id;
-                        return Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                          SizedBox(width: gap),
+                        ],
+                        Container(
                           decoration: BoxDecoration(
                             color: Colors.black.withValues(alpha: 0.5),
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(borderRadius),
                           ),
                           child: IconButton(
-                            icon: isCurrentPlay
-                                ? Icon(Icons.stop, size: 16, color: theme.hintColor)
-                                : Icon(Icons.play_arrow, size: 16, color: theme.hintColor),
-                            constraints: const BoxConstraints(),
-                            padding: const EdgeInsets.all(2),
-                            onPressed: () => onPlayTTS?.call(message.id),
+                            icon: Icon(Icons.edit, size: iconSize, color: theme.hintColor),
+                            constraints: btnConstraints,
+                            style: shrinkWrap,
+                            onPressed: onEditMessage != null
+                                ? () => onEditMessage?.call(message)
+                                : null,
                           ),
-                        );
-                      },
-                    ),
-                  ],
+                        ),
+                      ],
+                    ],
+                  ),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      if (player != null &&
+                          (message.id > 0 || message.id == Consts.greetingTmp)) ...[
+                        ValueListenableBuilder<bool>(
+                          valueListenable: player.isAutoEnabled,
+                          builder: (context, value, child) {
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: value
+                                    ? theme.colorScheme.primary.withValues(alpha: 0.5)
+                                    : Colors.black.withValues(alpha: 0.5),
+                                borderRadius: BorderRadius.circular(borderRadius),
+                              ),
+                              child: IconButton(
+                                icon: Icon(
+                                  Icons.hdr_auto_rounded,
+                                  size: iconSize,
+                                  color: value ? theme.cardColor : theme.hintColor,
+                                ),
+                                constraints: btnConstraints,
+                                style: shrinkWrap,
+                                onPressed: () => player.changeAutoTts(!value),
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(width: gap),
+                        ValueListenableBuilder<int?>(
+                          valueListenable: player.activeMessageId,
+                          builder: (context, value, child) {
+                            final isCurrentPlay = value != null && value == message.id;
+                            return Container(
+                              decoration: BoxDecoration(
+                                color: Colors.black.withValues(alpha: 0.5),
+                                borderRadius: BorderRadius.circular(borderRadius),
+                              ),
+                              child: IconButton(
+                                icon: isCurrentPlay
+                                    ? Icon(Icons.stop, size: iconSize, color: theme.hintColor)
+                                    : Icon(
+                                        Icons.play_arrow,
+                                        size: iconSize,
+                                        color: theme.hintColor,
+                                      ),
+                                style: shrinkWrap,
+                                constraints: btnConstraints,
+                                onPressed: () => onPlayTTS?.call(message.id),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
+                    ],
+                  ),
                 ],
               ),
             ],
