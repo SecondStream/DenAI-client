@@ -3,6 +3,7 @@ import 'package:den_ai/blocs/lorebook_form/lorebook_form_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/screens/persona_form_screen.dart';
+import 'package:den_ai/widgets/dialogs/confirmation_dialog.dart';
 import 'package:den_ai/widgets/persona_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -115,10 +116,17 @@ class _LorebookFormScreenState extends PersonaFormScreenState<LorebookFormScreen
                                   loc.deleteButton,
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                onPressed: () {
-                                  context.read<LorebookFormBloc>().add(
-                                    DeleteLorebookEvent(state.lorebook!.id),
+                                onPressed: () async {
+                                  final res = await ConfirmationDialog.open(
+                                    context,
+                                    loc.removeLoreConfirmTitle,
+                                    loc.removeLoreConfirmMessage,
                                   );
+                                  if (res == true && context.mounted) {
+                                    context.read<LorebookFormBloc>().add(
+                                      DeleteLorebookEvent(state.lorebook!.id),
+                                    );
+                                  }
                                 },
                               ),
                             ),

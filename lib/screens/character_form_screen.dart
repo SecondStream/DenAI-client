@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
+import 'package:den_ai/widgets/dialogs/confirmation_dialog.dart';
 import 'package:den_ai/widgets/status.dart';
 import 'package:den_ai/blocs/character_form/character_form_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
@@ -289,10 +290,17 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
                                   loc.delete,
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                onPressed: () {
-                                  context.read<CharacterFormBloc>().add(
-                                    DeleteCharacterEvent(state.character!.id),
+                                onPressed: () async {
+                                  final res = await ConfirmationDialog.open(
+                                    context,
+                                    loc.removeCharConfirmTitle,
+                                    loc.removeCharConfirmMessage,
                                   );
+                                  if (res == true && context.mounted) {
+                                    context.read<CharacterFormBloc>().add(
+                                      DeleteCharacterEvent(state.character!.id),
+                                    );
+                                  }
                                 },
                               ),
                             ),
@@ -403,9 +411,9 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
       onTap: () async {
         final List<int>? result = await LorebooksSelectDialog.open(
           context,
-            allLorebooks,
+          allLorebooks,
           _selectedLorebookIds,
-          context.isDesktop
+          context.isDesktop,
         );
         if (result != null) {
           setState(() {

@@ -256,6 +256,17 @@ class AppLocalization {
       'voice_male_label': 'Male',
       'voice_female_label': 'Female',
       'voice_settings_hint': 'Select a voice',
+
+      'remove_char_confirm_title': 'Deleting character',
+      'remove_char_confirm_message': 'Are you sure you want to delete the character?',
+      'remove_lore_confirm_title': 'Deleting Lorebook',
+      'remove_lore_confirm_message': 'Are you sure you want to delete the Lorebook?',
+      'remove_user_confirm_title': 'Deleting Profile',
+      'remove_user_confirm_message': 'Are you sure you want to delete the profile?',
+      'remove_lore_entry_confirm_title': 'Deleting entry',
+      'remove_lore_entry_confirm_message': 'Are you sure you want to delete the entry?',
+      'remove_provider_confirm_title': 'Removing provider',
+      'remove_provider_confirm_message': 'Are you sure you want to remove the provider?',
     },
     'ru': {
       // --- Базовые сообщения ---
@@ -503,6 +514,18 @@ class AppLocalization {
       'voice_male_label': 'Мужские',
       'voice_female_label': 'Женские',
       'voice_settings_hint': 'Выбрать голос',
+
+      // confirmations
+      'remove_char_confirm_title': 'Удаление персонажа',
+      'remove_char_confirm_message': 'Вы действительно хотите удалить персонажа?',
+      'remove_lore_confirm_title': 'Удаление лорбука',
+      'remove_lore_confirm_message': 'Вы действительно хотите удалить лорбук?',
+      'remove_user_confirm_title': 'Удаление профиля',
+      'remove_user_confirm_message': 'Вы действительно хотите удалить профиль?',
+      'remove_lore_entry_confirm_title': 'Удаление записи',
+      'remove_lore_entry_confirm_message': 'Вы действительно хотите удалить запись?',
+      'remove_provider_confirm_title': 'Удаление провайдера',
+      'remove_provider_confirm_message': 'Вы действительно хотите удалить провайдер?',
     },
   };
 
@@ -568,6 +591,29 @@ class AppLocalization {
   String get backgroundLabel => _localizedValues[locale.languageCode]?['background_label'] ?? empty;
   String get selectBackground =>
       _localizedValues[locale.languageCode]?['select_background'] ?? empty;
+
+  String get removeCharConfirmTitle =>
+      _localizedValues[locale.languageCode]?['remove_char_confirm_title'] ?? empty;
+  String get removeCharConfirmMessage =>
+      _localizedValues[locale.languageCode]?['remove_char_confirm_message'] ?? empty;
+
+  String get removeLoreConfirmTitle =>
+      _localizedValues[locale.languageCode]?['remove_lore_confirm_title'] ?? empty;
+  String get removeLoreConfirmMessage =>
+      _localizedValues[locale.languageCode]?['remove_lore_confirm_message'] ?? empty;
+
+  String get removeUserConfirmTitle =>
+      _localizedValues[locale.languageCode]?['remove_user_confirm_title'] ?? empty;
+  String get removeUserConfirmMessage =>
+      _localizedValues[locale.languageCode]?['remove_user_confirm_message'] ?? empty;
+  String get removeLoreEntryConfirmTitle =>
+      _localizedValues[locale.languageCode]?['remove_lore_entry_confirm_title'] ?? empty;
+  String get removeLoreEntryConfirmMessage =>
+      _localizedValues[locale.languageCode]?['remove_lore_entry_confirm_message'] ?? empty;
+  String get removeProviderConfirmTitle =>
+      _localizedValues[locale.languageCode]?['remove_provider_confirm_title'] ?? empty;
+  String get removeProviderConfirmMessage =>
+      _localizedValues[locale.languageCode]?['remove_provider_confirm_message'] ?? empty;
 
   String get charNameLabel => _localizedValues[locale.languageCode]?['char_name_label'] ?? empty;
   String get charNameHint => _localizedValues[locale.languageCode]?['char_name_hint'] ?? empty;

@@ -2,6 +2,7 @@ import 'package:den_ai/application/config.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/screens/persona_form_screen.dart';
+import 'package:den_ai/widgets/dialogs/confirmation_dialog.dart';
 import 'package:den_ai/widgets/persona_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -129,10 +130,17 @@ class _UserCardFormScreenState extends PersonaFormScreenState<UserCardFormScreen
                                   loc.deleteButton,
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                onPressed: () {
-                                  context.read<UserCardFormBloc>().add(
-                                    DeleteUserCardEvent(state.card!.id),
+                                onPressed: () async {
+                                  final res = await ConfirmationDialog.open(
+                                    context,
+                                    loc.removeUserConfirmTitle,
+                                    loc.removeUserConfirmMessage,
                                   );
+                                  if (res == true && context.mounted) {
+                                    context.read<UserCardFormBloc>().add(
+                                      DeleteUserCardEvent(state.card!.id),
+                                    );
+                                  }
                                 },
                               ),
                             ),

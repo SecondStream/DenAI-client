@@ -4,6 +4,8 @@ import 'package:den_ai/screens/lorebook_entries_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:den_ai/models/models.dart';
 
+import 'confirmation_dialog.dart';
+
 class LoreEntryDialog extends StatefulWidget {
   final int bookId;
   final LoreEntry? entry;
@@ -123,10 +125,17 @@ class _LoreEntryDialogState extends State<LoreEntryDialog> {
           children: [
             if (widget.entry != null && !widget.readonly)
               TextButton(
-                onPressed: () {
-                  context.pop(
-                    LoreEntryIn(id: -1, lorebookId: widget.bookId, title: '', content: ''),
+                onPressed: () async {
+                  final res = await ConfirmationDialog.open(
+                    context,
+                    loc.removeLoreEntryConfirmTitle,
+                    loc.removeLoreEntryConfirmMessage,
                   );
+                  if (res == true && context.mounted) {
+                    context.pop(
+                      LoreEntryIn(id: -1, lorebookId: widget.bookId, title: '', content: ''),
+                    );
+                  }
                 },
                 child: Text(
                   loc.delete,

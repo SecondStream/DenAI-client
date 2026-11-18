@@ -7,6 +7,8 @@ import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:flutter/material.dart';
 import 'package:den_ai/models/models.dart';
 
+import 'confirmation_dialog.dart';
+
 class EditProviderDialog extends StatefulWidget {
   final Provider? provider;
 
@@ -33,9 +35,7 @@ class EditProviderDialog extends StatefulWidget {
             useSafeArea: true,
             builder: (ctx) => Padding(
               padding: EdgeInsets.only(bottom: MediaQuery.of(ctx).viewInsets.bottom),
-              child: SizedBox(
-                child: EditProviderDialog(provider: provider),
-              ),
+              child: SizedBox(child: EditProviderDialog(provider: provider)),
             ),
           );
   }
@@ -218,10 +218,17 @@ class _EditProviderDialogState extends State<EditProviderDialog> {
                   if (widget.provider != null &&
                       widget.provider!.id != DefaultSettings.singleSettingsId)
                     TextButton(
-                      onPressed: () {
-                        context.pop(
-                          ProviderIn(id: -1, name: '', url: '', key: '', additionalArgs: ''),
+                      onPressed: () async {
+                        final res = await ConfirmationDialog.open(
+                          context,
+                          loc.removeProviderConfirmTitle,
+                          loc.removeProviderConfirmMessage,
                         );
+                        if (res == true && context.mounted) {
+                          context.pop(
+                            ProviderIn(id: -1, name: '', url: '', key: '', additionalArgs: ''),
+                          );
+                        }
                       },
                       child: Text(
                         loc.delete,
