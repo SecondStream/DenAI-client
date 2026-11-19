@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/logger.dart';
@@ -11,6 +13,7 @@ import 'package:den_ai/widgets/cropped_avatar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:share_plus/share_plus.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
@@ -103,6 +106,11 @@ class AppDrawer extends StatelessWidget {
               onTap: () async {
                 final file = await AppLogger.getLogFileForExport();
                 if (file != null) {
+                  if (Platform.isAndroid) {
+                    await SharePlus.instance.share(ShareParams(files: [XFile(file.path)]));
+                    return;
+                  }
+
                   final path = await FileTool.getSaveLogPath(loc);
                   if (path != null) file.copy(path);
                 }

@@ -17,6 +17,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CharacterFormScreen extends StatefulWidget {
@@ -573,6 +574,19 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     Uint8List? image,
   ) async {
     final fileExt = image != null ? 'png' : 'json';
+
+    if (Platform.isAndroid) {
+      final xFile = XFile.fromData(
+        image ?? utf8.encode(json),
+        name: '$name.$fileExt',
+        mimeType: image != null ? 'image/png' : 'application/json',
+      );
+
+      await SharePlus.instance.share(ShareParams(files: [xFile]));
+
+      return;
+    }
+
     final path = await FileTool.getExportPath(loc, name, fileExt);
     if (path != null) {
       final file = File(path);
