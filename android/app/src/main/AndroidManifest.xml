@@ -4,7 +4,7 @@
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     <uses-permission android:name="android.permission.MODIFY_AUDIO_SETTINGS" />
     <application
-        android:label="den_ai"
+        android:label="DenAI"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
         <activity
