@@ -8,6 +8,7 @@
 ### Fixed
 
 - Position of the attached image
+- Incorrect list of vision models
 
 ## v1.0.4 (2026-11-16)
 

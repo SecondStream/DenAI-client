@@ -59,7 +59,7 @@ class SettingsLoadedState extends SettingsState {
   }) {
     return SettingsLoadedState(
       models: models ?? this.models.toList(),
-      visionModels: models ?? this.visionModels.toList(),
+      visionModels: visionModels ?? this.visionModels.toList(),
       embeddingModels: embeddingModels ?? this.embeddingModels.toList(),
       tokenizers: tokenizers ?? this.tokenizers.toList(),
       settings: settings ?? this.settings.copy(),
