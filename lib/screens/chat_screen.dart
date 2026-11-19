@@ -542,7 +542,7 @@ class _ChatScreenState extends State<ChatScreen> {
         color: theme.appBarTheme.backgroundColor,
         child: SafeArea(
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               if (isDesktop) ...[
                 Tooltip(
@@ -602,7 +602,7 @@ class _ChatScreenState extends State<ChatScreen> {
                     child: TextField(
                       keyboardType: TextInputType.multiline,
                       minLines: 1,
-                      maxLines: isDesktop ? null : 4,
+                      maxLines: 4,
                       controller: _textController,
                       style: const TextStyle(color: Colors.white),
                       enabled: !isBlocked && chatAv,
