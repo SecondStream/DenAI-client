@@ -32,6 +32,7 @@ dependencies:
   png_chunk_text: ^1.0.0
   png_chunks_encode: ^1.0.0
   record: ^7.1.2
+  share_plus: ^13.3.1
   shared_preferences: ^2.5.6
   sherpa_onnx: ^2.0.1
   sqlite3: ^3.7.1
