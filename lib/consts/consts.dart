@@ -5,6 +5,7 @@ class Consts {
   static const normalCode = 200;
   static const notFoundCode = 404;
   static const unknownCode = 520;
+  static const defaultChar = 'Lynx';
 }
 
 class MessageTags {

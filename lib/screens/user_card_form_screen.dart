@@ -1,4 +1,4 @@
-import 'package:den_ai/application/config.dart';
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/screens/persona_form_screen.dart';
@@ -182,7 +182,7 @@ class _UserCardFormScreenState extends PersonaFormScreenState<UserCardFormScreen
   }
 
   Widget _buildAvatarPicker(BuildContext context, ThemeData theme, UserCard? card) {
-    final avatarUrl = selectedAvatarFile?.path ?? card?.getAvatar(AppConfig.of(context).baseUrl);
+    final avatarUrl = selectedAvatarFile?.path ?? card?.getAvatar(AppEnv.baseUrl);
     return InkWell(
       onTap: () => handleAvatarClick(context, card),
       borderRadius: BorderRadius.circular(60),

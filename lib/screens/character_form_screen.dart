@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
-import 'package:den_ai/application/config.dart';
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/widgets/dialogs/confirmation_dialog.dart';
@@ -83,7 +83,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
       context.read<CharacterFormBloc>().add(
         SelectedCardEvent(
           card,
-          AppConfig.of(context).baseUrl,
+          AppEnv.baseUrl,
           AppStatus.of(context).embeddingsAvailable,
         ),
       );
@@ -131,7 +131,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
             IconButton(
               icon: const Icon(Icons.help_outline, size: 28),
               onPressed: () =>
-                  launchUrl(Uri.parse('${AppConfig.of(context).getSiteUrl(loc)}/denai/character')),
+                  launchUrl(Uri.parse('${AppEnv.getSiteUrl(loc)}/denai/character')),
             ),
           ],
         ),
@@ -460,7 +460,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
 
   Widget _buildAvatarPicker(BuildContext context, ThemeData theme, Char? character) {
     final char = character;
-    final avatarUrl = selectedAvatarFile?.path ?? char?.getAvatar(AppConfig.of(context).baseUrl);
+    final avatarUrl = selectedAvatarFile?.path ?? char?.getAvatar(AppEnv.baseUrl);
     return InkWell(
       onTap: () => handleAvatarClick(context, character),
       borderRadius: BorderRadius.circular(60),
@@ -475,7 +475,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     Char? character,
   ) {
     final char = character;
-    final baseUrl = AppConfig.of(context).baseUrl;
+    final baseUrl = AppEnv.baseUrl;
     final bgUrl = char?.getBackground(baseUrl);
     if (_selectedBackgroundFile != null) {
       return Image.file(_selectedBackgroundFile!, fit: BoxFit.cover, width: double.infinity);
@@ -531,7 +531,7 @@ class _CharacterFormScreenState extends PersonaFormScreenState<CharacterFormScre
     if (!_formKey.currentState!.validate()) return;
     context.read<CharacterFormBloc>().add(
       ExportCardEvent(
-        baseUrl: AppConfig.of(context).baseUrl,
+        baseUrl: AppEnv.baseUrl,
         id: id,
         name: _nameController.text.trim(),
         appearance: _appearanceController.text.trim(),

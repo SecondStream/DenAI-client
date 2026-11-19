@@ -10,6 +10,9 @@ import 'package:den_ai/repositories/base_repository.dart';
 class CharactersRepository extends BaseRepository {
   CharactersRepository(super.db);
 
+  bool _defaultCreated = false;
+  bool get defaultCreated => _defaultCreated;
+
   Future<List<Char>> getCharacters() async {
     final rows = await db.select(db.chars).get();
     return rows.map((row) => Char.fromDb(row, lorebooks: [])).toList();
@@ -84,6 +87,7 @@ class CharactersRepository extends BaseRepository {
     CropData? cropData,
     String? avatarPath,
     String? backgroundPath,
+    bool isDefault = false,
   }) async {
     return await db.transaction(() async {
       int finalId;
@@ -102,6 +106,7 @@ class CharactersRepository extends BaseRepository {
           crop: crop != null || avatarPath != null ? Value(crop) : const Value.absent(),
           avatar: avatarPath != null ? Value(avatarPath) : const Value.absent(),
           background: backgroundPath != null ? Value(backgroundPath) : const Value.absent(),
+          type: Value(isDefault ? CharType.system : CharType.user),
         );
 
         await (db.update(db.chars)..where((tbl) => tbl.id.equals(id))).write(companion);
@@ -119,9 +124,12 @@ class CharactersRepository extends BaseRepository {
           crop: Value(crop),
           avatar: Value(finalAvatar),
           background: Value(backgroundPath),
+          type: isDefault ? CharType.system : CharType.user,
         );
 
         finalId = await db.into(db.chars).insert(companion);
+
+        if (isDefault) _defaultCreated = true;
       }
 
       for (final bookId in lorebookIds) {

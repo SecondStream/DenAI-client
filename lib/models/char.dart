@@ -6,6 +6,7 @@ import 'package:drift/drift.dart';
 import 'lorebook.dart';
 import 'package:path/path.dart' as p;
 
+enum CharType {user, system}
 class Char extends Persona {
   final int id;
   final String name;
@@ -18,6 +19,7 @@ class Char extends Persona {
   final String greeting;
   final String prompt;
   final String notes;
+  final CharType type;
   final List<Lorebook> lorebooks;
 
   Char({
@@ -32,6 +34,7 @@ class Char extends Persona {
     this.greeting = "",
     this.prompt = "",
     this.notes = "",
+    required this.type,
     required this.lorebooks,
   });
 
@@ -48,6 +51,7 @@ class Char extends Persona {
       greeting: data.greeting,
       prompt: data.prompt,
       notes: data.notes,
+      type: data.type,
       lorebooks: lorebooks,
     );
   }
@@ -77,7 +81,7 @@ class Chars extends Table {
   TextColumn get avatar => text().nullable()();
   TextColumn get crop => text().nullable()();
   TextColumn get background => text().nullable()();
-
+  TextColumn get type => textEnum<CharType>()();
   TextColumn get appearance => text().withDefault(const Constant(''))();
   TextColumn get personality => text().withDefault(const Constant(''))();
   TextColumn get scenario => text().withDefault(const Constant(''))();

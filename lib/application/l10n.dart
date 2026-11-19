@@ -1,3 +1,5 @@
+import 'package:den_ai/common/def_chars_data.dart';
+import 'package:den_ai/models/character_card.dart';
 import 'package:flutter/material.dart';
 
 class AppLocalization {
@@ -571,6 +573,10 @@ class AppLocalization {
   String charLorebookCount(int count) {
     final template = _localizedValues[locale.languageCode]?['char_lorebooks_count'] ?? empty;
     return template.replaceAll('{num}', count.toString());
+  }
+
+  ImportedFromAssetsCardData? getCharacter(String name) {
+    return DefCharsData().data[locale.languageCode]?[name];
   }
 
   String get empty => '';

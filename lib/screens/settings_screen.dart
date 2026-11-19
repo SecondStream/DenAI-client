@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:den_ai/application/config.dart';
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/routes.dart';
 import 'package:den_ai/blocs/app_status/app_status_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
@@ -147,7 +147,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             IconButton(
               icon: const Icon(Icons.help_outline, size: 28),
               onPressed: () =>
-                  launchUrl(Uri.parse('${AppConfig.of(context).getSiteUrl(loc)}/denai/settings')),
+                  launchUrl(Uri.parse('${AppEnv.getSiteUrl(loc)}/denai/settings')),
             ),
           ],
         ),

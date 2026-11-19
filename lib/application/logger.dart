@@ -19,6 +19,8 @@ class AppLogger {
     RegExp(r'("?(?:api_?key|token|secret|password)"?\s*[:=]\s*"?)[^"\s,}]+', caseSensitive: false),
   ];
 
+  static String? lastError;
+
   static Future<void> init(String appVersion) async {
     if (_initialized) return;
     try {
@@ -48,7 +50,10 @@ class AppLogger {
 
   static void error(String message, {Object? error, StackTrace? stackTrace}) {
     final buffer = StringBuffer(message);
-    if (error != null) buffer.write('\n  Error: $error');
+    if (error != null) {
+      lastError = _sanitize('$error');
+      buffer.write('\n  Error: $error');
+    }
     if (stackTrace != null) buffer.write('\n  StackTrace:\n$stackTrace');
     _write('ERROR', buffer.toString());
   }

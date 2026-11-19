@@ -1,4 +1,4 @@
-import 'package:den_ai/application/config.dart';
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/widgets/cropped_avatar.dart';
@@ -19,7 +19,7 @@ class LorebookCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
-    final avatarUrl = lorebook.getAvatar(AppConfig.of(context).baseUrl);
+    final avatarUrl = lorebook.getAvatar(AppEnv.baseUrl);
     return Card(
       color: theme.cardColor,
       elevation: 4,

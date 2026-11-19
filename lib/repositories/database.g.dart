@@ -63,6 +63,15 @@ class $CharsTable extends Chars with TableInfo<$CharsTable, CharData> {
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  @override
+  late final GeneratedColumnWithTypeConverter<CharType, String> type =
+      GeneratedColumn<String>(
+        'type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<CharType>($CharsTable.$convertertype);
   static const VerificationMeta _appearanceMeta = const VerificationMeta(
     'appearance',
   );
@@ -138,6 +147,7 @@ class $CharsTable extends Chars with TableInfo<$CharsTable, CharData> {
     avatar,
     crop,
     background,
+    type,
     appearance,
     personality,
     scenario,
@@ -254,6 +264,12 @@ class $CharsTable extends Chars with TableInfo<$CharsTable, CharData> {
         DriftSqlType.string,
         data['${effectivePrefix}background'],
       ),
+      type: $CharsTable.$convertertype.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}type'],
+        )!,
+      ),
       appearance: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}appearance'],
@@ -285,6 +301,9 @@ class $CharsTable extends Chars with TableInfo<$CharsTable, CharData> {
   $CharsTable createAlias(String alias) {
     return $CharsTable(attachedDatabase, alias);
   }
+
+  static JsonTypeConverter2<CharType, String, String> $convertertype =
+      const EnumNameConverter<CharType>(CharType.values);
 }
 
 class CharData extends DataClass implements Insertable<CharData> {
@@ -293,6 +312,7 @@ class CharData extends DataClass implements Insertable<CharData> {
   final String? avatar;
   final String? crop;
   final String? background;
+  final CharType type;
   final String appearance;
   final String personality;
   final String scenario;
@@ -305,6 +325,7 @@ class CharData extends DataClass implements Insertable<CharData> {
     this.avatar,
     this.crop,
     this.background,
+    required this.type,
     required this.appearance,
     required this.personality,
     required this.scenario,
@@ -326,6 +347,9 @@ class CharData extends DataClass implements Insertable<CharData> {
     if (!nullToAbsent || background != null) {
       map['background'] = Variable<String>(background);
     }
+    {
+      map['type'] = Variable<String>($CharsTable.$convertertype.toSql(type));
+    }
     map['appearance'] = Variable<String>(appearance);
     map['personality'] = Variable<String>(personality);
     map['scenario'] = Variable<String>(scenario);
@@ -346,6 +370,7 @@ class CharData extends DataClass implements Insertable<CharData> {
       background: background == null && nullToAbsent
           ? const Value.absent()
           : Value(background),
+      type: Value(type),
       appearance: Value(appearance),
       personality: Value(personality),
       scenario: Value(scenario),
@@ -366,6 +391,9 @@ class CharData extends DataClass implements Insertable<CharData> {
       avatar: serializer.fromJson<String?>(json['avatar']),
       crop: serializer.fromJson<String?>(json['crop']),
       background: serializer.fromJson<String?>(json['background']),
+      type: $CharsTable.$convertertype.fromJson(
+        serializer.fromJson<String>(json['type']),
+      ),
       appearance: serializer.fromJson<String>(json['appearance']),
       personality: serializer.fromJson<String>(json['personality']),
       scenario: serializer.fromJson<String>(json['scenario']),
@@ -383,6 +411,9 @@ class CharData extends DataClass implements Insertable<CharData> {
       'avatar': serializer.toJson<String?>(avatar),
       'crop': serializer.toJson<String?>(crop),
       'background': serializer.toJson<String?>(background),
+      'type': serializer.toJson<String>(
+        $CharsTable.$convertertype.toJson(type),
+      ),
       'appearance': serializer.toJson<String>(appearance),
       'personality': serializer.toJson<String>(personality),
       'scenario': serializer.toJson<String>(scenario),
@@ -398,6 +429,7 @@ class CharData extends DataClass implements Insertable<CharData> {
     Value<String?> avatar = const Value.absent(),
     Value<String?> crop = const Value.absent(),
     Value<String?> background = const Value.absent(),
+    CharType? type,
     String? appearance,
     String? personality,
     String? scenario,
@@ -410,6 +442,7 @@ class CharData extends DataClass implements Insertable<CharData> {
     avatar: avatar.present ? avatar.value : this.avatar,
     crop: crop.present ? crop.value : this.crop,
     background: background.present ? background.value : this.background,
+    type: type ?? this.type,
     appearance: appearance ?? this.appearance,
     personality: personality ?? this.personality,
     scenario: scenario ?? this.scenario,
@@ -426,6 +459,7 @@ class CharData extends DataClass implements Insertable<CharData> {
       background: data.background.present
           ? data.background.value
           : this.background,
+      type: data.type.present ? data.type.value : this.type,
       appearance: data.appearance.present
           ? data.appearance.value
           : this.appearance,
@@ -447,6 +481,7 @@ class CharData extends DataClass implements Insertable<CharData> {
           ..write('avatar: $avatar, ')
           ..write('crop: $crop, ')
           ..write('background: $background, ')
+          ..write('type: $type, ')
           ..write('appearance: $appearance, ')
           ..write('personality: $personality, ')
           ..write('scenario: $scenario, ')
@@ -464,6 +499,7 @@ class CharData extends DataClass implements Insertable<CharData> {
     avatar,
     crop,
     background,
+    type,
     appearance,
     personality,
     scenario,
@@ -480,6 +516,7 @@ class CharData extends DataClass implements Insertable<CharData> {
           other.avatar == this.avatar &&
           other.crop == this.crop &&
           other.background == this.background &&
+          other.type == this.type &&
           other.appearance == this.appearance &&
           other.personality == this.personality &&
           other.scenario == this.scenario &&
@@ -494,6 +531,7 @@ class CharsCompanion extends UpdateCompanion<CharData> {
   final Value<String?> avatar;
   final Value<String?> crop;
   final Value<String?> background;
+  final Value<CharType> type;
   final Value<String> appearance;
   final Value<String> personality;
   final Value<String> scenario;
@@ -506,6 +544,7 @@ class CharsCompanion extends UpdateCompanion<CharData> {
     this.avatar = const Value.absent(),
     this.crop = const Value.absent(),
     this.background = const Value.absent(),
+    this.type = const Value.absent(),
     this.appearance = const Value.absent(),
     this.personality = const Value.absent(),
     this.scenario = const Value.absent(),
@@ -519,19 +558,22 @@ class CharsCompanion extends UpdateCompanion<CharData> {
     this.avatar = const Value.absent(),
     this.crop = const Value.absent(),
     this.background = const Value.absent(),
+    required CharType type,
     this.appearance = const Value.absent(),
     this.personality = const Value.absent(),
     this.scenario = const Value.absent(),
     this.greeting = const Value.absent(),
     this.prompt = const Value.absent(),
     this.notes = const Value.absent(),
-  }) : name = Value(name);
+  }) : name = Value(name),
+       type = Value(type);
   static Insertable<CharData> custom({
     Expression<int>? id,
     Expression<String>? name,
     Expression<String>? avatar,
     Expression<String>? crop,
     Expression<String>? background,
+    Expression<String>? type,
     Expression<String>? appearance,
     Expression<String>? personality,
     Expression<String>? scenario,
@@ -545,6 +587,7 @@ class CharsCompanion extends UpdateCompanion<CharData> {
       if (avatar != null) 'avatar': avatar,
       if (crop != null) 'crop': crop,
       if (background != null) 'background': background,
+      if (type != null) 'type': type,
       if (appearance != null) 'appearance': appearance,
       if (personality != null) 'personality': personality,
       if (scenario != null) 'scenario': scenario,
@@ -560,6 +603,7 @@ class CharsCompanion extends UpdateCompanion<CharData> {
     Value<String?>? avatar,
     Value<String?>? crop,
     Value<String?>? background,
+    Value<CharType>? type,
     Value<String>? appearance,
     Value<String>? personality,
     Value<String>? scenario,
@@ -573,6 +617,7 @@ class CharsCompanion extends UpdateCompanion<CharData> {
       avatar: avatar ?? this.avatar,
       crop: crop ?? this.crop,
       background: background ?? this.background,
+      type: type ?? this.type,
       appearance: appearance ?? this.appearance,
       personality: personality ?? this.personality,
       scenario: scenario ?? this.scenario,
@@ -599,6 +644,11 @@ class CharsCompanion extends UpdateCompanion<CharData> {
     }
     if (background.present) {
       map['background'] = Variable<String>(background.value);
+    }
+    if (type.present) {
+      map['type'] = Variable<String>(
+        $CharsTable.$convertertype.toSql(type.value),
+      );
     }
     if (appearance.present) {
       map['appearance'] = Variable<String>(appearance.value);
@@ -629,6 +679,7 @@ class CharsCompanion extends UpdateCompanion<CharData> {
           ..write('avatar: $avatar, ')
           ..write('crop: $crop, ')
           ..write('background: $background, ')
+          ..write('type: $type, ')
           ..write('appearance: $appearance, ')
           ..write('personality: $personality, ')
           ..write('scenario: $scenario, ')
@@ -5173,6 +5224,7 @@ typedef $$CharsTableCreateCompanionBuilder =
       Value<String?> avatar,
       Value<String?> crop,
       Value<String?> background,
+      required CharType type,
       Value<String> appearance,
       Value<String> personality,
       Value<String> scenario,
@@ -5187,6 +5239,7 @@ typedef $$CharsTableUpdateCompanionBuilder =
       Value<String?> avatar,
       Value<String?> crop,
       Value<String?> background,
+      Value<CharType> type,
       Value<String> appearance,
       Value<String> personality,
       Value<String> scenario,
@@ -5269,6 +5322,12 @@ class $$CharsTableFilterComposer extends Composer<_$AppDatabase, $CharsTable> {
     column: $table.background,
     builder: (column) => ColumnFilters(column),
   );
+
+  ColumnWithTypeConverterFilters<CharType, CharType, String> get type =>
+      $composableBuilder(
+        column: $table.type,
+        builder: (column) => ColumnWithTypeConverterFilters(column),
+      );
 
   ColumnFilters<String> get appearance => $composableBuilder(
     column: $table.appearance,
@@ -5385,6 +5444,11 @@ class $$CharsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get type => $composableBuilder(
+    column: $table.type,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get appearance => $composableBuilder(
     column: $table.appearance,
     builder: (column) => ColumnOrderings(column),
@@ -5441,6 +5505,9 @@ class $$CharsTableAnnotationComposer
     column: $table.background,
     builder: (column) => column,
   );
+
+  GeneratedColumnWithTypeConverter<CharType, String> get type =>
+      $composableBuilder(column: $table.type, builder: (column) => column);
 
   GeneratedColumn<String> get appearance => $composableBuilder(
     column: $table.appearance,
@@ -5548,6 +5615,7 @@ class $$CharsTableTableManager
                 Value<String?> avatar = const Value.absent(),
                 Value<String?> crop = const Value.absent(),
                 Value<String?> background = const Value.absent(),
+                Value<CharType> type = const Value.absent(),
                 Value<String> appearance = const Value.absent(),
                 Value<String> personality = const Value.absent(),
                 Value<String> scenario = const Value.absent(),
@@ -5560,6 +5628,7 @@ class $$CharsTableTableManager
                 avatar: avatar,
                 crop: crop,
                 background: background,
+                type: type,
                 appearance: appearance,
                 personality: personality,
                 scenario: scenario,
@@ -5574,6 +5643,7 @@ class $$CharsTableTableManager
                 Value<String?> avatar = const Value.absent(),
                 Value<String?> crop = const Value.absent(),
                 Value<String?> background = const Value.absent(),
+                required CharType type,
                 Value<String> appearance = const Value.absent(),
                 Value<String> personality = const Value.absent(),
                 Value<String> scenario = const Value.absent(),
@@ -5586,6 +5656,7 @@ class $$CharsTableTableManager
                 avatar: avatar,
                 crop: crop,
                 background: background,
+                type: type,
                 appearance: appearance,
                 personality: personality,
                 scenario: scenario,

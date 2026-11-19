@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:den_ai/application/config.dart';
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/application/routes.dart';
@@ -116,7 +116,7 @@ class AppDrawer extends StatelessWidget {
                 }
               },
               child: Text(
-                AppConfig.of(context).version,
+                AppEnv.version,
                 style: TextStyle(color: theme.hintColor, fontSize: 11),
               ),
             ),
@@ -132,7 +132,7 @@ class AppDrawer extends StatelessWidget {
   }
 
   Widget _buildUserCard(BuildContext context, ThemeData theme, UserCard? card) {
-    final avatarUrl = card?.getAvatar(AppConfig.of(context).baseUrl);
+    final avatarUrl = card?.getAvatar(AppEnv.baseUrl);
 
     return BlocBuilder<DrawerBloc, DrawerState>(
       builder: (context, state) {

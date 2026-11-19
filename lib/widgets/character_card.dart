@@ -1,4 +1,4 @@
-import 'package:den_ai/application/config.dart';
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:den_ai/models/models.dart';
@@ -20,7 +20,7 @@ class CharacterCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final loc = AppLocalization.of(context);
-    final avatarUrl = character.getAvatar(AppConfig.of(context).baseUrl);
+    final avatarUrl = character.getAvatar(AppEnv.baseUrl);
     final isDesktop = context.isDesktop;
     return Card(
       color: theme.cardColor,
@@ -52,31 +52,35 @@ class CharacterCard extends StatelessWidget {
                             size: cardWidth,
                             isCircle: false,
                           ),
-                    Positioned(
-                      top: 8,
-                      right: 8,
-                      child: IconButton(
-                        tooltip: loc.editPrompts,
-                        icon: Icon(Icons.edit, color: theme.colorScheme.primary, size: 18),
-                        style: IconButton.styleFrom(
-                          backgroundColor: Colors.black.withValues(alpha: 0.6),
-                          padding: const EdgeInsets.all(8),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    if (character.type != CharType.system)
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: IconButton(
+                          tooltip: loc.editPrompts,
+                          icon: Icon(Icons.edit, color: theme.colorScheme.primary, size: 18),
+                          style: IconButton.styleFrom(
+                            backgroundColor: Colors.black.withValues(alpha: 0.6),
+                            padding: const EdgeInsets.all(8),
+                            minimumSize: Size.zero,
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          onPressed: () => onEditPressed(character.id),
                         ),
-                        onPressed: () => onEditPressed(character.id),
                       ),
-                    ),
                   ],
                 ),
                 Padding(
-                  padding: EdgeInsets.all(isDesktop ? 12: 8),
+                  padding: EdgeInsets.all(isDesktop ? 12 : 8),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         character.name,
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: isDesktop ? 15 : 12),
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: isDesktop ? 15 : 12,
+                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),

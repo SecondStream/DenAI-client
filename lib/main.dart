@@ -1,5 +1,4 @@
 import 'package:den_ai/application/app.dart';
-import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/di_initializer.dart';
 import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/logger.dart';
@@ -25,10 +24,15 @@ void main() async {
     getApplicationSupportDirectory(),
   ]);
 
-  AppEnv.init(docPath: paths[0].path, supportPath: paths[1].path, prod: kReleaseMode);
-  await DiInitializer.init();
-
   final info = await PackageInfo.fromPlatform();
+  AppEnv.init(
+    docPath: paths[0].path,
+    supportPath: paths[1].path,
+    prod: kReleaseMode,
+    siteBaseUrl: 'https://realwaifu.ru',
+    packageInfo: info,
+  );
+  await DiInitializer.init();
 
   try {
     if (window != null) {
@@ -91,12 +95,5 @@ void main() async {
     await GetIt.instance.get<StatisticsRepository>().increment(StatEventType.appLaunchCount);
   } catch (_) {}
 
-  runApp(
-    AppConfig(
-      baseUrl: AppEnv.supportDir,
-      siteUrl: 'https://realwaifu.ru',
-      info: info,
-      child: AppStatus(child: ChatApp()),
-    ),
-  );
+  runApp(AppStatus(child: ChatApp()));
 }

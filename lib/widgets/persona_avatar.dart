@@ -1,4 +1,4 @@
-import 'package:den_ai/application/config.dart';
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/widgets/cropped_avatar.dart';
 import 'package:flutter/material.dart';
@@ -64,7 +64,7 @@ class PersonaAvatar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final avatarUrl = _avatarUrl ?? _getAvatarUrl?.call(AppConfig.of(context).baseUrl);
+    final avatarUrl = _avatarUrl ?? _getAvatarUrl?.call(AppEnv.baseUrl);
     final cropData = _cropData ?? _getCropData?.call();
     return avatarUrl == null
         ? CircleAvatar(

@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:den_ai/application/config.dart';
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/models/models.dart';
 import 'package:den_ai/tools/file_tool.dart';
 import 'package:den_ai/widgets/dialogs/image_crop_dialog.dart';
@@ -11,7 +11,7 @@ abstract class PersonaFormScreenState<T extends StatefulWidget> extends State<T>
   CropData? currentCropData;
 
   Future<void> handleAvatarClick(BuildContext context, Persona? persona, {File? newAvatar}) async {
-    final baseUrl = AppConfig.of(context).baseUrl;
+    final baseUrl = AppEnv.baseUrl;
     final userAvatar = persona?.getAvatar(baseUrl);
 
     ImageProvider? providerToCrop;

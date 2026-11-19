@@ -22,6 +22,25 @@ class ImportedCardData {
   });
 }
 
+class ImportedFromAssetsCardData extends ImportedCardData {
+  final String avatar;
+  final String background;
+
+  ImportedFromAssetsCardData({
+    required super.name,
+    required super.description,
+    required super.personality,
+    required super.scenario,
+    required super.greeting,
+    required super.notes,
+    required super.instructions,
+    required super.tags,
+    required super.lorebooks,
+    required this.avatar,
+    required this.background,
+  });
+}
+
 class ImportedLorebookData {
   final String name;
   final String description;

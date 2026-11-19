@@ -1,4 +1,4 @@
-import 'package:den_ai/application/config.dart';
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/blocs/lorebook_form/lorebook_form_bloc.dart';
 import 'package:den_ai/extensions/navigation_ext.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
@@ -170,7 +170,7 @@ class _LorebookFormScreenState extends PersonaFormScreenState<LorebookFormScreen
 
   Widget _buildAvatarPicker(BuildContext context, ThemeData theme, Lorebook? lorebook) {
     final avatarUrl =
-        selectedAvatarFile?.path ?? lorebook?.getAvatar(AppConfig.of(context).baseUrl);
+        selectedAvatarFile?.path ?? lorebook?.getAvatar(AppEnv.baseUrl);
     return InkWell(
       onTap: () => handleAvatarClick(context, lorebook),
       borderRadius: BorderRadius.circular(60),

@@ -80,17 +80,38 @@ abstract class FileTool {
     return saveImage(file, _avatarsDir, prefix: 'avatar');
   }
 
+  static Future<String> saveAvatarBytes(Uint8List bytes, String extension) {
+    return saveImageBytes(bytes, _avatarsDir, prefix: 'avatar', extension: extension);
+  }
+
   static Future<String> saveBackground(File file) {
-    return saveImage(file, _backgroundsDir, prefix: 'avatar');
+    return saveImage(file, _backgroundsDir, prefix: 'bg');
+  }
+
+  static Future<String> saveBackgroundBytes(Uint8List bytes, String extension) {
+    return saveImageBytes(bytes, _backgroundsDir, prefix: 'bg', extension: extension);
   }
 
   static Future<String> saveImage(File file, String directoryName, {required String prefix}) async {
+    return saveImageBytes(
+      await file.readAsBytes(),
+      directoryName,
+      prefix: prefix,
+      extension: p.extension(file.path),
+    );
+  }
+
+  static Future<String> saveImageBytes(
+    Uint8List bytes,
+    String directoryName, {
+    required String prefix,
+    String extension = '.webp',
+  }) async {
     final Directory targetFolder = await _getDirectory(directoryName);
-    final String extension = p.extension(file.path);
     final int timestamp = DateTime.now().millisecondsSinceEpoch;
     final String fileName = '${prefix}_$timestamp$extension';
     final String finalPath = p.join(targetFolder.path, fileName);
-    await file.copy(finalPath);
+    await File(finalPath).writeAsBytes(bytes);
     return p.join(directoryName, fileName);
   }
 

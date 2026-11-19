@@ -21,8 +21,13 @@ class ChatsListScreen extends StatelessWidget {
     final loc = AppLocalization.of(context);
 
     return BlocProvider<ChatsListBloc>(
-      create: (context) =>
-          ChatsListBloc(GetIt.instance.get(), context.notifyBloc)..add(LoadAllChatsEvent()),
+      create: (context) => ChatsListBloc(
+        GetIt.instance.get(),
+        context.notifyBloc,
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+        GetIt.instance.get(),
+      )..add(ChatListShownEvent(loc.getCharacter)),
       child: Builder(
         builder: (context) {
           return BlocListener<NotifyBloc, NotifyState>(

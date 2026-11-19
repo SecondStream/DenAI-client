@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:den_ai/application/config.dart';
 import 'package:den_ai/application/env.dart';
 import 'package:den_ai/application/l10n.dart';
 import 'package:den_ai/application/logger.dart';
@@ -176,10 +175,10 @@ class _ChatScreenState extends State<ChatScreen> {
                           : () => _showVoiceSettings(context, loc, theme),
                     ),
                   ),
-                Tooltip(
-                  message: isActionsBlocked ? loc.empty : loc.editPrompts,
-                  child: IconButton(
+                if (!isActionsBlocked && state.char.type != CharType.system)
+                  IconButton(
                     icon: const Icon(Icons.edit, color: Colors.white, size: 24),
+                    tooltip: isActionsBlocked ? loc.empty : loc.editPrompts,
                     onPressed: isActionsBlocked
                         ? null
                         : () async {
@@ -192,7 +191,6 @@ class _ChatScreenState extends State<ChatScreen> {
                             }
                           },
                   ),
-                ),
                 Tooltip(
                   message: isActionsBlocked ? loc.empty : loc.historyTooltip,
                   child: IconButton(
@@ -247,7 +245,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
     if (state is ChatLoadedState) {
       final bgUrl = state.background;
-      final baseUrl = AppConfig.of(context).baseUrl;
+      final baseUrl = AppEnv.baseUrl;
       final messages = state.messages.reversed.toList();
       return Container(
         decoration: BoxDecoration(
@@ -536,9 +534,7 @@ class _ChatScreenState extends State<ChatScreen> {
     return CompositedTransformTarget(
       link: _inputBarLink,
       child: Container(
-        padding: isDesktop
-            ? const EdgeInsets.all(12)
-            : const EdgeInsets.only(top: 12, bottom: 12),
+        padding: isDesktop ? const EdgeInsets.all(12) : const EdgeInsets.only(top: 12, bottom: 12),
         color: theme.appBarTheme.backgroundColor,
         child: SafeArea(
           child: Row(
@@ -640,14 +636,14 @@ class _ChatScreenState extends State<ChatScreen> {
                 onPressed: (isBlocked || !chatAv) && !isRecording
                     ? null
                     : () {
-                  if (isRecording) {
-                    _recording(context);
-                  } else if (currentText.isNotEmpty || !AppEnv.isFull) {
-                    _sendMessage(context, status);
-                  } else {
-                    _recording(context);
-                  }
-                },
+                        if (isRecording) {
+                          _recording(context);
+                        } else if (currentText.isNotEmpty || !AppEnv.isFull) {
+                          _sendMessage(context, status);
+                        } else {
+                          _recording(context);
+                        }
+                      },
               ),
             ],
           ),

@@ -1,6 +1,10 @@
+import 'dart:io';
+
+import 'package:den_ai/application/env.dart';
+import 'package:den_ai/application/logger.dart';
 import 'package:den_ai/consts/consts.dart';
-import 'package:den_ai/models/chat.dart';
-import 'package:den_ai/models/settings_base.dart';
+import 'package:den_ai/models/models.dart';
+import 'package:intl/intl.dart';
 
 class PromptRenderer {
   static String getSystemContent({
@@ -64,6 +68,15 @@ class PromptRenderer {
     if (instructions.trim().isNotEmpty) {
       sb.writeln('\n\n[IMPORTANT SYSTEM INSTRUCTIONS & BEHAVIOR RULES:');
       sb.writeln(instructions);
+      sb.write(']');
+    }
+
+    if (char.type == CharType.system) {
+      sb.writeln('\n\n[SPECIAL INFO:');
+      sb.writeln('DenAI version: ${AppEnv.version}');
+      sb.writeln('$userName\'s OS: ${Platform.operatingSystem} ${Platform.operatingSystemVersion}');
+      sb.writeln('Current date: ${DateFormat('EEEE dd.MM.yyyy HH:mm').format(DateTime.now())}');
+      sb.writeln('Last error: ${AppLogger.lastError ?? 'There were no errors in this session.'}');
       sb.write(']');
     }
 

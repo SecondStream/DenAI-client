@@ -230,6 +230,7 @@ class CharacterFormBloc extends Bloc<CharacterFormEvent, CharacterFormState> {
         greeting: event.greeting,
         prompt: event.prompt,
         notes: event.notes,
+        type: CharType.user,
       );
 
       Uint8List? avatar = event.avatarFile != null ? await event.avatarFile!.readAsBytes() : null;
