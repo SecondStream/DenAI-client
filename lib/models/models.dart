@@ -15,3 +15,4 @@ export 'stream_message.dart';
 export 'summary.dart';
 export 'provider.dart';
 export 'tokenizer_info.dart';
+export 'statistic.dart';

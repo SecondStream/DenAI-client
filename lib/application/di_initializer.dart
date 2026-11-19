@@ -8,6 +8,7 @@ import 'package:den_ai/repositories/database.dart';
 import 'package:den_ai/repositories/lorebooks_repository.dart';
 import 'package:den_ai/repositories/provider/interceptor.dart';
 import 'package:den_ai/repositories/settings_repository.dart';
+import 'package:den_ai/repositories/statistics_repository.dart';
 import 'package:den_ai/repositories/user_cards_repository.dart';
 import 'package:den_ai/services/chat_generation_service.dart';
 import 'package:den_ai/services/lore_search_service.dart';
@@ -55,6 +56,7 @@ class DiInitializer {
     di.registerSingleton(UserCardsRepository(database));
     di.registerSingleton(SettingsRepository(database, secureStorage));
     di.registerSingleton(LorebooksRepository(database));
+    di.registerSingleton(StatisticsRepository(database));
     di.registerSingleton(ChatGenerationService(client, chatsRepo, tokenCounter));
 
     if (AppEnv.isFull) {

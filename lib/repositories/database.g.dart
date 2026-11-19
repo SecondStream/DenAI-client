@@ -4800,6 +4800,278 @@ class ModelsCompanion extends UpdateCompanion<ModelData> {
   }
 }
 
+class $StatisticsTable extends Statistics
+    with TableInfo<$StatisticsTable, StatisticsData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $StatisticsTable(this.attachedDatabase, [this._alias]);
+  @override
+  late final GeneratedColumnWithTypeConverter<StatEventType, String> eventType =
+      GeneratedColumn<String>(
+        'event_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      ).withConverter<StatEventType>($StatisticsTable.$convertereventType);
+  static const VerificationMeta _payloadMeta = const VerificationMeta(
+    'payload',
+  );
+  @override
+  late final GeneratedColumn<String> payload = GeneratedColumn<String>(
+    'payload',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [eventType, payload, updatedAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'statistics';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<StatisticsData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('payload')) {
+      context.handle(
+        _payloadMeta,
+        payload.isAcceptableOrUnknown(data['payload']!, _payloadMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_payloadMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {eventType};
+  @override
+  StatisticsData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return StatisticsData(
+      eventType: $StatisticsTable.$convertereventType.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}event_type'],
+        )!,
+      ),
+      payload: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}payload'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $StatisticsTable createAlias(String alias) {
+    return $StatisticsTable(attachedDatabase, alias);
+  }
+
+  static JsonTypeConverter2<StatEventType, String, String> $convertereventType =
+      const EnumNameConverter<StatEventType>(StatEventType.values);
+}
+
+class StatisticsData extends DataClass implements Insertable<StatisticsData> {
+  final StatEventType eventType;
+  final String payload;
+  final DateTime updatedAt;
+  const StatisticsData({
+    required this.eventType,
+    required this.payload,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    {
+      map['event_type'] = Variable<String>(
+        $StatisticsTable.$convertereventType.toSql(eventType),
+      );
+    }
+    map['payload'] = Variable<String>(payload);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  StatisticsCompanion toCompanion(bool nullToAbsent) {
+    return StatisticsCompanion(
+      eventType: Value(eventType),
+      payload: Value(payload),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory StatisticsData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return StatisticsData(
+      eventType: $StatisticsTable.$convertereventType.fromJson(
+        serializer.fromJson<String>(json['eventType']),
+      ),
+      payload: serializer.fromJson<String>(json['payload']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'eventType': serializer.toJson<String>(
+        $StatisticsTable.$convertereventType.toJson(eventType),
+      ),
+      'payload': serializer.toJson<String>(payload),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  StatisticsData copyWith({
+    StatEventType? eventType,
+    String? payload,
+    DateTime? updatedAt,
+  }) => StatisticsData(
+    eventType: eventType ?? this.eventType,
+    payload: payload ?? this.payload,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  StatisticsData copyWithCompanion(StatisticsCompanion data) {
+    return StatisticsData(
+      eventType: data.eventType.present ? data.eventType.value : this.eventType,
+      payload: data.payload.present ? data.payload.value : this.payload,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StatisticsData(')
+          ..write('eventType: $eventType, ')
+          ..write('payload: $payload, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(eventType, payload, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is StatisticsData &&
+          other.eventType == this.eventType &&
+          other.payload == this.payload &&
+          other.updatedAt == this.updatedAt);
+}
+
+class StatisticsCompanion extends UpdateCompanion<StatisticsData> {
+  final Value<StatEventType> eventType;
+  final Value<String> payload;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const StatisticsCompanion({
+    this.eventType = const Value.absent(),
+    this.payload = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  StatisticsCompanion.insert({
+    required StatEventType eventType,
+    required String payload,
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : eventType = Value(eventType),
+       payload = Value(payload);
+  static Insertable<StatisticsData> custom({
+    Expression<String>? eventType,
+    Expression<String>? payload,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (eventType != null) 'event_type': eventType,
+      if (payload != null) 'payload': payload,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  StatisticsCompanion copyWith({
+    Value<StatEventType>? eventType,
+    Value<String>? payload,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return StatisticsCompanion(
+      eventType: eventType ?? this.eventType,
+      payload: payload ?? this.payload,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (eventType.present) {
+      map['event_type'] = Variable<String>(
+        $StatisticsTable.$convertereventType.toSql(eventType.value),
+      );
+    }
+    if (payload.present) {
+      map['payload'] = Variable<String>(payload.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('StatisticsCompanion(')
+          ..write('eventType: $eventType, ')
+          ..write('payload: $payload, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -4814,6 +5086,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ProvidersTable providers = $ProvidersTable(this);
   late final $SettingsTableTable settingsTable = $SettingsTableTable(this);
   late final $ModelsTable models = $ModelsTable(this);
+  late final $StatisticsTable statistics = $StatisticsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4830,6 +5103,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     providers,
     settingsTable,
     models,
+    statistics,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -9267,6 +9541,178 @@ typedef $$ModelsTableProcessedTableManager =
       ModelData,
       PrefetchHooks Function({bool providerId})
     >;
+typedef $$StatisticsTableCreateCompanionBuilder =
+    StatisticsCompanion Function({
+      required StatEventType eventType,
+      required String payload,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+typedef $$StatisticsTableUpdateCompanionBuilder =
+    StatisticsCompanion Function({
+      Value<StatEventType> eventType,
+      Value<String> payload,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$StatisticsTableFilterComposer
+    extends Composer<_$AppDatabase, $StatisticsTable> {
+  $$StatisticsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnWithTypeConverterFilters<StatEventType, StatEventType, String>
+  get eventType => $composableBuilder(
+    column: $table.eventType,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnFilters<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$StatisticsTableOrderingComposer
+    extends Composer<_$AppDatabase, $StatisticsTable> {
+  $$StatisticsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get eventType => $composableBuilder(
+    column: $table.eventType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get payload => $composableBuilder(
+    column: $table.payload,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$StatisticsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $StatisticsTable> {
+  $$StatisticsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumnWithTypeConverter<StatEventType, String> get eventType =>
+      $composableBuilder(column: $table.eventType, builder: (column) => column);
+
+  GeneratedColumn<String> get payload =>
+      $composableBuilder(column: $table.payload, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$StatisticsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $StatisticsTable,
+          StatisticsData,
+          $$StatisticsTableFilterComposer,
+          $$StatisticsTableOrderingComposer,
+          $$StatisticsTableAnnotationComposer,
+          $$StatisticsTableCreateCompanionBuilder,
+          $$StatisticsTableUpdateCompanionBuilder,
+          (
+            StatisticsData,
+            BaseReferences<_$AppDatabase, $StatisticsTable, StatisticsData>,
+          ),
+          StatisticsData,
+          PrefetchHooks Function()
+        > {
+  $$StatisticsTableTableManager(_$AppDatabase db, $StatisticsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$StatisticsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$StatisticsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$StatisticsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<StatEventType> eventType = const Value.absent(),
+                Value<String> payload = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StatisticsCompanion(
+                eventType: eventType,
+                payload: payload,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required StatEventType eventType,
+                required String payload,
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => StatisticsCompanion.insert(
+                eventType: eventType,
+                payload: payload,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$StatisticsTable, StatisticsData>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $StatisticsTable,
+                    StatisticsData
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$StatisticsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $StatisticsTable,
+      StatisticsData,
+      $$StatisticsTableFilterComposer,
+      $$StatisticsTableOrderingComposer,
+      $$StatisticsTableAnnotationComposer,
+      $$StatisticsTableCreateCompanionBuilder,
+      $$StatisticsTableUpdateCompanionBuilder,
+      (
+        StatisticsData,
+        BaseReferences<_$AppDatabase, $StatisticsTable, StatisticsData>,
+      ),
+      StatisticsData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -9293,4 +9739,6 @@ class $AppDatabaseManager {
       $$SettingsTableTableTableManager(_db, _db.settingsTable);
   $$ModelsTableTableManager get models =>
       $$ModelsTableTableManager(_db, _db.models);
+  $$StatisticsTableTableManager get statistics =>
+      $$StatisticsTableTableManager(_db, _db.statistics);
 }

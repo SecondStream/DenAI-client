@@ -54,6 +54,7 @@ class AppLogger {
   }
 
   static void _write(String level, String rawMessage) {
+    if (!_initialized) return;
     try {
       final timestamp = DateTime.now().toIso8601String();
       final safeMessage = _sanitize(rawMessage);

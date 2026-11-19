@@ -21,13 +21,14 @@ part 'database.g.dart';
     SettingsTable,
     Providers,
     Models,
+    Statistics,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -50,6 +51,16 @@ class AppDatabase extends _$AppDatabase {
               from3To4: (m, schema) async {
                 await m.createTable(schema.models);
                 await m.addColumn(schema.settingsTable, schema.settingsTable.embeddingEnabled);
+              },
+              from4To5: (m, schema) async {
+                await m.createTable(schema.statistics);
+                await into(schema.statistics).insert(
+                  RawValuesInsertable({
+                    'event_type': Variable.withString(StatEventType.appLaunchCount.name),
+                    'payload': Variable.withString('1'),
+                    'updated_at': Variable.withDateTime(DateTime.now()),
+                  }),
+                );
               },
             ),
           );
