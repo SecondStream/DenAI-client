@@ -42,6 +42,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     on<SaveProviderEvent>(_onSaveProvider);
     on<DeleteProviderEvent>(_onDeleteProvider);
     on<SaveSettingsEvent>(_onSaveSettings);
+    on<TokenizerUploadedEvent>(_onTokenizerUploaded);
   }
 
   void _onLoadAllSettings(LoadAllSettingsEvent event, Emitter<SettingsState> emit) async {
@@ -314,6 +315,13 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     for (final entry in memoryCache.entries) {
       await _storage.saveVectors(entry.key, entry.value);
     }
+  }
+
+  Future<void> _onTokenizerUploaded(TokenizerUploadedEvent event, Emitter<SettingsState> emit) async {
+    final currentState = state;
+    if (currentState is! SettingsLoadedState) return;
+    final tokenizers = await getAvailableTokenizers();
+    emit(currentState.copyWith(tokenizers: tokenizers));
   }
 }
 

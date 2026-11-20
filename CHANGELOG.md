@@ -6,6 +6,7 @@
 - Converting images to PNG when exporting a card
 - Statistics added
 - Starting character Lynx
+- Adding a tokenizer within the application
 
 ### Fixed
 

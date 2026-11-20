@@ -157,6 +157,9 @@ class AppLocalization {
       'label_vision_model': 'Vision Model',
       'label_embedding_model': 'Embedding Model',
       'label_tokenizer': 'Local Tokenizer Dictionary',
+      'add_tokenizer': 'Add a dictionary',
+      'replace_tokenizer_title': 'Replace Tokenizer',
+      'replace_tokenizer_msg': 'A tokenizer with this name already exists. Replace it?',
       'label_provider': 'Provider',
       'label_context_limit': 'Context Token Limit',
       'label_context_size': '{num} tokens',
@@ -415,6 +418,9 @@ class AppLocalization {
       'label_vision_model': 'Vision модель',
       'label_embedding_model': 'Embedding модель',
       'label_tokenizer': 'Локальный словарь токенизатора',
+      'add_tokenizer': 'Добавить словарь',
+      'replace_tokenizer_title': 'Замена словаря',
+      'replace_tokenizer_msg': 'Словарь с таким именем уже существует. Заменить?',
       'label_provider': 'Провайдер',
       'label_context_limit': 'Лимит токенов контекста',
       'label_context_size': '{num} tokens',
@@ -737,6 +743,9 @@ class AppLocalization {
   String get labelEmbeddingModel =>
       _localizedValues[locale.languageCode]?['label_embedding_model'] ?? empty;
   String get labelTokenizer => _localizedValues[locale.languageCode]?['label_tokenizer'] ?? empty;
+  String get addTokenizer => _localizedValues[locale.languageCode]?['add_tokenizer'] ?? empty;
+  String get replaceTokenizerTitle => _localizedValues[locale.languageCode]?['replace_tokenizer_title'] ?? empty;
+  String get replaceTokenizerMsg => _localizedValues[locale.languageCode]?['replace_tokenizer_msg'] ?? empty;
   String get labelProvider => _localizedValues[locale.languageCode]?['label_provider'] ?? empty;
   String get labelContextLimit =>
       _localizedValues[locale.languageCode]?['label_context_limit'] ?? empty;

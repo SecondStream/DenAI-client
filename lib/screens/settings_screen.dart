@@ -8,6 +8,7 @@ import 'package:den_ai/extensions/responsive_context.dart';
 import 'package:den_ai/extensions/snackbar_ext.dart';
 import 'package:den_ai/managers/lore_vector_storage.dart';
 import 'package:den_ai/models/models.dart';
+import 'package:den_ai/tools/file_tool.dart';
 import 'package:den_ai/widgets/app_drawer.dart';
 import 'package:den_ai/widgets/dialogs/confirmation_dialog.dart';
 import 'package:den_ai/widgets/dialogs/edit_provider_dialog.dart';
@@ -299,6 +300,37 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 value: _selectedTokenizer,
                 items: state.tokenizers,
                 onChanged: (v) => setState(() => _selectedTokenizer = v),
+              ),
+
+              ElevatedButton.icon(
+                icon: const Icon(Icons.upload, size: 22),
+                label: Text(
+                  loc.addTokenizer,
+                  style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
+                ),
+                onPressed: () async {
+                  final file = await FileTool.pickTokenizer();
+                  if (file != null) {
+                    final res = await FileTool.saveTokenizer(file);
+                    if (context.mounted) {
+                      if (res) {
+                        context.read<SettingsBloc>().add(TokenizerUploadedEvent());
+                      } else {
+                        final confirmed = await ConfirmationDialog.open(
+                          context,
+                          loc.replaceTokenizerTitle,
+                          loc.replaceTokenizerMsg,
+                        );
+                        if (confirmed == true) {
+                          await FileTool.saveTokenizer(file, replace: true);
+                          if (context.mounted) {
+                            context.read<SettingsBloc>().add(TokenizerUploadedEvent());
+                          }
+                        }
+                      }
+                    }
+                  }
+                },
               ),
 
               const SizedBox(height: 16),

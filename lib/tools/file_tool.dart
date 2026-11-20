@@ -38,6 +38,15 @@ abstract class FileTool {
     return file != null ? File(file.path) : null;
   }
 
+  static Future<XFile?> pickTokenizer() async {
+    const XTypeGroup typeGroup = XTypeGroup(
+      label: 'json files',
+      extensions: <String>['json'],
+      uniformTypeIdentifiers: <String>['tokenizer.json'],
+    );
+    return openFile(acceptedTypeGroups: <XTypeGroup>[typeGroup]);
+  }
+
   static Future<String?> getExportPath(AppLocalization loc, String charName, String ext) async {
     final XTypeGroup typeGroup = XTypeGroup(label: loc.exportLabel, extensions: <String>[ext]);
 
@@ -90,6 +99,17 @@ abstract class FileTool {
 
   static Future<String> saveBackgroundBytes(Uint8List bytes, String extension) {
     return saveImageBytes(bytes, _backgroundsDir, prefix: 'bg', extension: extension);
+  }
+
+  static Future<bool> saveTokenizer(XFile file, {bool replace = false}) async {
+    final dir = AppEnv.tokenizersDir;
+    final path = p.join(dir, file.name);
+    if (!replace) {
+      if(File(path).existsSync()) return false;
+    }
+    final Uint8List bytes = await file.readAsBytes();
+    await File(path).writeAsBytes(bytes);
+    return true;
   }
 
   static Future<String> saveImage(File file, String directoryName, {required String prefix}) async {

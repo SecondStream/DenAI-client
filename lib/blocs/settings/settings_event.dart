@@ -2,6 +2,8 @@ part of 'settings_bloc.dart';
 
 abstract class SettingsEvent {}
 
+class TokenizerUploadedEvent extends SettingsEvent {}
+
 class LoadAllSettingsEvent extends SettingsEvent {}
 
 class SaveSettingsEvent extends SettingsEvent {
