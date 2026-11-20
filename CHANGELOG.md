@@ -1,5 +1,7 @@
 ## Next release
 
+## v1.0.5 (2026-11-20)
+
 ### Added
 
 - Android version of the application
