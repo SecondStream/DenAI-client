@@ -2,6 +2,7 @@
 
 ### Added
 
+- Android version of the application
 - Deletion confirmation windows
 - Converting images to PNG when exporting a card
 - Statistics added
