@@ -49,6 +49,17 @@ dev_dependencies:
   json_serializable: ^6.14.1
   flutter_launcher_icons: ^0.14.4
   inno_bundle: ^0.12.0
+  flutter_native_splash: ^2.4.8
+
+flutter_native_splash:
+  color: "#161622"
+  color_dark: "#161622"
+  image: "assets/icons/icon.png"
+
+  android_12:
+    color: "#161622"
+    color_dark: "#161622"
+    image: "assets/icons/icon.png"
 
 inno_bundle:
   id: bb63d2a0-d3ec-11f1-8b20-83c7fc0f5cea
