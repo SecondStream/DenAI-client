@@ -111,18 +111,21 @@ class _SettingsScreenState extends State<SettingsScreen> {
   void _checkModels(SettingsLoadedState state) {
     if (!_selectedModel.handInputName &&
         state.models.indexWhere((m) => m.name == _selectedModel.name) == -1) {
-      _selectedModel = ModelView.fromInfo(ModelType.chat, state.models.first);
+      _selectedModel = state.models.isNotEmpty
+          ? ModelView.fromInfo(ModelType.chat, state.models.first)
+          : ModelView.fromModel(state.activeModels.chat);
     }
     if (!_selectedVisionModel.handInputName &&
         state.visionModels.indexWhere((m) => m.name == _selectedVisionModel.name) == -1) {
-      _selectedVisionModel = ModelView.fromInfo(ModelType.vision, state.visionModels.first);
+      _selectedVisionModel = state.visionModels.isNotEmpty
+          ? ModelView.fromInfo(ModelType.vision, state.visionModels.first)
+          : ModelView.fromModel(state.activeModels.vision);
     }
     if (!_selectedEmbeddingModel.handInputName &&
         state.embeddingModels.indexWhere((m) => m.name == _selectedEmbeddingModel.name) == -1) {
-      _selectedEmbeddingModel = ModelView.fromInfo(
-        ModelType.embedding,
-        state.embeddingModels.first,
-      );
+      _selectedEmbeddingModel = state.embeddingModels.isNotEmpty
+          ? ModelView.fromInfo(ModelType.embedding, state.embeddingModels.first)
+          : ModelView.fromModel(state.activeModels.embedding);
     }
   }
 
@@ -146,8 +149,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
           actions: [
             IconButton(
               icon: const Icon(Icons.help_outline, size: 28),
-              onPressed: () =>
-                  launchUrl(Uri.parse('${AppEnv.getSiteUrl(loc)}/denai/settings')),
+              onPressed: () => launchUrl(Uri.parse('${AppEnv.getSiteUrl(loc)}/denai/settings')),
             ),
           ],
         ),

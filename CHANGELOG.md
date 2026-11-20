@@ -12,6 +12,8 @@
 - Position of the attached image
 - Incorrect list of vision models
 - Links in messages won't open
+- Display of default (non-existent) models in settings lists
+- Loading indicator remains displayed indefinitely in settings
 
 ## v1.0.4 (2026-11-16)
 

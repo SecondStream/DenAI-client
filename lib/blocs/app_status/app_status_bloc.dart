@@ -90,6 +90,15 @@ class AppStatusBloc extends Bloc<AppStatusEvent, AppStatusState> {
         ),
       );
     } catch (e, st) {
+      emit(
+        AppStatusSuccessState(
+          chatModelAvailable: false,
+          embeddingModelAvailable: false,
+          visionModelAvailable: false,
+          providerAvailable: false,
+          code: Consts.unknownCode,
+        ),
+      );
       AppLogger.error('_checkStatus', error: e, stackTrace: st);
     }
   }

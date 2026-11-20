@@ -249,10 +249,10 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     ); // TODO: Different providers
     final (visionModels, _) = code == Consts.normalCode
         ? await _client.fetchVisionModels(settings.provider)
-        : ([ModelInfo(name: _client.defaultVisionModel, info: "???")], false);
+        : (<ModelInfo>[], false);
     final (embeddingModels, _) = code == Consts.normalCode
         ? await _client.fetchEmbeddingModels(settings.provider)
-        : ([ModelInfo(name: _client.defaultEmbeddingModel, info: "???")], false);
+        : (<ModelInfo>[], false);
     return (models, visionModels, embeddingModels, code);
   }
 

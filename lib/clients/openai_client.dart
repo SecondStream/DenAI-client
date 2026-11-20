@@ -338,16 +338,10 @@ class OpenAIClient {
       if (result.isNotEmpty) return (result, Consts.normalCode);
       // ignore: empty_catches
     } on AppException catch (e) {
-      return (
-        [ModelInfo(name: !vision ? defaultModel : defaultVisionModel, info: "???")],
-        e.statusCode ?? Consts.unknownCode,
-      );
+      return (<ModelInfo>[], e.statusCode ?? Consts.unknownCode);
     } catch (_) {}
 
-    return (
-      [ModelInfo(name: !vision ? defaultModel : defaultVisionModel, info: "???")],
-      Consts.unknownCode,
-    );
+    return (<ModelInfo>[], Consts.unknownCode);
   }
 
   Future<(List<ModelInfo>, int)> fetchVisionModels(Provider provider) async {
@@ -430,10 +424,10 @@ class OpenAIClient {
 
       // ignore: empty_catches
     } on AppException catch (e) {
-      return ([ModelInfo(name: defaultEmbeddingModel, info: "? ctx")], e.statusCode ?? Consts.unknownCode);
+      return (<ModelInfo>[], e.statusCode ?? Consts.unknownCode);
     } catch (_) {}
 
-    return ([ModelInfo(name: defaultEmbeddingModel, info: "? ctx")], Consts.unknownCode);
+    return (<ModelInfo>[], Consts.unknownCode);
   }
 
   Map<String, dynamic> _getPayload(
