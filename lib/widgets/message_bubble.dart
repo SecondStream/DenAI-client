@@ -1,9 +1,10 @@
-import 'package:den_ai/application/config.dart';
+import 'package:den_ai/application/env.dart';
 import 'package:den_ai/widgets/local_r_image.dart';
 import 'package:flutter/material.dart';
 import 'package:gpt_markdown/custom_widgets/markdown_config.dart';
 import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:path/path.dart' as p;
+import 'package:url_launcher/url_launcher.dart';
 
 class MessageBubble extends StatelessWidget {
   final MessagePosition position;
@@ -43,10 +44,11 @@ class MessageBubble extends StatelessWidget {
           SourceTag(),
         ],
         imageBuilder: (context, imageUrl, width, height) => LocalRoundedImage(
-          imagePath: imageUrl.startsWith('http') ? imageUrl : p.join(AppConfig.of(context).baseUrl, imageUrl),
+          imagePath: imageUrl.startsWith('http') ? imageUrl : p.join(AppEnv.baseUrl, imageUrl),
           width: width,
           height: height,
         ),
+        onLinkTap: (url, title) => launchUrl(Uri.parse(url)),
       ),
     );
   }

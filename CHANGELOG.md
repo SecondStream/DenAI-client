@@ -11,6 +11,7 @@
 
 - Position of the attached image
 - Incorrect list of vision models
+- Links in messages won't open
 
 ## v1.0.4 (2026-11-16)
 

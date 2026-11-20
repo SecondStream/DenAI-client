@@ -26,8 +26,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:gpt_markdown/custom_widgets/markdown_config.dart';
-import 'package:gpt_markdown/gpt_markdown.dart';
 import 'package:path/path.dart' as p;
 
 import '../widgets/chat_actions_menu.dart';
@@ -735,28 +733,4 @@ class _ChatScreenState extends State<ChatScreen> {
 
 class SendMessageIntent extends Intent {
   const SendMessageIntent();
-}
-
-class CustomItalicComponent extends ItalicMd {
-  final Color italicColor;
-
-  CustomItalicComponent({required this.italicColor});
-
-  @override
-  RegExp get exp => RegExp(r"(?:(?<!\*)\*(?<!\s)(.+?)(?:(?<!\s)\*(?!\*)|$))", dotAll: true);
-
-  @override
-  InlineSpan span(BuildContext context, String text, final GptMarkdownConfig config) {
-    final match = exp.firstMatch(text);
-    final data = match?[1] ?? text.replaceAll('*', '');
-
-    final conf = config.copyWith(
-      style: (config.style ?? const TextStyle()).copyWith(
-        fontStyle: FontStyle.italic,
-        color: italicColor,
-      ),
-    );
-
-    return TextSpan(text: data, style: conf.style);
-  }
 }
